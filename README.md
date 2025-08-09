@@ -48,12 +48,7 @@ cd rescuecompete
 docker-compose up -d
 ```
 
-3. Datenbank initialisieren
-```bash
-# Importiere die Datenbankstruktur aus webappdb-V5-2.sql
-```
-
-4. Webserver konfigurieren und auf `index.php` verweisen
+3. Webserver konfigurieren und auf `index.php` verweisen
 
 ## Benutzerrollen
 
