@@ -126,7 +126,7 @@ $userType = isset($_SESSION['acc_typ']) ? htmlspecialchars($_SESSION['acc_typ'])
                         Jede Gliederung kann die Software kostenlos nutzen, selbst hosten und
                         weiterentwickeln.
                     </p>
-                    <a href="#" class="github-link">
+                    <a href="https://github.com/LifeguardORG/Rescue-Compete" class="github-link">
                         GitHub Repository
                     </a>
                 </div>
