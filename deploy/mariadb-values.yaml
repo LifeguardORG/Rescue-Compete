@@ -1,0 +1,5 @@
+global:
+  storageClass: "nfs-study-projects"
+
+auth:
+  existingSecret: "despj-mariadb-secret"

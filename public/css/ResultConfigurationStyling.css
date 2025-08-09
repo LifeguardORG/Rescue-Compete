@@ -1,0 +1,541 @@
+@import "Colors.css";  /* Farben und Variablen definieren */
+
+/* ===== SPEZIFISCHE ANPASSUNG FÜR RESULT CONFIGURATION ===== */
+/* Kleinerer Abstand zwischen Titel und Container nur auf dieser Seite */
+.main-content.vertical .data-container {
+    margin-top: 0px; /* Reduziert von standardmäßig 20px */
+}
+
+/* ===== DATA CONTAINER (wie in StationWeightsStyling.css) ===== */
+.data-container {
+    background-color: var(--white);
+    padding: 20px;
+    border: 1px solid var(--ww-blue-100);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 0;
+}
+
+/* ===== INFO BOX (identisch zu StationWeights) ===== */
+.info-box {
+    background-color: var(--ww-blue-30);
+    border: 1px solid var(--ww-blue-60);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: left !important; /* Explizit linksbündig, überschreibt alle anderen Regeln */
+}
+
+.info-box h4 {
+    color: var(--ww-darkblue-100);
+    margin: 0 0 15px 0;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+    text-align: left !important; /* Sicherstellung für h4 */
+}
+
+.info-box h4::before {
+    content: "ℹ️";
+    margin-right: 8px;
+    font-size: 1.2em;
+}
+
+.info-box ul {
+    margin: 0;
+    padding-left: 20px;
+    text-align: left !important; /* Explizit für ul */
+}
+
+.info-box li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+    color: var(--ww-darkblue-90);
+    text-align: left !important; /* Explizit für li */
+}
+
+.info-box li:last-child {
+    margin-bottom: 0;
+}
+
+.info-box p {
+    text-align: left !important; /* Für eventuelle p-Tags */
+    margin: 8px 0;
+    line-height: 1.4;
+    color: var(--ww-darkblue-90);
+}
+
+/* ===== CONFIG FORM SECTIONS ===== */
+.config-form-section {
+    background-color: var(--white);
+    border: 1px solid var(--ww-blue-100);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.config-form-section:last-child {
+    margin-bottom: 0;
+}
+
+.config-form-section h3 {
+    color: var(--ww-darkblue-100);
+    font-size: 18px;
+    margin: 0 0 20px 0;
+    border-bottom: 2px solid var(--ww-blue-100);
+    padding-bottom: 10px;
+    display: flex;
+    align-items: center;
+    text-align: left; /* Überschrift linksbündig */
+}
+
+.config-form-section h3::before {
+    content: "⚙️";
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+/* ===== NEUE GESAMTBERECHNUNG LAYOUT ===== */
+.total-calculation-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+    align-items: start;
+}
+
+.calculation-column {
+    text-align: center;
+    padding: 15px;
+    background-color: var(--ww-blue-30);
+    border-radius: 8px;
+    border: 1px solid var(--ww-blue-100);
+}
+
+.calculation-column h4 {
+    color: var(--ww-darkblue-100);
+    font-size: 16px;
+    margin: 0 0 15px 0;
+    font-weight: bold;
+    text-align: center; /* Nur für die h4 in calculation-column zentriert lassen */
+}
+
+.calculation-column.total-column {
+    background-color: var(--ww-darkblue-30);
+}
+
+.calculation-column.total-column h4 {
+    color: var(--ww-darkblue-100);
+}
+
+.points-input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid var(--ww-blue-100);
+    border-radius: 4px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    background-color: var(--white);
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.points-input:focus {
+    outline: none;
+    border-color: var(--ww-darkblue-100);
+    box-shadow: 0 0 0 3px rgba(0, 140, 205, 0.1);
+}
+
+.percentage-input {
+    width: 80px;
+    padding: 8px;
+    border: 2px solid var(--ww-blue-100);
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    background-color: var(--white);
+    transition: all 0.3s ease;
+}
+
+.percentage-input:focus {
+    outline: none;
+    border-color: var(--ww-darkblue-100);
+    box-shadow: 0 0 0 3px rgba(0, 140, 205, 0.1);
+}
+
+.percentage-label {
+    display: inline-block;
+    margin-left: 5px;
+    font-weight: bold;
+    color: var(--ww-darkblue-100);
+}
+
+/* ===== FORM FIELDS GRID (für andere Bereiche) ===== */
+.config-fields-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: bold;
+    color: var(--ww-darkblue-100);
+    margin-bottom: 8px;
+    font-size: 14px;
+    text-align: left; /* Labels immer linksbündig */
+}
+
+.form-group input[type="number"] {
+    padding: 10px;
+    border: 2px solid var(--ww-blue-100);
+    border-radius: 4px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background-color: var(--white);
+}
+
+.form-group input[type="number"]:focus {
+    outline: none;
+    border-color: var(--ww-darkblue-100);
+    box-shadow: 0 0 0 3px rgba(0, 140, 205, 0.1);
+}
+
+.form-group input[type="number"]:hover {
+    border-color: var(--ww-darkblue-90);
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+    padding: 12px 24px;
+    background-color: var(--button);
+    color: var(--white);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn:hover {
+    background-color: var(--button-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn.primary-btn {
+    background-color: var(--ww-blue-100);
+}
+
+.btn.primary-btn:hover {
+    background-color: var(--ww-darkblue-90);
+}
+
+.btn:focus {
+    outline: 2px solid var(--ww-blue-100);
+    outline-offset: 2px;
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* ===== FORM ACTIONS ===== */
+.form-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--ww-blue-100);
+    padding-top: 15px;
+}
+
+/* ===== MESSAGE BOXES (konsistent mit StationWeights) ===== */
+.message-box {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    border: 1px solid;
+    border-left: 4px solid;
+    animation: slideInMessage 0.4s ease-out;
+    text-align: left !important; /* Message boxes immer linksbündig */
+}
+
+@keyframes slideInMessage {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.message-box.success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    border-left-color: #28a745;
+    color: #155724;
+}
+
+.message-box.error {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    border-left-color: var(--drk-rot);
+    color: #721c24;
+}
+
+.message-box.info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    border-left-color: var(--ww-blue-100);
+    color: #0c5460;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .data-container {
+        padding: 15px;
+        margin: 0 10px;
+    }
+
+    .config-form-section {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .config-form-section h3 {
+        font-size: 16px;
+        margin-bottom: 15px;
+    }
+
+    .total-calculation-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .calculation-column {
+        padding: 12px;
+    }
+
+    .points-input {
+        font-size: 16px;
+        padding: 8px;
+    }
+
+    .percentage-input {
+        width: 70px;
+        font-size: 14px;
+        padding: 6px;
+    }
+
+    .config-fields-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .form-group input[type="number"] {
+        padding: 12px;
+        font-size: 16px; /* Verhindert Zoom auf iOS */
+    }
+
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .form-actions .btn:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Info-Box responsive */
+    .info-box {
+        padding: 15px;
+        margin: 15px 0;
+        text-align: left !important; /* Auch bei responsive linksbündig */
+    }
+
+    .info-box h4 {
+        font-size: 1em;
+        text-align: left !important;
+    }
+
+    /* Kleinerer Abstand auch auf Mobile */
+    .main-content.vertical .data-container {
+        margin-top: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .config-form-section {
+        padding: 10px;
+    }
+
+    .config-form-section h3 {
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+
+    .calculation-column {
+        padding: 10px;
+    }
+
+    .calculation-column h4 {
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .points-input {
+        font-size: 14px;
+        padding: 6px;
+    }
+
+    .percentage-input {
+        width: 60px;
+        font-size: 12px;
+        padding: 4px;
+    }
+
+    .config-fields-grid {
+        gap: 12px;
+    }
+
+    .form-group input[type="number"] {
+        padding: 10px;
+    }
+
+    .data-container {
+        padding: 10px;
+        margin: 0 5px;
+    }
+
+    .btn {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+
+    .config-form-section h3::before {
+        display: none; /* Emoji auf sehr kleinen Bildschirmen ausblenden */
+    }
+
+    .info-box h4::before {
+        display: none; /* Emoji auf sehr kleinen Bildschirmen ausblenden */
+    }
+
+    .info-box {
+        text-align: left !important; /* Auch bei kleinen Bildschirmen linksbündig */
+    }
+
+    .info-box h4,
+    .info-box ul,
+    .info-box li,
+    .info-box p {
+        text-align: left !important;
+    }
+}
+
+/* ===== ACCESSIBILITY ===== */
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+    .form-group input[type="number"],
+    .points-input,
+    .percentage-input {
+        border-width: 2px;
+    }
+
+    .btn {
+        border: 2px solid var(--white);
+    }
+
+    .config-form-section,
+    .data-container,
+    .calculation-column,
+    .info-box {
+        border-width: 2px;
+    }
+}
+
+/* Prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .btn,
+    .form-group input[type="number"],
+    .points-input,
+    .percentage-input,
+    .message-box {
+        transition: none;
+        animation: none;
+    }
+
+    .btn:hover {
+        transform: none;
+        box-shadow: none;
+    }
+}
+
+/* Focus indicators für Keyboard Navigation */
+.form-group input[type="number"]:focus-visible,
+.points-input:focus-visible,
+.percentage-input:focus-visible {
+    outline: 3px solid var(--ww-blue-100);
+    outline-offset: 2px;
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .form-actions,
+    .info-box {
+        display: none;
+    }
+
+    .config-form-section {
+        page-break-inside: avoid;
+        margin-bottom: 20px;
+    }
+
+    .data-container,
+    .config-form-section,
+    .calculation-column {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+
+    .form-group input[type="number"],
+    .points-input,
+    .percentage-input {
+        border: 1px solid #000;
+        background: transparent;
+    }
+
+    /* Werte nach den Inputs anzeigen */
+    .form-group input[type="number"]::after,
+    .points-input::after,
+    .percentage-input::after {
+        content: " [Wert: " attr(value) "]";
+        font-style: italic;
+        font-weight: normal;
+    }
+}

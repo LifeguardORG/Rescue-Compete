@@ -1,0 +1,136 @@
+/* Sidebar.css - Einfache Wettkampf-Sidebar Styles */
+@import "Colors.css";
+
+/* ===== GRUNDLEGENDE SIDEBAR-STRUKTUR ===== */
+.competition-sidebar {
+    position: fixed;
+    top: 70px; /* Unterhalb der Navbar */
+    left: 0;
+    width: 200px;
+    height: calc(100vh - 70px);
+    background-color: var(--white);
+    border-right: 1px solid var(--ww-blue-100);
+    z-index: 900;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Hauptinhalt Anpassung */
+.main-content {
+    margin-left: 200px;
+    transition: margin-left 0.3s ease;
+}
+
+/* ===== SIDEBAR CONTENT ===== */
+.sidebar-content {
+    flex: 1;
+    padding: 20px 0;
+    overflow-y: auto;
+}
+
+.sidebar-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+    background: var(--ww-blue-100);
+    border-radius: 2px;
+}
+
+/* ===== SIDEBAR SECTIONS ===== */
+.sidebar-section {
+    margin-bottom: 25px;
+    padding: 0 15px;
+}
+
+.sidebar-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--ww-darkblue-100);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--ww-blue-30);
+}
+
+/* ===== SIDEBAR MENU ===== */
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu li {
+    margin-bottom: 5px;
+}
+
+.sidebar-menu li:last-child {
+    margin-bottom: 0;
+}
+
+.sidebar-link {
+    display: block;
+    padding: 8px 12px;
+    text-decoration: none;
+    color: var(--ww-darkblue-100);
+    background-color: transparent;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.sidebar-link:hover {
+    background-color: var(--ww-blue-30);
+    color: var(--ww-darkblue-100);
+}
+
+.sidebar-link.active {
+    background-color: var(--ww-blue-100);
+    color: var(--white);
+    font-weight: 500;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablet und kleiner */
+@media (max-width: 1024px) {
+    .competition-sidebar {
+        display: none;
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+}
+
+/* ===== FOCUS UND ACCESSIBILITY ===== */
+.sidebar-link:focus {
+    outline: 2px solid var(--ww-blue-100);
+    outline-offset: 2px;
+}
+
+.sidebar-link:focus-visible {
+    outline: 2px solid var(--drk-rot);
+    outline-offset: 2px;
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .competition-sidebar {
+        display: none !important;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+    }
+}

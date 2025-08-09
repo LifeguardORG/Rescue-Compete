@@ -1,0 +1,72 @@
+image: 'thlmylab/swakkd:stable'
+
+stages:
+  - prepare
+  - build
+  - deploy
+
+variables:
+  NS: "stud-itd-despj-richter"
+
+secrets:
+  stage: prepare
+  only:
+    variables:
+      - $CI_COMMIT_REF_SLUG == "main"
+  script:
+    - kubectl delete secret despj-gitlab-registry-$CI_PROJECT_ID -n $NS || true
+    - >
+      kubectl create secret docker-registry despj-gitlab-registry-$CI_PROJECT_ID
+      --docker-server=$CI_REGISTRY
+      --docker-username=image-registry
+      --docker-password=$CI_REGISTRY_TOKEN
+      -n $NS
+    - kubectl delete secret despj-$CI_PROJECT_ID-secret -n $NS || true
+    - >
+      kubectl create secret generic despj-$CI_PROJECT_ID-secret
+      --from-literal=MYSQL_SERVER=mariadb.stud-itd-despj-richter.svc.cluster.local
+      --from-literal=MYSQL_USERNAME=despj_user
+      --from-literal=MYSQL_USERPASS=$DB_PASSWORD
+      --from-literal=MYSQL_DATABASE=despj
+      -n $NS
+
+build-despj:
+  stage: build
+  image: docker:24
+  services: [ "docker:24-dind" ]
+  only:
+    variables:
+      - $CI_COMMIT_REF_SLUG == "main"
+    changes:
+      - public/*
+      - public/**/**
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build -t $CI_REGISTRY_IMAGE/despj:latest .
+    - docker push $CI_REGISTRY_IMAGE/despj:latest
+
+deploy-despj:
+  stage: deploy
+  only:
+    variables:
+      - $CI_COMMIT_REF_SLUG == "main"
+  script:
+    - cd deploy
+    - kubectl delete deployment despj-$CI_PROJECT_ID -n $NS || true
+    - mo despj-deploy+svc.yaml | kubectl apply -n $NS -f -
+
+ingress:
+    stage: deploy
+    rules:
+      - if: $CI_COMMIT_REF_SLUG == "main"
+        changes:
+          - deploy/project-ing.yaml
+        when: manual
+    script:
+      - cd deploy
+      - mo ingress.yaml | kubectl apply -n $NS -f -
+
+phpmyadmin:
+  stage: deploy
+  when: manual
+  script: kubectl apply -f deploy/pma-deploy+svc.yaml -n $NS

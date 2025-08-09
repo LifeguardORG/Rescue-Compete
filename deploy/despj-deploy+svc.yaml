@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: despj-{{ CI_PROJECT_ID }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: despj-{{ CI_PROJECT_ID }}
+  template:
+    metadata:
+      labels:
+        app: despj-{{ CI_PROJECT_ID }}
+    spec:
+      containers:
+        - name: despj-{{ CI_PROJECT_ID }}
+          image: {{ CI_REGISTRY_IMAGE }}/despj:latest
+          envFrom:
+            - secretRef:
+                name: despj-{{ CI_PROJECT_ID }}-secret
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: 500m
+              memory: 500Mi
+            requests:
+              cpu: 100m
+              memory: 125Mi
+          imagePullPolicy: Always
+      imagePullSecrets:
+        - name: despj-gitlab-registry-{{ CI_PROJECT_ID }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: despj-{{ CI_PROJECT_ID }}
+  labels:
+    app: despj-{{ CI_PROJECT_ID }}
+spec:
+  type: ClusterIP
+  selector:
+    app: despj-{{ CI_PROJECT_ID }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80

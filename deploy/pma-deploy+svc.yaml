@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: despj-pma
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: despj-pma
+  template:
+    metadata:
+      labels:
+        app: despj-pma
+    spec:
+      containers:
+        - name: despj-pma
+          image: phpmyadmin/phpmyadmin
+          ports:
+            - containerPort: 80
+          env:
+            - name: PMA_HOST
+              value: mariadb.stud-itd-despj-richter.svc.cluster.local
+            - name: PMA_PORT
+              value: "3306"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: despj-pma
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  selector:
+    app: despj-pma

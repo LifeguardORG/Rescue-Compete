@@ -1,0 +1,255 @@
+@import "Colors.css";
+
+/* Page Container */
+.page-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--beige);
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 20px;
+}
+
+/* Guidelines Container */
+.guidelines-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: var(--white);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
+
+/* Guidelines Header */
+.guidelines-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--ww-blue-100);
+}
+
+.guidelines-header h1 {
+    color: var(--ww-blue-100);
+    font-size: 28px;
+    margin: 0 0 10px 0;
+    font-weight: bold;
+}
+
+.guidelines-subtitle {
+    color: var(--ww-darkblue-100);
+    font-size: 16px;
+    margin: 0;
+    font-style: italic;
+}
+
+/* Guidelines Content */
+.guidelines-content {
+    line-height: 1.6;
+}
+
+/* Guidelines Sections */
+.guidelines-section {
+    margin-bottom: 25px;
+}
+
+.guidelines-section h2 {
+    color: var(--ww-darkblue-100);
+    font-size: 20px;
+    margin: 0 0 15px 0;
+    font-weight: bold;
+    border-left: 4px solid var(--ww-blue-100);
+    padding-left: 15px;
+}
+
+.guidelines-section p {
+    color: var(--black);
+    font-size: 14px;
+    margin: 0 0 10px 0;
+    text-align: justify;
+}
+
+.guidelines-section ul {
+    margin: 0 0 10px 20px;
+    padding: 0;
+}
+
+.guidelines-section li {
+    color: var(--black);
+    font-size: 14px;
+    margin-bottom: 8px;
+    list-style-type: disc;
+}
+
+.guidelines-section li::marker {
+    color: var(--ww-blue-100);
+}
+
+/* Guidelines Footer */
+.guidelines-footer {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--ww-blue-30);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.last-updated {
+    color: var(--ww-darkblue-60);
+    font-size: 12px;
+    margin: 0;
+    font-style: italic;
+}
+
+/* Back Button */
+.back-button {
+    display: inline-block;
+    background-color: var(--ww-blue-100);
+    color: var(--white);
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.back-button:hover {
+    background-color: var(--button-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.back-button:focus {
+    outline: 2px solid var(--ww-blue-100);
+    outline-offset: 2px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 15px;
+    }
+
+    .guidelines-container {
+        padding: 20px;
+        margin: 0 10px;
+    }
+
+    .guidelines-header h1 {
+        font-size: 24px;
+    }
+
+    .guidelines-subtitle {
+        font-size: 14px;
+    }
+
+    .guidelines-section h2 {
+        font-size: 18px;
+    }
+
+    .guidelines-section p,
+    .guidelines-section li {
+        font-size: 13px;
+    }
+
+    .guidelines-footer {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .back-button {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-content {
+        padding: 10px;
+    }
+
+    .guidelines-container {
+        padding: 15px;
+        margin: 0 5px;
+    }
+
+    .guidelines-header h1 {
+        font-size: 22px;
+    }
+
+    .guidelines-subtitle {
+        font-size: 13px;
+    }
+
+    .guidelines-section h2 {
+        font-size: 16px;
+        padding-left: 10px;
+    }
+
+    .guidelines-section p,
+    .guidelines-section li {
+        font-size: 12px;
+    }
+
+    .guidelines-section ul {
+        margin-left: 15px;
+    }
+
+    .back-button {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+}
+
+/* Accessibility Improvements */
+.guidelines-section h2:focus,
+.back-button:focus {
+    outline: 2px solid var(--ww-blue-100);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+    .guidelines-container {
+        border: 2px solid var(--ww-blue-100);
+    }
+
+    .guidelines-section h2 {
+        border-left-width: 6px;
+    }
+
+    .back-button {
+        border: 2px solid var(--ww-darkblue-100);
+    }
+}
+
+/* Print styles */
+@media print {
+    .page-container {
+        background-color: white;
+    }
+
+    .guidelines-container {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+
+    .back-button {
+        display: none;
+    }
+
+    .guidelines-header {
+        border-bottom: 2px solid #000;
+    }
+
+    .guidelines-section h2 {
+        border-left: 4px solid #000;
+    }
+}

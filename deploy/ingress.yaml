@@ -1,0 +1,37 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: despj-{{ CI_PROJECT_ID }}-ingress
+  annotations:
+    acme.cert-manager.io/http01-edit-in-place: 'true'
+    cert-manager.io/cluster-issuer: "sectigo"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  rules:
+    - host: despj-{{ CI_PROJECT_ID }}.proj.mylab.th-luebeck.de
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: despj-{{ CI_PROJECT_ID }}
+                port:
+                  number: 80
+    - host: pma.despj-{{ CI_PROJECT_ID }}.proj.mylab.th-luebeck.de
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: despj-pma
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - despj-{{ CI_PROJECT_ID }}.proj.mylab.th-luebeck.de
+        - pma.despj-{{ CI_PROJECT_ID }}.proj.mylab.th-luebeck.de
+      secretName: despj-{{ CI_PROJECT_ID }}-ingress-cert

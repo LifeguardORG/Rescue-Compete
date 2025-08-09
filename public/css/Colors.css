@@ -1,0 +1,24 @@
+:root {
+    /* DRK - Styleguid Farben */
+    --white: white;
+    --black: black;
+    --beige: #f5f0e6;
+    --drk-rot:#e60005;
+    --ww-blue-100: #008ccd;
+    --ww-blue-60: #73afdc;
+    --ww-blue-30: #b4d7eb;
+    --ww-darkblue-100: #002d55;
+    --ww-darkblue-90: #004888;
+    --ww-darkblue-60: #698caf;
+    --ww-darkblue-30: #b4c3d7;
+
+    /* Funktions-Farben*/
+    --button: var(--ww-darkblue-100);
+    --button-hover: var(--ww-darkblue-90);
+
+    /*Account-Typen*/
+    --admin-color: var(--drk-rot);
+    --wettkampfleitung-color: #ff6a00;
+    --schiedsrichter-color: var(--ww-blue-100);
+    --teilnehmer-color: #349d00;
+}

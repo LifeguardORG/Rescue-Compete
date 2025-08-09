@@ -1,0 +1,17 @@
+{
+  "name": "des-project-nr1",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node public/js/FetchParcoursData.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.mylab.th-luebeck.de/jonas.richter/designproject-nr1.git"
+  },
+  "private": true,
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
+}

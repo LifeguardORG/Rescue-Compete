@@ -1,0 +1,362 @@
+@import "Colors.css";  /* Farben und Variablen definieren */
+
+/* ===== SPEZIFISCHE ANPASSUNG FÜR STATIONSGEWICHTUNG ===== */
+/* Kleinerer Abstand zwischen Titel und Container nur auf dieser Seite */
+.main-content.vertical .data-container {
+    margin-top: 0px; /* Reduziert von standardmäßig 20px */
+}
+
+/* ===== DATA CONTAINER (wie in ScoringInputViewStyling.css) ===== */
+.data-container {
+    background-color: var(--white);
+    padding: 20px;
+    border: 1px solid var(--ww-blue-100);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 0;
+}
+
+/* ===== WEIGHT CONTROLS ===== */
+.weight-input {
+    width: 80px;
+    text-align: center;
+}
+
+.weight-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.weight-button {
+    width: 30px;
+    height: 30px;
+    margin: 0 5px;
+    font-weight: bold;
+    background-color: var(--ww-darkblue-100);
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.weight-button:hover {
+    background-color: var(--ww-darkblue-90);
+}
+
+.weight-button:focus {
+    outline: 2px solid var(--ww-blue-100);
+    outline-offset: 2px;
+}
+
+/* ===== TABLES ===== */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1em;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: var(--white);
+}
+
+.data-table thead {
+    background-color: var(--ww-blue-100);
+    color: var(--white);
+}
+
+.data-table th,
+.data-table td {
+    padding: 12px 8px;
+    border: 1px solid var(--ww-blue-100);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.data-table tbody tr:nth-child(even) {
+    background-color: var(--ww-blue-30);
+}
+
+.data-table tbody tr:hover {
+    background-color: var(--ww-blue-60);
+    color: var(--white);
+}
+
+/* ===== MESSAGES ===== */
+.message {
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.message.success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+/* ===== MESSAGE BOXES (konsistent mit anderen Views) ===== */
+.message-box {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    border: 1px solid;
+    border-left: 4px solid;
+    animation: slideInMessage 0.4s ease-out;
+}
+
+@keyframes slideInMessage {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.message-box.success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    border-left-color: #28a745;
+    color: #155724;
+}
+
+.message-box.error {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    border-left-color: var(--drk-rot);
+    color: #721c24;
+}
+
+.message-box.info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    border-left-color: var(--ww-blue-100);
+    color: #0c5460;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+    padding: 10px 20px;
+    background-color: var(--button);
+    color: var(--white);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.btn:hover {
+    background-color: var(--button-hover);
+    transform: translateY(-1px);
+}
+
+.btn.primary-btn {
+    background-color: var(--ww-blue-100);
+}
+
+.btn.primary-btn:hover {
+    background-color: var(--ww-darkblue-90);
+}
+
+.btn:focus {
+    outline: 2px solid var(--ww-blue-100);
+    outline-offset: 2px;
+}
+
+/* ===== FORM ACTIONS ===== */
+.form-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+/* ===== INFO BOX ===== */
+.info-box {
+    background-color: var(--ww-blue-30);
+    border: 1px solid var(--ww-blue-60);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.info-box h4 {
+    color: var(--ww-darkblue-100);
+    margin: 0 0 15px 0;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+}
+
+.info-box h4::before {
+    content: "ℹ️";
+    margin-right: 8px;
+    font-size: 1.2em;
+}
+
+.info-box ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.info-box li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+    color: var(--ww-darkblue-90);
+}
+
+.info-box li:last-child {
+    margin-bottom: 0;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .data-container {
+        padding: 15px;
+        margin: 0 10px;
+    }
+
+    .data-table {
+        font-size: 0.9em;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 8px 5px;
+    }
+
+    .weight-controls {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .weight-button {
+        width: 25px;
+        height: 25px;
+        margin: 2px 0;
+    }
+
+    .weight-input {
+        width: 60px;
+        margin: 5px 0;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+
+    .info-box {
+        padding: 15px;
+        margin: 15px 0;
+    }
+
+    .info-box h4 {
+        font-size: 1em;
+    }
+
+    /* Kleinerer Abstand auch auf Mobile */
+    .main-content.vertical .data-container {
+        margin-top: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .data-table {
+        font-size: 0.85em;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 6px 4px;
+    }
+
+    .weight-button {
+        width: 20px;
+        height: 20px;
+        font-size: 0.8em;
+    }
+
+    .weight-input {
+        width: 50px;
+    }
+
+    .data-container {
+        padding: 10px;
+        margin: 0 5px;
+    }
+
+    .info-box h4::before {
+        display: none; /* Emoji auf sehr kleinen Bildschirmen ausblenden */
+    }
+}
+
+/* ===== ACCESSIBILITY ===== */
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+    .weight-button {
+        border: 2px solid var(--white);
+    }
+
+    .info-box {
+        border-width: 2px;
+    }
+
+    .data-container {
+        border-width: 2px;
+    }
+}
+
+/* Prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .btn,
+    .weight-button,
+    .message-box {
+        transition: none;
+        animation: none;
+    }
+
+    .btn:hover,
+    .weight-button:hover {
+        transform: none;
+    }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .form-actions,
+    .info-box {
+        display: none;
+    }
+
+    .data-table {
+        page-break-inside: avoid;
+    }
+
+    .data-container {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+
+    .weight-controls::after {
+        content: " [Gewichtung: " attr(data-weight) "%]";
+        font-style: italic;
+    }
+}

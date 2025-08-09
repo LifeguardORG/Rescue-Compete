@@ -1,0 +1,510 @@
+@import "Colors.css";
+
+/* ===== ADMIN-SPEZIFISCHE STYLES ===== */
+
+/* Admin-Page-Header mit mehr Platz */
+.main-content h2.main-title {
+    color: var(--drk-rot);
+    border-bottom-color: var(--drk-rot);
+    margin-top: 40px; /* Mehr Platz über der Überschrift */
+}
+
+.main-content h2 {
+    color: var(--drk-rot);
+    border-bottom-color: var(--drk-rot);
+}
+
+/* Admin-Status-Badge */
+.status-badge.admin {
+    background-color: rgba(230, 0, 5, 0.1);
+    color: var(--admin-color);
+    font-weight: bold;
+    padding: 6px 12px;
+    border-radius: 16px;
+    border: 1px solid var(--admin-color);
+}
+
+/* Account-Typ Status-Badges */
+.status-badge {
+    font-weight: bold;
+    padding: 6px 12px;
+    border-radius: 16px;
+    border: 1px solid;
+}
+
+.status-badge.wettkampfleitung {
+    background-color: rgba(255, 106, 0, 0.1);
+    color: var(--wettkampfleitung-color);
+    border-color: var(--wettkampfleitung-color);
+}
+
+.status-badge.schiedsrichter {
+    background-color: rgba(0, 45, 85, 0.1);
+    color: var(--schiedsrichter-color);
+    border-color: var(--schiedsrichter-color);
+}
+
+.status-badge.mime {
+    background-color: rgba(52, 157, 0, 0.1);
+    color: var(--mieme-color);
+    border-color: var(--mieme-color);
+}
+
+.status-badge.teilnehmer {
+    background-color: rgba(0, 140, 205, 0.1);
+    color: var(--teilnehmer-color);
+    border-color: var(--teilnehmer-color);
+}
+
+/* Aktueller Benutzer-Indikator */
+.current-user-indicator {
+    color: var(--ww-blue-100);
+    font-weight: bold;
+    font-style: italic;
+    display: inline-block;
+    padding: 2px 6px;
+    background-color: rgba(0, 140, 205, 0.1);
+    border-radius: 4px;
+    margin-top: 5px;
+}
+
+/* ===== PASSWORT-UPDATE-BEREICH ===== */
+.password-update-cell {
+    max-width: 200px;
+    min-width: 180px;
+}
+
+.password-update-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+}
+
+.password-input {
+    flex: 1;
+    min-width: 120px;
+    padding: 6px 8px;
+    border: 1px solid var(--ww-blue-60);
+    border-radius: 4px;
+    font-size: 0.9em;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.password-input:focus {
+    outline: none;
+    border-color: var(--ww-blue-100);
+    box-shadow: 0 0 0 2px rgba(0, 140, 205, 0.2);
+}
+
+.password-input::placeholder {
+    color: var(--ww-darkblue-60);
+    font-style: italic;
+}
+
+.update-password-btn {
+    white-space: nowrap;
+    padding: 6px 10px;
+    font-size: 0.85em;
+    min-width: auto;
+    background-color: var(--ww-blue-100);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.update-password-btn:hover {
+    background-color: var(--ww-darkblue-90);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 140, 205, 0.3);
+}
+
+.update-password-btn:disabled {
+    background-color: var(--ww-darkblue-30);
+    color: var(--ww-darkblue-60);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Typ-Zelle zentrieren */
+.type-cell {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Datum-Zelle */
+.date-cell {
+    text-align: center;
+    color: var(--ww-darkblue-60);
+    font-size: 0.9em;
+}
+
+/* Deaktivierter Button */
+.btn.disabled {
+    background-color: var(--ww-darkblue-30);
+    color: var(--ww-darkblue-60);
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* ===== INFO-BOX ===== */
+.info-box {
+    background-color: var(--ww-blue-30);
+    border: 1px solid var(--ww-blue-60);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.info-box h4 {
+    color: var(--ww-darkblue-100);
+    margin: 0 0 15px 0;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+}
+
+.info-box h4::before {
+    content: "ℹ️";
+    margin-right: 8px;
+    font-size: 1.2em;
+}
+
+.info-box ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.info-box li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+    color: var(--ww-darkblue-90);
+}
+
+.info-box li:last-child {
+    margin-bottom: 0;
+}
+
+/* ===== ENHANCED FORM VALIDATION ===== */
+.form-group input.error {
+    border-color: var(--drk-rot);
+    background-color: rgba(230, 0, 5, 0.05);
+    box-shadow: 0 0 0 2px rgba(230, 0, 5, 0.2);
+}
+
+.validation-message.field-error {
+    display: block;
+    color: var(--drk-rot);
+    font-size: 0.9em;
+    margin-top: 5px;
+    padding: 8px 12px;
+    background-color: rgba(230, 0, 5, 0.1);
+    border: 1px solid rgba(230, 0, 5, 0.3);
+    border-radius: 4px;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== PASSWORD STRENGTH INDICATOR ===== */
+.password-strength {
+    margin-top: 5px;
+    display: flex;
+    gap: 3px;
+}
+
+.strength-bar {
+    height: 4px;
+    flex: 1;
+    background-color: var(--ww-blue-30);
+    border-radius: 2px;
+    transition: background-color 0.3s ease;
+}
+
+.strength-bar.weak {
+    background-color: var(--drk-rot);
+}
+
+.strength-bar.medium {
+    background-color: #ff8f00;
+}
+
+.strength-bar.strong {
+    background-color: #2e7d32;
+}
+
+/* ===== ENHANCED TABLE STYLES ===== */
+.data-table tbody tr:hover .current-user-indicator {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: var(--ww-blue-100);
+}
+
+.data-table tbody tr:hover .status-badge.admin {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: var(--drk-rot);
+}
+
+.data-table tbody tr:hover .password-update-container {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.data-table tbody tr:hover .password-input {
+    border-color: var(--ww-blue-100);
+}
+
+/* ===== ENHANCED BUTTON STYLES ===== */
+.btn.primary-btn {
+    background-color: var(--ww-blue-100);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 140, 205, 0.3);
+}
+
+.btn.primary-btn:hover {
+    background-color: var(--ww-darkblue-90);
+    box-shadow: 0 4px 8px rgba(0, 140, 205, 0.4);
+    transform: translateY(-1px);
+}
+
+.btn.warning-btn {
+    background-color: var(--drk-rot);
+    color: white;
+    box-shadow: 0 2px 4px rgba(230, 0, 5, 0.3);
+}
+
+.btn.warning-btn:hover {
+    background-color: #c00004;
+    box-shadow: 0 4px 8px rgba(230, 0, 5, 0.4);
+    transform: translateY(-1px);
+}
+
+.btn.secondary-btn {
+    background-color: var(--ww-darkblue-30);
+    color: var(--ww-darkblue-100);
+    border: 1px solid var(--ww-darkblue-60);
+}
+
+.btn.secondary-btn:hover {
+    background-color: var(--ww-darkblue-60);
+    color: white;
+}
+
+/* ===== ENHANCED MESSAGE BOX ===== */
+.message-box {
+    border-left: 4px solid;
+    transition: opacity 0.5s ease;
+}
+
+.message-box.success {
+    border-left-color: #2e7d32;
+    background-color: #d4edda;
+}
+
+.message-box.error {
+    border-left-color: var(--drk-rot);
+    background-color: #f8d7da;
+}
+
+.message-box.info {
+    border-left-color: var(--ww-blue-100);
+    background-color: #d1ecf1;
+}
+
+/* ===== TAB NAVIGATION ENHANCEMENT ===== */
+.tab-button.active {
+    background-color: rgba(0, 140, 205, 0.1);
+    border-bottom-color: var(--ww-blue-100);
+    position: relative;
+}
+
+.tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid var(--ww-blue-100);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .info-box {
+        padding: 15px;
+        margin: 15px 0;
+    }
+
+    .info-box h4 {
+        font-size: 1em;
+    }
+
+    .password-update-cell {
+        min-width: auto;
+        max-width: none;
+    }
+
+    .password-update-container {
+        flex-direction: column;
+        gap: 4px;
+        align-items: stretch;
+    }
+
+    .password-input {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .update-password-btn {
+        width: 100%;
+    }
+
+    .current-user-indicator {
+        font-size: 0.8em;
+        padding: 1px 4px;
+    }
+
+    .status-badge.admin {
+        padding: 4px 8px;
+        font-size: 0.85em;
+    }
+
+    .button-group {
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .button-group .btn {
+        width: 100%;
+        text-align: center;
+        padding: 6px 8px;
+        font-size: 0.9em;
+    }
+}
+
+@media (max-width: 480px) {
+    .data-table th:nth-child(2), /* Passwort */
+    .data-table td:nth-child(2) {
+        display: none;
+    }
+
+    .data-table th:nth-child(4), /* Erstellungsdatum */
+    .data-table td:nth-child(4) {
+        display: none;
+    }
+
+    .info-box h4::before {
+        display: none; /* Emoji auf sehr kleinen Bildschirmen ausblenden */
+    }
+}
+
+/* ===== ACCESSIBILITY ENHANCEMENTS ===== */
+.btn:focus-visible {
+    outline: 3px solid var(--ww-blue-100);
+    outline-offset: 2px;
+}
+
+.tab-button:focus-visible {
+    outline: 2px solid var(--ww-blue-100);
+    outline-offset: 2px;
+}
+
+.password-input:focus-visible {
+    outline: 2px solid var(--ww-blue-100);
+    outline-offset: 2px;
+}
+
+.update-password-btn:focus-visible {
+    outline: 2px solid var(--ww-blue-100);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+    .status-badge.admin {
+        background-color: var(--white);
+        border-width: 2px;
+    }
+
+    .current-user-indicator {
+        background-color: var(--white);
+        border: 1px solid var(--ww-blue-100);
+    }
+
+    .info-box {
+        border-width: 2px;
+    }
+
+    .password-input {
+        border-width: 2px;
+    }
+
+    .password-update-container {
+        border: 1px solid var(--ww-blue-100);
+        border-radius: 4px;
+        padding: 8px;
+    }
+}
+
+/* Prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .btn,
+    .tab-button,
+    .validation-message,
+    .message-box,
+    .password-input,
+    .update-password-btn {
+        transition: none;
+        animation: none;
+    }
+
+    .btn:hover,
+    .update-password-btn:hover {
+        transform: none;
+    }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .tab-navigation,
+    .actions-bar,
+    .button-group,
+    .form-actions,
+    .info-box,
+    .password-update-container {
+        display: none;
+    }
+
+    .data-table {
+        page-break-inside: avoid;
+    }
+
+    .current-user-indicator {
+        background-color: transparent;
+        border: 1px solid #000;
+    }
+
+    .status-badge.admin {
+        background-color: transparent;
+        border: 1px solid #000;
+    }
+
+    .password-update-cell::after {
+        content: " [Passwort-Bearbeitung]";
+        font-style: italic;
+    }
+}

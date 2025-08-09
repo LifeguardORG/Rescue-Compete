@@ -1,0 +1,523 @@
+@import "Colors.css";
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: var(--beige);
+    line-height: 1.6;
+}
+
+/* Landing Container */
+.landing-container {
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 20px 40px;
+    box-sizing: border-box;
+}
+
+/* Hero Section */
+.hero-section {
+    background-color: var(--white);
+    border: 2px solid var(--ww-blue-100);
+    border-radius: 12px;
+    padding: 40px 30px;
+    text-align: center;
+    margin-bottom: 40px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.logo-container {
+    margin-bottom: 20px;
+}
+
+.hero-logo {
+    height: 80px;
+    width: auto;
+}
+
+.hero-title {
+    font-size: 2.8rem;
+    color: var(--ww-blue-100);
+    margin: 15px 0;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    color: var(--ww-blue-60);
+    margin: 15px 0;
+    font-weight: 600;
+}
+
+.hero-description {
+    font-size: 1.1rem;
+    color: var(--ww-blue-60);
+    max-width: 600px;
+    margin: 20px auto 0;
+}
+
+/* Hero Actions für CTA Buttons */
+.hero-actions {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+/* CTA Button Styling */
+.cta-button {
+    display: inline-block;
+    padding: 12px 24px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    border: 2px solid var(--ww-blue-100);
+    cursor: pointer;
+    text-align: center;
+    min-width: 140px;
+}
+
+.cta-button.primary {
+    background-color: var(--ww-blue-100);
+    color: var(--white);
+}
+
+.cta-button.primary:hover {
+    background-color: var(--button-hover);
+}
+
+/* Info Section */
+.info-section {
+    margin-bottom: 40px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+.info-card {
+    background-color: var(--white);
+    border: 1px solid var(--ww-blue-60);
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.info-card h3 {
+    color: var(--ww-blue-100);
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    font-weight: bold;
+    border-bottom: 2px solid var(--ww-blue-30);
+    padding-bottom: 10px;
+}
+
+.info-card p {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.project-details h4 {
+    color: var(--ww-blue-100);
+    margin: 20px 0 10px 0;
+    font-size: 1.1rem;
+}
+
+.project-details ul,
+.feature-list,
+.achievement-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.project-details li,
+.feature-list li,
+.achievement-list li {
+    border-bottom: 1px solid var(--ww-blue-30);
+    position: relative;
+    padding: 8px 0 8px 20px;
+}
+
+.team-member {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--ww-blue-30);
+    text-align: left;
+}
+
+.team-member:last-child {
+    border-bottom: none;
+}
+
+.team-member strong {
+    color: #333;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.github-link {
+    display: inline-block;
+    margin-top: 15px;
+    color: var(--ww-blue-100);
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 16px;
+    border: 1px solid var(--ww-blue-100);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.github-link:hover {
+    background-color: var(--ww-blue-100);
+    color: var(--white);
+}
+
+.project-details li:before,
+.feature-list li:before,
+.achievement-list li:before {
+    content: "▶";
+    color: var(--ww-blue-100);
+    position: absolute;
+    left: 0;
+    font-size: 0.8rem;
+}
+
+.project-details li:last-child,
+.feature-list li:last-child,
+.achievement-list li:last-child {
+    border-bottom: none;
+}
+
+/* Open Source Section */
+.opensource-section {
+    background-color: var(--white);
+    border: 1px solid var(--ww-blue-60);
+    border-radius: 8px;
+    padding: 40px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.opensource-content h2 {
+    color: var(--ww-blue-100);
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: bold;
+}
+
+.opensource-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.opensource-info {
+    padding: 20px;
+    border: 1px solid var(--ww-blue-30);
+    border-radius: 6px;
+    background-color: var(--ww-blue-30);
+}
+
+.opensource-info h3 {
+    color: var(--ww-blue-100);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.opensource-info p {
+    color: #333;
+    margin: 0;
+}
+
+/* Contact Section */
+.contact-section {
+    margin-bottom: 40px;
+}
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+}
+
+.contact-card {
+    background-color: var(--white);
+    border: 1px solid var(--ww-blue-60);
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.contact-card h3 {
+    color: var(--ww-blue-100);
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.contact-card p {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.contact-methods {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.contact-button {
+    background-color: var(--ww-blue-100);
+    color: var(--white);
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    display: inline-block;
+}
+
+.contact-button:hover {
+    background-color: var(--button-hover);
+}
+
+.contact-info {
+    font-size: 0.9rem;
+    color: var(--ww-blue-60);
+    text-align: left;
+    margin: 0;
+}
+
+/* Disclaimer Section */
+.disclaimer-section {
+    background-color: #f8f9fa;
+    border: 1px solid var(--ww-blue-60);
+    border-radius: 8px;
+    padding: 40px;
+    margin-bottom: 40px;
+}
+
+.disclaimer-content h2 {
+    color: var(--ww-blue-100);
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: bold;
+}
+
+.disclaimer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.disclaimer-card {
+    background-color: var(--white);
+    border: 1px solid var(--ww-blue-30);
+    border-radius: 6px;
+    padding: 25px;
+    border-left: 4px solid var(--drk-rot);
+}
+
+.disclaimer-card h3 {
+    color: var(--drk-rot);
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.disclaimer-card p {
+    color: #333;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Focus states für bessere Accessibility */
+.cta-button:focus,
+.github-link:focus,
+.contact-button:focus {
+    outline: 3px solid var(--ww-blue-100);
+    outline-offset: 2px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .landing-container {
+        padding: 10px 20px;
+    }
+
+    .hero-section {
+        padding: 30px 15px;
+    }
+
+    .hero-title {
+        font-size: 2.2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+
+    .info-grid,
+    .contact-grid,
+    .disclaimer-grid,
+    .opensource-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-card,
+    .contact-card,
+    .disclaimer-card {
+        padding: 20px;
+    }
+
+    .opensource-section {
+        padding: 25px;
+    }
+
+    .hero-logo {
+        height: 60px;
+    }
+
+    .hero-actions {
+        margin-top: 25px;
+    }
+
+    .cta-button {
+        width: 100%;
+        max-width: 250px;
+    }
+}
+
+@media (max-width: 576px) {
+    .landing-container {
+        padding: 10px 15px;
+    }
+
+    .hero-title {
+        font-size: 1.8rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .hero-description {
+        font-size: 1rem;
+    }
+
+    .info-card h3,
+    .contact-card h3 {
+        font-size: 1.2rem;
+    }
+
+    .opensource-content h2,
+    .disclaimer-content h2 {
+        font-size: 1.5rem;
+    }
+
+    .hero-logo {
+        height: 50px;
+    }
+
+    .cta-button {
+        padding: 10px 20px;
+        font-size: 14px;
+        min-width: 120px;
+    }
+
+    .hero-actions {
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .landing-container {
+        padding: 10px 15px;
+    }
+
+    .hero-title {
+        font-size: 1.8rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .hero-description {
+        font-size: 1rem;
+    }
+
+    .info-card h3,
+    .contact-card h3 {
+        font-size: 1.2rem;
+    }
+
+    .opensource-content h2,
+    .disclaimer-content h2 {
+        font-size: 1.5rem;
+    }
+
+    .hero-logo {
+        height: 50px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .navbar,
+    .contact-section {
+        display: none;
+    }
+
+    .landing-container {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .hero-section,
+    .info-section,
+    .opensource-section,
+    .disclaimer-section {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ccc;
+        background: white !important;
+        color: black !important;
+    }
+
+    .cta-button,
+    .contact-button,
+    .github-link {
+        display: none;
+    }
+
+    .hero-title {
+        color: black !important;
+        text-shadow: none;
+    }
+
+    .hero-subtitle,
+    .hero-description {
+        color: #333 !important;
+    }
+}

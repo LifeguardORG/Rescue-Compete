@@ -1,0 +1,22 @@
+{
+  "name": "RescueCompete Fragenformular",
+  "short_name": "Formular",
+  "description": "Formular-App für Wettkampfteilnehmer der RescueCompete Plattform",
+  "start_url": "/view/FormView.php",
+  "display": "standalone",
+  "background_color": "#f5f0e6",
+  "theme_color": "#008ccd",
+  "icons": [
+    {
+      "src": "/assets/images/logos/ww-rundlogo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "id": "rescuecompete-formular",
+  "scope": "/",
+  "categories": ["utilities", "sports"]
+}

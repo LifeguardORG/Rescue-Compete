@@ -1,0 +1,360 @@
+
+--boundary_.oOo._rsfQJ5WR3578ZSu2kEYqxedU+BGD4iQT
+Content-Length: 604
+Content-Type: application/octet-stream
+X-File-MD5: a69b10063040c64a1bccc6e7ff6bef5b
+X-File-Mtime: 1733072521
+X-File-Path: /Studium/Designproject 1/des-project/examples/Php_cookies_sessions/session_auslesen.php
+
+<?php 
+	session_start();  
+	$name = $_SESSION['name']; // "Marie";  
+	$farbe = $_SESSION['farbe']; //"rot"; 
+	$besuche = $_SESSION['Besuche']++; //0; 
+
+/*Übungsaufgabe:
+
+a) Geben Sie die SessionID im Browser aus.
+
+b) Löschen Sie die Session und prüfen Sie nach, ob die SessionID wirklich verschwunden ist.
+
+*/
+
+?> 
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>     
+		<meta charset="UTF-8" />   
+		<title>Session ausgeben</title>  
+	</head>  
+	<body>
+	<?php
+	 echo("Mein Name ist $name und ich liebe die Farbe $farbe und besuche die Seite so oft: $besuche");?>  
+	</body>
+</html>
+--boundary_.oOo._rsfQJ5WR3578ZSu2kEYqxedU+BGD4iQT
+Content-Length: 441
+Content-Type: application/octet-stream
+X-File-MD5: 7bef3dea656d8f15a4f416bcb7d53e21
+X-File-Mtime: 1733072521
+X-File-Path: /Studium/Designproject 1/des-project/examples/Php_cookies_sessions/sessions.php
+
+<?php
+session_start();
+?>
+<!DOCTYPE html>
+<html>
+	<head>  
+		<meta charset="UTF-8" />
+		<title>Session verwenden</title>
+	</head>
+	<body>
+		<?php
+			$_SESSION['name']  = "Marie";
+			$_SESSION['farbe'] = "rot";
+			$_SESSION['Besuche'] = 0;
+			echo "Dieses Mal werden Werte über Sessions gesetzt. ";
+			echo "Hier werden diese wieder ausgelesen <a href='session_auslesen.php'>session_auslesen.php</a>";
+			?>
+</body>
+</html>
+--boundary_.oOo._rsfQJ5WR3578ZSu2kEYqxedU+BGD4iQT
+Content-Length: 499
+Content-Type: application/octet-stream
+X-File-MD5: dc78351472c3e0f40831061a30462425
+X-File-Mtime: 1733072521
+X-File-Path: /Studium/Designproject 1/des-project/examples/Php_cookies_sessions/cookie_setzen.php
+
+<?php
+
+date_default_timezone_set('CET+1');
+
+$config['cookie_secure'] = TRUE;
+
+setcookie('name', 'Marie', time()+60*10);
+setcookie('farbe', 'rot', time()+60*10);
+
+/*Übungsaufgabe:
+
+Fügen ein Cookie hinzu welcher nach 1 Minute ausläuft.
+
+*/
+
+?>
+
+<html>
+	<head>
+		<title>Show Cookie</title>
+	</head>
+	<body>
+	<?php if (isset($_COOKIE['name'])) {
+	echo($_COOKIE['name']); } ?>
+	<br/>
+	<?php if (isset($_COOKIE['farbe'])) {
+	echo($_COOKIE['farbe']); } ?>
+	</body>
+</html>
+
+--boundary_.oOo._rsfQJ5WR3578ZSu2kEYqxedU+BGD4iQT
+Content-Length: 1360
+Content-Type: application/octet-stream
+X-File-MD5: 5e983821d586121731b0efcb5d1dd7bc
+X-File-Mtime: 1733072521
+X-File-Path: /Studium/Designproject 1/des-project/public/css/Login.css
+
+@import "Colors.css";
+
+/* Allgemeiner Stil */
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--beige);
+    margin: 0;
+    padding: 0;
+}
+
+/* Container-Stil */
+.container {
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 20px;
+}
+
+/* Formular-Sektion */
+.form-section {
+    background-color: var(--white);
+    padding: 20px;
+    border: 1px solid var(--ww-blue-100);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.form-section h2 {
+    color: var(--ww-darkblue-100);
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* Formular-Gruppen */
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: var(--ww-darkblue-100);
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--ww-blue-100);
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+/* Button */
+button {
+    width: 100%;
+    padding: 10px;
+    font-size: 18px;
+    color: var(--white);
+    background-color: var(--button);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: var(--button-hover);
+}
+
+--boundary_.oOo._rsfQJ5WR3578ZSu2kEYqxedU+BGD4iQT
+Content-Length: 1611
+Content-Type: application/octet-stream
+X-File-MD5: 6112f8e689d09a0190cda84bb032092b
+X-File-Mtime: 1733072521
+X-File-Path: /Studium/Designproject 1/des-project/examples/Training/JSeventsdom/jstauschundtext.html
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Praktikum JavaScript + DOM</title>
+		<meta charset="utf-8">
+		<script  type="text/javascript" src="jstauschundtext.js"></script>
+		<link rel="stylesheet" type="text/css" href="jstauschundtext.css">
+	</head>
+
+	<body>
+		<h1>Praktikumsaufgabe 2 - JavaScript</h1>
+
+		<section id="tausche">
+			<div id="links" class="green">
+				MITTE
+			</div>
+			<div id="mitte" class="pink">
+				LINKS
+			</div>
+			<div id="rechts" class="red">
+				RECHTS
+			</div>
+
+			<h2>Aufgabe 1: Tausche Bezeichner</h2>
+			<p>Mit folgendem Button sollen die Bezeichner des linken und mittleren Kästchens vertauscht werden, sodass im linken Kästchen "MITTE" und im mittleren Kästchen "LINKS" steht. <br>
+				<input type="submit" id="switch" value="Bezeichner tauschen" onclick="switchMe()">
+			</p>
+		</section>
+
+
+		<section class="text">
+
+			<h2>Aufgabe 2: Text zusammenbauen</h2>
+			<p>Die Eingaben des Nutzers sollen zu einem Satz zusammengebaut werden entsprechend dem Beispiel im unteren Absatz. Die Lösung soll in dem Absatz mit der id "loesung" geschrieben werden. Der Beispielsatz kann dabei überschrieben werden.</p>
+
+			<div>
+				<form>
+				Name: <input type="text" id="name" placeholder="Mara">
+				Anzahl: <input type="number" id="number" placeholder="20">
+				Dinge: <input type="text" id="thing" placeholder="Murmeln"><br>
+				<input type="submit" id="createtext" value="Schreibe den Text" onclick="createText()"><br>
+				</form>
+			</div>
+
+
+			<p id="loesung">(Beispiel: Mara hat 20 Murmeln.)</p>
+
+		</section>
+
+	</body>
+
+</html>
+
+--boundary_.oOo._rsfQJ5WR3578ZSu2kEYqxedU+BGD4iQT
+Content-Length: 280
+Content-Type: application/octet-stream
+X-File-MD5: 6b7fd9a2a10556d2b0249303b952aa44
+X-File-Mtime: 1733072521
+X-File-Path: /Studium/Designproject 1/des-project/examples/Training/FormulareValClient/rezepte.css
+
+h1 {
+    margin-left: 10px;
+}
+
+#rezept {
+    color: #00ff33;
+}
+
+#fehler{
+    color: red;
+}
+
+section{
+    float: left;
+    border: 1px solid black;
+    padding: 15px;
+    margin-right: 50px;
+    margin-left: 10px;
+
+
+}
+input {
+    margin: 5px 0px 5px 0px;
+}
+
+--boundary_.oOo._rsfQJ5WR3578ZSu2kEYqxedU+BGD4iQT
+Content-Length: 1304
+Content-Type: application/octet-stream
+X-File-MD5: cada1e735053ece37ed0be68abb6aa7c
+X-File-Mtime: 1733072521
+X-File-Path: /Studium/Designproject 1/des-project/examples/css/style.css
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+}
+
+.navbar a:hover {
+    text-decoration: underline;
+}
+
+.content {
+    padding: 20px;
+    text-align: center;
+}
+
+.form-container {
+    margin: 20px auto;
+    max-width: 400px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.form-container input, .form-container textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.form-container button {
+    padding: 10px 15px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.form-container button:hover {
+    background-color: #218838;
+}
+
+.message {
+    margin: 10px 0;
+    color: green;
+}
+
+.error {
+    margin: 10px 0;
+    color: red;
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #f1f1f1;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+--boundary_.oOo._rsfQJ5WR3578ZSu2kEYqxedU+BGD4iQT
+Content-Length: 4088
+Content-Type: application/octet-stream
+X-File-MD5: 7b98

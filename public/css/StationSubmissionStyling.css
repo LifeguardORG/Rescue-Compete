@@ -1,0 +1,287 @@
+@import "Colors.css";  /* Importiert Farbvariablen */
+
+/* Basis-Reset und Grundlayout */
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Container für den Hauptinhalt – volle Breite */
+.container {
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Überschriften */
+h1 {
+    text-align: center;
+    color: var(--ww-darkblue-100);
+    margin-bottom: 20px;
+}
+
+/* Liste der Stationen */
+.station-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Jede Station als eigene Box */
+.station-item {
+    background-color: var(--white);
+    border: 1px solid var(--ww-blue-100);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column; /* Vertikale Anordnung innerhalb der Box */
+}
+
+/* Header-Bereich in jeder Station: Stationsname und Button in einer Zeile */
+.station-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Stationsname */
+.station-name {
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--ww-darkblue-100);
+}
+
+/* Button zur Ergebniseingabe */
+.station-button {
+    background-color: var(--ww-darkblue-100);
+    color: var(--white);
+    border: none;
+    border-radius: 4px;
+    padding: 8px 20px;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.station-button:hover {
+    background-color: var(--button-hover);
+}
+
+/* Header mit Rückpfeil und Überschrift */
+.header-with-back {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap; /* Erlaubt Umbruch auf kleineren Geräten */
+}
+
+.back-button {
+    font-size: 24px;
+    text-decoration: none;
+    color: var(--ww-darkblue-100);
+    border: var(--ww-darkblue-100) 1px solid;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background-color: var(--white);
+    margin-right: 10px;
+    display: inline-flex; /* Besser für responsives Design */
+    align-items: center;
+    justify-content: center;
+}
+
+.back-button:hover {
+    color: var(--ww-blue-100);
+}
+
+/* Submission-Box für die Eingabemaske */
+.submission-box {
+    border: 1px solid var(--ww-blue-100);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    background-color: var(--white);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Formulargruppen */
+.form-group {
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+/* Flexbox-Layout für Label und Input in einer Zeile */
+.flex-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap; /* Erlaubt Umbruch auf kleineren Geräten */
+    gap: 10px; /* Abstand zwischen Elementen, wenn sie umbrechen */
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: var(--ww-darkblue-100);
+    flex: 1; /* Label nimmt verfügbaren Platz ein */
+    min-width: 200px; /* Mindestbreite für bessere Lesbarkeit */
+}
+
+input[type="number"],
+select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--ww-blue-100);
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* Spezifischer Stil für Protokoll-Eingabefelder */
+.protocol-input {
+    width: 100px; /* Feste Breite für Zahlenfelder */
+    flex-shrink: 0; /* Verhindert Schrumpfen auf kleineren Bildschirmen */
+}
+
+/* Überschrift für den Speichern-Bereich */
+.submission-box h2 {
+    text-align: center;
+    margin-top: 20px;
+    color: var(--ww-darkblue-100);
+}
+
+/* Button-Stile */
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: var(--ww-darkblue-100);
+    color: var(--white);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.btn:hover {
+    background-color: var(--button-hover);
+}
+
+/* Stil für die Zeiteingabefelder und die Auflistung */
+.time-input {
+    width: 100px;
+    margin-right: 10px;
+}
+.team-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.team-name {
+    width: 200px;
+}
+.warning {
+    color: red;
+    font-weight: bold;
+}
+
+/* Wrapper als flex Container, damit wir absolute Positionierung für die Legende nutzen können */
+.wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+}
+
+/* Legende: Absolut links im Container positioniert */
+.legend {
+    position: absolute;
+    left: 20px;  /* Passt sich dem Container-Padding an */
+    top: 20px;
+    width: 400px; /* Breiter als zuvor */
+    padding: 10px;
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+}
+
+/* Submission-Form: Feste Breite und zentriert durch Flex-Container */
+.submission-form {
+    width: 100%;
+    max-width: 600px; /* Maximale Breite für größere Bildschirme */
+    margin: 0 auto; /* Zentrieren */
+}
+
+/* Responsive Anpassungen */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    .header-with-back h1 {
+        font-size: 20px; /* Kleinere Überschrift auf mobilen Geräten */
+    }
+
+    .submission-form {
+        width: 100%;
+    }
+
+    .legend {
+        position: static; /* Legende nicht mehr absolut positionieren */
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    /* Anpassung für das Formular auf kleineren Bildschirmen */
+    .flex-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    label {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+
+    .protocol-input {
+        width: 100%; /* Volle Breite auf mobilen Geräten */
+    }
+
+    /* Button nimmt volle Breite ein */
+    .btn {
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 10px;
+    }
+
+    .submission-box {
+        padding: 15px;
+    }
+
+    .back-button {
+        font-size: 20px; /* Etwas kleiner auf sehr kleinen Geräten */
+    }
+
+    h1 {
+        font-size: 18px; /* Noch kleinere Überschrift auf sehr kleinen Geräten */
+    }
+
+    /* Mannschafts-Dropdown-Liste */
+    select {
+        font-size: 16px; /* Größere Schrift für bessere Bedienbarkeit auf Mobilgeräten */
+    }
+}

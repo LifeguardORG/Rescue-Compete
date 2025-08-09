@@ -1,0 +1,193 @@
+@import "Colors.css";  /* Farben und Variablen importieren */
+
+/* Hauptcontainer-Stil */
+.main-content {
+    padding: 20px;
+    width: 100%;
+}
+
+/* Überschrift-Stil, konsistent mit anderen Seiten */
+.main-content h2 {
+    color: var(--ww-darkblue-100);
+    font-size: 20px;
+    margin: 0 0 25px;
+    border-bottom: 1px solid var(--ww-blue-100);
+    padding-bottom: 5px;
+}
+
+/* Aktionsleiste */
+.actions-bar {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 20px;
+    gap: 15px;
+}
+
+/* Daten-Container im Stil der form-section und info-section */
+.data-container {
+    background-color: var(--white);
+    padding: 20px;
+    border: 1px solid var(--ww-blue-100);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1em;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.data-table th {
+    background-color: var(--ww-blue-100);
+    color: var(--white);
+    padding: 12px;
+    text-align: left;
+    border: 1px solid var(--ww-blue-100);
+}
+
+.data-table td {
+    padding: 12px;
+    border: 1px solid var(--ww-blue-100);
+    text-align: left;
+}
+
+.data-table tbody tr:nth-child(even) {
+    background-color: var(--ww-blue-30);
+}
+
+.data-table tbody tr:hover {
+    background-color: var(--ww-blue-60);
+    color: var(--white);
+}
+
+.numeric-cell {
+    text-align: center;
+}
+
+.status-cell {
+    text-align: center;
+}
+
+/* Status-Anzeige */
+.status-indicator {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.status-indicator.completed {
+    background-color: #e6f7e6;
+    color: #2e7d32;
+}
+
+.status-indicator.pending {
+    background-color: #fff8e1;
+    color: #ff8f00;
+}
+
+/* Aktionszellen */
+.action-cell {
+    text-align: center;
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Button-Styling, angepasst an Colors.css */
+.btn {
+    padding: 10px 20px;
+    background-color: var(--button);
+    color: var(--white);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-decoration: none;
+    font-family: inherit;
+    font-size: 1em;
+    line-height: normal;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.btn:hover {
+    background-color: var(--button-hover);
+}
+
+.warning-btn {
+    background-color: var(--drk-rot);
+}
+
+.warning-btn:hover {
+    background-color: #c00004;
+}
+
+.primary-btn {
+    background-color: var(--ww-blue-100);
+}
+
+.primary-btn:hover {
+    background-color: var(--ww-darkblue-90);
+}
+
+/* Statusmeldungen */
+.message-box {
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.message-box.success {
+    background-color: #e6f7e6;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+.message-box.error {
+    background-color: rgba(230, 0, 5, 0.1);
+    color: var(--drk-rot);
+    border: 1px solid var(--drk-rot);
+}
+
+.message-box.info {
+    background-color: var(--ww-blue-30);
+    color: var(--ww-darkblue-100);
+    border: 1px solid var(--ww-blue-100);
+}
+
+.no-data {
+    text-align: center;
+    color: var(--ww-darkblue-60);
+    padding: 30px 0;
+    font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .button-group {
+        flex-direction: column;
+    }
+
+    .button-group .btn {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+
+    .data-table {
+        font-size: 0.9em;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 8px 5px;
+    }
+}
