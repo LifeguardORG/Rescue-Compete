@@ -139,9 +139,9 @@ $pageTitle = "Verwaltung der Wertungsklassen";
                     <button class="btn primary-btn" onclick="showTab('create')">
                         Neue Wertungsklasse erstellen
                     </button>
-                    <button class="btn secondary-btn" onclick="showTab('assign')">
+                    <!--   <button class="btn secondary-btn" onclick="showTab('assign')">
                         Teams zuweisen
-                    </button>
+                    </button>  -->
                     <button class="btn warning-btn" onclick="showTab('remove')">
                         Teams entfernen
                     </button>

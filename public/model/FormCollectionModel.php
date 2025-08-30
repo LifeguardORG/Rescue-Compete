@@ -112,6 +112,7 @@ class FormCollectionModel
             $errors = $this->validateCollectionData($collectionData);
             if (!empty($errors)) {
                 $this->db->rollBack();
+                error_log("FormCollectionModel::createCollection - Validation errors: " . json_encode($errors));
                 return null;
             }
 
@@ -141,6 +142,7 @@ class FormCollectionModel
             $this->generateTokensForCollection($collectionId, $collectionData['formsCount']);
 
             $this->db->commit();
+            error_log("FormCollectionModel::createCollection - Successfully created collection with ID: {$collectionId}");
             return $collectionId;
         } catch (PDOException $e) {
             $this->db->rollBack();
@@ -151,6 +153,7 @@ class FormCollectionModel
 
     /**
      * Liest eine oder mehrere FormCollections aus der Datenbank
+     * REPARIERT: Verwendet jetzt direkte Tabellen-Abfrage statt problematische View
      *
      * @param int|null $collectionId Optional: ID einer spezifischen Collection
      * @return array|null Collection-Daten oder null bei Fehler
@@ -159,9 +162,25 @@ class FormCollectionModel
     {
         try {
             if ($collectionId === null) {
-                // Alle Collections mit Statistiken über View abrufen
-                $stmt = $this->db->query("SELECT * FROM CollectionOverview ORDER BY createdAt DESC");
-                return $stmt->fetchAll(PDO::FETCH_ASSOC);
+                // Alle Collections mit Basis-Daten und Statistiken abrufen
+                $stmt = $this->db->prepare(
+                    "SELECT fc.*, s.name as stationName
+                     FROM FormCollection fc
+                     LEFT JOIN Station s ON fc.station_ID = s.ID
+                     ORDER BY fc.createdAt DESC"
+                );
+                $stmt->execute();
+                $collections = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                // Debug: Anzahl gefundener Collections loggen
+                error_log("FormCollectionModel::readCollection - Found " . count($collections) . " collections");
+
+                // Statistiken für jede Collection hinzufügen
+                foreach ($collections as &$collection) {
+                    $collection = $this->enrichCollectionWithStats($collection);
+                }
+
+                return $collections;
             } else {
                 // Spezifische Collection mit Details
                 $stmt = $this->db->prepare(
@@ -174,11 +193,70 @@ class FormCollectionModel
                      GROUP BY fc.ID"
                 );
                 $stmt->execute([':collectionId' => $collectionId]);
-                return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($result) {
+                    return $this->enrichCollectionWithStats($result);
+                }
+
+                return null;
             }
         } catch (PDOException $e) {
             error_log("Error in FormCollectionModel::readCollection: " . $e->getMessage());
             return null;
+        }
+    }
+
+    /**
+     * Erweitert Collection-Daten um Statistiken
+     *
+     * @param array $collection Basis-Collection-Daten
+     * @return array Collection mit Statistiken
+     */
+    private function enrichCollectionWithStats(array $collection): array
+    {
+        try {
+            $collectionId = $collection['ID'];
+
+            // Team-Statistiken abrufen
+            $stmt = $this->db->prepare(
+                "SELECT 
+                    COUNT(DISTINCT tfi.team_ID) as assignedTeams,
+                    COUNT(tfi.ID) as totalInstances,
+                    COUNT(CASE WHEN tfi.completed = 1 THEN tfi.ID END) as completedForms,
+                    AVG(CASE WHEN tfi.completed = 1 THEN tfi.points END) as averagePoints
+                FROM TeamFormInstance tfi
+                WHERE tfi.collection_ID = :collectionId"
+            );
+            $stmt->execute([':collectionId' => $collectionId]);
+            $stats = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Statistiken zur Collection hinzufügen
+            $collection['assignedTeams'] = intval($stats['assignedTeams'] ?? 0);
+            $collection['totalInstances'] = intval($stats['totalInstances'] ?? 0);
+            $collection['completedForms'] = intval($stats['completedForms'] ?? 0);
+            $collection['averagePoints'] = round(floatval($stats['averagePoints'] ?? 0), 2);
+
+            // Completion Rate berechnen
+            if ($collection['totalInstances'] > 0) {
+                $collection['completionRate'] = round(
+                    ($collection['completedForms'] / $collection['totalInstances']) * 100,
+                    1
+                );
+            } else {
+                $collection['completionRate'] = 0;
+            }
+
+            return $collection;
+        } catch (PDOException $e) {
+            error_log("Error in FormCollectionModel::enrichCollectionWithStats: " . $e->getMessage());
+            // Fallback: Collection ohne erweiterte Statistiken zurückgeben
+            $collection['assignedTeams'] = 0;
+            $collection['totalInstances'] = 0;
+            $collection['completedForms'] = 0;
+            $collection['averagePoints'] = 0;
+            $collection['completionRate'] = 0;
+            return $collection;
         }
     }
 
@@ -198,6 +276,7 @@ class FormCollectionModel
             // Ergebnis der Stored Procedure abrufen
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
+            error_log("FormCollectionModel::deleteCollection - Collection {$collectionId} deleted");
             return $result !== false;
         } catch (PDOException $e) {
             error_log("Error in FormCollectionModel::deleteCollection: " . $e->getMessage());
@@ -231,6 +310,7 @@ class FormCollectionModel
                 ]);
             }
 
+            error_log("FormCollectionModel::assignQuestionsToCollection - Assigned " . count($questionIds) . " questions to collection {$collectionId}");
             return true;
         } catch (PDOException $e) {
             error_log("Error in FormCollectionModel::assignQuestionsToCollection: " . $e->getMessage());
@@ -256,7 +336,10 @@ class FormCollectionModel
                  ORDER BY q.ID"
             );
             $stmt->execute([':collectionId' => $collectionId]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            error_log("FormCollectionModel::getCollectionQuestions - Found " . count($result) . " questions for collection {$collectionId}");
+            return $result;
         } catch (PDOException $e) {
             error_log("Error in FormCollectionModel::getCollectionQuestions: " . $e->getMessage());
             return [];
@@ -291,6 +374,7 @@ class FormCollectionModel
                 ]);
             }
 
+            error_log("FormCollectionModel::generateTokensForCollection - Generated {$formsCount} tokens for collection {$collectionId}");
             return true;
         } catch (PDOException $e) {
             error_log("Error in FormCollectionModel::generateTokensForCollection: " . $e->getMessage());
@@ -357,6 +441,7 @@ class FormCollectionModel
                 $token['qrCodeUrl'] = $baseUrl . '/view/FormRedirect.php?code=' . $token['token'];
             }
 
+            error_log("FormCollectionModel::getCollectionTokens - Found " . count($tokens) . " tokens for collection {$collectionId}");
             return $tokens;
         } catch (PDOException $e) {
             error_log("Error in FormCollectionModel::getCollectionTokens: " . $e->getMessage());
@@ -373,7 +458,10 @@ class FormCollectionModel
     {
         try {
             $stmt = $this->db->query("SELECT * FROM Station ORDER BY name");
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            error_log("FormCollectionModel::getAvailableStations - Found " . count($result) . " stations");
+            return $result;
         } catch (PDOException $e) {
             error_log("Error in FormCollectionModel::getAvailableStations: " . $e->getMessage());
             return [];
@@ -389,7 +477,10 @@ class FormCollectionModel
     {
         try {
             $stmt = $this->db->query("SELECT * FROM QuestionPool ORDER BY Name");
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            error_log("FormCollectionModel::getAvailableQuestionPools - Found " . count($result) . " question pools");
+            return $result;
         } catch (PDOException $e) {
             error_log("Error in FormCollectionModel::getAvailableQuestionPools: " . $e->getMessage());
             return [];
@@ -407,7 +498,10 @@ class FormCollectionModel
         try {
             $stmt = $this->db->prepare("SELECT * FROM Question WHERE QuestionPool_ID = :poolId ORDER BY ID");
             $stmt->execute([':poolId' => $poolId]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            error_log("FormCollectionModel::getQuestionsByPool - Found " . count($result) . " questions for pool {$poolId}");
+            return $result;
         } catch (PDOException $e) {
             error_log("Error in FormCollectionModel::getQuestionsByPool: " . $e->getMessage());
             return [];
@@ -416,6 +510,7 @@ class FormCollectionModel
 
     /**
      * Holt Collection-Performance-Statistiken
+     * REPARIERT: Fallback für fehlende View
      *
      * @param int|null $collectionId Optional: Spezifische Collection
      * @return array Performance-Daten
@@ -423,22 +518,77 @@ class FormCollectionModel
     public function getCollectionPerformance(?int $collectionId = null): array
     {
         try {
+            // Erst versuchen die View zu nutzen
             if ($collectionId === null) {
                 $stmt = $this->db->query("SELECT * FROM CollectionPerformance ORDER BY collectionName");
-                return $stmt->fetchAll(PDO::FETCH_ASSOC);
             } else {
                 $stmt = $this->db->prepare("SELECT * FROM CollectionPerformance WHERE collectionId = :collectionId");
                 $stmt->execute([':collectionId' => $collectionId]);
-                return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
             }
+
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("FormCollectionModel::getCollectionPerformance - Found " . count($result) . " performance records");
+            return $result;
         } catch (PDOException $e) {
-            error_log("Error in FormCollectionModel::getCollectionPerformance: " . $e->getMessage());
-            return [];
+            error_log("Error in FormCollectionModel::getCollectionPerformance (trying View): " . $e->getMessage());
+
+            // Fallback: Manuelle Abfrage ohne View
+            try {
+                if ($collectionId === null) {
+                    $stmt = $this->db->query(
+                        "SELECT fc.ID as collectionId, fc.name as collectionName, 
+                                fc.formsCount, fc.totalQuestions, fc.timeLimit,
+                                COUNT(DISTINCT tfi.team_ID) as teamsAssigned,
+                                COUNT(tfi.ID) as totalInstances,
+                                COUNT(CASE WHEN tfi.completed = 1 THEN 1 END) as completedInstances,
+                                AVG(CASE WHEN tfi.completed = 1 THEN tfi.points END) as averageScore,
+                                MAX(CASE WHEN tfi.completed = 1 THEN tfi.points END) as maxScore,
+                                MIN(CASE WHEN tfi.completed = 1 THEN tfi.points END) as minScore
+                         FROM FormCollection fc 
+                         LEFT JOIN TeamFormInstance tfi ON fc.ID = tfi.collection_ID
+                         GROUP BY fc.ID
+                         ORDER BY fc.name"
+                    );
+                } else {
+                    $stmt = $this->db->prepare(
+                        "SELECT fc.ID as collectionId, fc.name as collectionName, 
+                                fc.formsCount, fc.totalQuestions, fc.timeLimit,
+                                COUNT(DISTINCT tfi.team_ID) as teamsAssigned,
+                                COUNT(tfi.ID) as totalInstances,
+                                COUNT(CASE WHEN tfi.completed = 1 THEN 1 END) as completedInstances,
+                                AVG(CASE WHEN tfi.completed = 1 THEN tfi.points END) as averageScore,
+                                MAX(CASE WHEN tfi.completed = 1 THEN tfi.points END) as maxScore,
+                                MIN(CASE WHEN tfi.completed = 1 THEN tfi.points END) as minScore
+                         FROM FormCollection fc 
+                         LEFT JOIN TeamFormInstance tfi ON fc.ID = tfi.collection_ID
+                         WHERE fc.ID = :collectionId
+                         GROUP BY fc.ID"
+                    );
+                    $stmt->execute([':collectionId' => $collectionId]);
+                }
+
+                $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                // Completion Rate hinzufügen
+                foreach ($result as &$row) {
+                    if ($row['totalInstances'] > 0) {
+                        $row['completionRate'] = round(($row['completedInstances'] / $row['totalInstances']) * 100, 1);
+                    } else {
+                        $row['completionRate'] = 0;
+                    }
+                }
+
+                error_log("FormCollectionModel::getCollectionPerformance (fallback) - Found " . count($result) . " performance records");
+                return $result;
+            } catch (PDOException $e2) {
+                error_log("Error in FormCollectionModel::getCollectionPerformance (fallback): " . $e2->getMessage());
+                return [];
+            }
         }
     }
 
     /**
-     * Holt Team-Collection-Progress (nur für bereits erstellte Instances)
+     * Holt Team-Collection-Progress
      *
      * @return array Team-Progress-Daten
      */
@@ -446,7 +596,10 @@ class FormCollectionModel
     {
         try {
             $stmt = $this->db->query("SELECT * FROM TeamCollectionProgress ORDER BY Teamname, collectionName");
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            error_log("FormCollectionModel::getTeamCollectionProgress - Found " . count($result) . " progress records");
+            return $result;
         } catch (PDOException $e) {
             error_log("Error in FormCollectionModel::getTeamCollectionProgress: " . $e->getMessage());
             return [];
@@ -485,6 +638,7 @@ class FormCollectionModel
                 }
             }
 
+            error_log("FormCollectionModel::processExpiredInstances - Processed: {$stats['processed']}, Expired: {$stats['expired']}, Errors: {$stats['errors']}");
             return $stats;
         } catch (PDOException $e) {
             error_log("Error in FormCollectionModel::processExpiredInstances: " . $e->getMessage());
@@ -503,6 +657,8 @@ class FormCollectionModel
         try {
             $stmt = $this->db->prepare("CALL autoSubmitExpiredForm(:instanceId)");
             $stmt->execute([':instanceId' => $instanceId]);
+
+            error_log("FormCollectionModel::completeFormInstance - Completed instance {$instanceId}");
             return true;
         } catch (PDOException $e) {
             error_log("Error in FormCollectionModel::completeFormInstance: " . $e->getMessage());

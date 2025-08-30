@@ -42,7 +42,7 @@ class FormCollectionController
             return; // Wichtig: Stoppt weitere Verarbeitung
         }
 
-        // Standard-Daten laden
+        // Standard-Daten laden mit verbessertem Error Handling
         $this->loadBaseData();
 
         // POST-Requests verarbeiten
@@ -95,14 +95,73 @@ class FormCollectionController
 
     /**
      * Lädt grundlegende Daten für die View
+     * VERBESSERT: Robusteres Error Handling und Debug-Logging
      */
     private function loadBaseData(): void
     {
-        $this->collections = $this->model->readCollection() ?? [];
-        $this->questionPools = $this->model->getAvailableQuestionPools();
-        $this->stations = $this->model->getAvailableStations();
-        $this->performanceStats = $this->model->getCollectionPerformance();
-        $this->teamProgress = $this->model->getTeamCollectionProgress();
+        try {
+            error_log("FormCollectionController::loadBaseData - Starting data load");
+
+            // Collections laden mit Fallback
+            $this->collections = $this->model->readCollection();
+            if ($this->collections === null) {
+                error_log("FormCollectionController::loadBaseData - Failed to load collections, setting empty array");
+                $this->collections = [];
+                $this->message = 'Hinweis: Collections konnten nicht vollständig geladen werden.';
+                $this->messageType = 'error';
+            } else {
+                error_log("FormCollectionController::loadBaseData - Successfully loaded " . count($this->collections) . " collections");
+            }
+
+            // Question Pools laden
+            $this->questionPools = $this->model->getAvailableQuestionPools();
+            if (empty($this->questionPools)) {
+                error_log("FormCollectionController::loadBaseData - No question pools found");
+            } else {
+                error_log("FormCollectionController::loadBaseData - Loaded " . count($this->questionPools) . " question pools");
+            }
+
+            // Stationen laden
+            $this->stations = $this->model->getAvailableStations();
+            if (empty($this->stations)) {
+                error_log("FormCollectionController::loadBaseData - No stations found");
+            } else {
+                error_log("FormCollectionController::loadBaseData - Loaded " . count($this->stations) . " stations");
+            }
+
+            // Performance Stats laden (mit Fallback)
+            $this->performanceStats = $this->model->getCollectionPerformance();
+            if ($this->performanceStats === null) {
+                error_log("FormCollectionController::loadBaseData - Failed to load performance stats, setting empty array");
+                $this->performanceStats = [];
+            } else {
+                error_log("FormCollectionController::loadBaseData - Loaded " . count($this->performanceStats) . " performance records");
+            }
+
+            // Team Progress laden (mit Fallback)
+            $this->teamProgress = $this->model->getTeamCollectionProgress();
+            if ($this->teamProgress === null) {
+                error_log("FormCollectionController::loadBaseData - Failed to load team progress, setting empty array");
+                $this->teamProgress = [];
+            } else {
+                error_log("FormCollectionController::loadBaseData - Loaded " . count($this->teamProgress) . " team progress records");
+            }
+
+            error_log("FormCollectionController::loadBaseData - Data loading completed");
+
+        } catch (Exception $e) {
+            error_log("Error in FormCollectionController::loadBaseData: " . $e->getMessage());
+
+            // Fallback: Leere Arrays setzen statt null
+            if (!is_array($this->collections)) $this->collections = [];
+            if (!is_array($this->questionPools)) $this->questionPools = [];
+            if (!is_array($this->stations)) $this->stations = [];
+            if (!is_array($this->performanceStats)) $this->performanceStats = [];
+            if (!is_array($this->teamProgress)) $this->teamProgress = [];
+
+            $this->message = 'Fehler beim Laden der Daten. Bitte versuchen Sie es erneut oder kontaktieren Sie den Administrator.';
+            $this->messageType = 'error';
+        }
     }
 
     /**
@@ -111,6 +170,7 @@ class FormCollectionController
     private function handlePostRequest(): void
     {
         $action = $_POST['action'] ?? '';
+        error_log("FormCollectionController::handlePostRequest - Action: {$action}");
 
         switch ($action) {
             case 'create_collection':
@@ -126,6 +186,7 @@ class FormCollectionController
                 break;
 
             default:
+                error_log("FormCollectionController::handlePostRequest - Unknown action: {$action}");
                 $this->message = 'Unbekannte Aktion.';
                 $this->messageType = 'error';
         }
@@ -137,6 +198,9 @@ class FormCollectionController
     private function handleGetRequest(): void
     {
         $action = $_GET['action'] ?? '';
+        if (!empty($action)) {
+            error_log("FormCollectionController::handleGetRequest - Action: {$action}");
+        }
 
         switch ($action) {
             case 'view_collection':
@@ -159,10 +223,13 @@ class FormCollectionController
     private function handleCreateCollection(): void
     {
         try {
+            error_log("FormCollectionController::handleCreateCollection - Starting collection creation");
+
             // Input-Validierung
             $requiredFields = ['name', 'question_pool', 'forms_count', 'time_limit'];
             foreach ($requiredFields as $field) {
                 if (empty($_POST[$field])) {
+                    error_log("FormCollectionController::handleCreateCollection - Missing required field: {$field}");
                     $this->message = "Feld '{$field}' ist erforderlich.";
                     $this->messageType = 'error';
                     return;
@@ -171,6 +238,7 @@ class FormCollectionController
 
             // Fragen-IDs validieren
             if (empty($_POST['question_ids']) || !is_array($_POST['question_ids'])) {
+                error_log("FormCollectionController::handleCreateCollection - No questions selected or invalid format");
                 $this->message = 'Bitte wählen Sie mindestens eine Frage aus.';
                 $this->messageType = 'error';
                 return;
@@ -178,6 +246,8 @@ class FormCollectionController
 
             $questionIds = array_map('intval', $_POST['question_ids']);
             $formsCount = intval($_POST['forms_count']);
+
+            error_log("FormCollectionController::handleCreateCollection - Processing " . count($questionIds) . " questions for {$formsCount} forms");
 
             // Collection-Daten zusammenstellen
             $collectionData = [
@@ -193,6 +263,7 @@ class FormCollectionController
             $this->validationErrors = $this->model->validateCollectionData($collectionData);
 
             if (!empty($this->validationErrors)) {
+                error_log("FormCollectionController::handleCreateCollection - Validation errors: " . json_encode($this->validationErrors));
                 $this->message = 'Bitte korrigieren Sie die Eingabefehler.';
                 $this->messageType = 'error';
                 return;
@@ -202,6 +273,7 @@ class FormCollectionController
             $collectionId = $this->model->createCollection($collectionData, $questionIds);
 
             if ($collectionId) {
+                error_log("FormCollectionController::handleCreateCollection - Successfully created collection ID: {$collectionId}");
                 $this->message = "Formular-Gruppe '{$collectionData['name']}' wurde erfolgreich erstellt.";
                 $this->messageType = 'success';
 
@@ -211,6 +283,7 @@ class FormCollectionController
                 // Validierungsfehler zurücksetzen nach erfolgreichem Erstellen
                 $this->validationErrors = [];
             } else {
+                error_log("FormCollectionController::handleCreateCollection - Failed to create collection");
                 $this->message = 'Fehler beim Erstellen der Formular-Gruppe.';
                 $this->messageType = 'error';
             }
@@ -231,13 +304,17 @@ class FormCollectionController
             $collectionId = intval($_POST['collection_id'] ?? 0);
             $confirmDelete = $_POST['confirm_delete'] ?? '';
 
+            error_log("FormCollectionController::handleDeleteCollection - Attempting to delete collection ID: {$collectionId}");
+
             if ($collectionId <= 0) {
+                error_log("FormCollectionController::handleDeleteCollection - Invalid collection ID: {$collectionId}");
                 $this->message = 'Ungültige Formular-Gruppen-ID.';
                 $this->messageType = 'error';
                 return;
             }
 
             if ($confirmDelete !== '1') {
+                error_log("FormCollectionController::handleDeleteCollection - Delete not confirmed");
                 $this->message = 'Löschung nicht bestätigt.';
                 $this->messageType = 'error';
                 return;
@@ -249,12 +326,14 @@ class FormCollectionController
 
             // Löschen
             if ($this->model->deleteCollection($collectionId)) {
+                error_log("FormCollectionController::handleDeleteCollection - Successfully deleted collection: {$collectionName}");
                 $this->message = "Formular-Gruppe '{$collectionName}' wurde erfolgreich gelöscht.";
                 $this->messageType = 'success';
 
                 // Daten neu laden
                 $this->loadBaseData();
             } else {
+                error_log("FormCollectionController::handleDeleteCollection - Failed to delete collection ID: {$collectionId}");
                 $this->message = 'Fehler beim Löschen der Formular-Gruppe.';
                 $this->messageType = 'error';
             }
@@ -272,12 +351,16 @@ class FormCollectionController
     private function handleProcessExpired(): void
     {
         try {
+            error_log("FormCollectionController::handleProcessExpired - Processing expired forms");
+
             $stats = $this->model->processExpiredInstances();
 
             if ($stats['errors'] > 0) {
+                error_log("FormCollectionController::handleProcessExpired - Completed with errors: {$stats['errors']}");
                 $this->message = "Verarbeitung abgeschlossen. {$stats['expired']} Formulare abgeschlossen, {$stats['errors']} Fehler.";
                 $this->messageType = 'error';
             } else {
+                error_log("FormCollectionController::handleProcessExpired - Successfully processed {$stats['expired']} forms");
                 $this->message = "Erfolgreich {$stats['expired']} von {$stats['processed']} abgelaufenen Formularen verarbeitet.";
                 $this->messageType = 'success';
             }
@@ -297,7 +380,10 @@ class FormCollectionController
         try {
             $collectionId = intval($_GET['collection_id'] ?? 0);
 
+            error_log("FormCollectionController::handleViewCollection - Loading collection ID: {$collectionId}");
+
             if ($collectionId <= 0) {
+                error_log("FormCollectionController::handleViewCollection - Invalid collection ID: {$collectionId}");
                 $this->message = 'Ungültige Formular-Gruppen-ID.';
                 $this->messageType = 'error';
                 return;
@@ -306,12 +392,14 @@ class FormCollectionController
             $this->currentCollection = $this->model->readCollection($collectionId);
 
             if (!$this->currentCollection) {
+                error_log("FormCollectionController::handleViewCollection - Collection not found: {$collectionId}");
                 $this->message = 'Formular-Gruppe nicht gefunden.';
                 $this->messageType = 'error';
                 return;
             }
 
             $this->selectedQuestions = $this->model->getCollectionQuestions($collectionId);
+            error_log("FormCollectionController::handleViewCollection - Loaded collection '{$this->currentCollection['name']}' with " . count($this->selectedQuestions) . " questions");
 
         } catch (Exception $e) {
             error_log("Error in FormCollectionController::handleViewCollection: " . $e->getMessage());
@@ -328,16 +416,26 @@ class FormCollectionController
         try {
             $collectionId = intval($_GET['collection_id'] ?? 0);
 
+            error_log("FormCollectionController::handleViewTokens - Loading tokens for collection ID: {$collectionId}");
+
             if ($collectionId <= 0) {
+                error_log("FormCollectionController::handleViewTokens - Invalid collection ID: {$collectionId}");
                 $this->message = 'Ungültige Formular-Gruppen-ID.';
                 $this->messageType = 'error';
                 return;
             }
 
             // Basis-URL für QR-Codes
-            $baseUrl = 'http://' . $_SERVER['HTTP_HOST'];
+            $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
+            $baseUrl = $protocol . $_SERVER['HTTP_HOST'];
 
             $this->collectionTokens = $this->model->getCollectionTokens($collectionId, $baseUrl);
+
+            if (!empty($this->collectionTokens)) {
+                error_log("FormCollectionController::handleViewTokens - Loaded " . count($this->collectionTokens) . " tokens");
+            } else {
+                error_log("FormCollectionController::handleViewTokens - No tokens found for collection {$collectionId}");
+            }
 
         } catch (Exception $e) {
             error_log("Error in FormCollectionController::handleViewTokens: " . $e->getMessage());
@@ -354,6 +452,8 @@ class FormCollectionController
         try {
             $poolId = intval($_GET['pool_id'] ?? 0);
 
+            error_log("FormCollectionController::handleLoadQuestionsAjax - Loading questions for pool ID: {$poolId}");
+
             if ($poolId <= 0) {
                 $this->sendJsonResponse(false, 'Ungültige Pool-ID.');
                 return;
@@ -361,6 +461,17 @@ class FormCollectionController
 
             // Model-Methode aufrufen
             $questions = $this->model->getQuestionsByPool($poolId);
+
+            if (empty($questions)) {
+                error_log("FormCollectionController::handleLoadQuestionsAjax - No questions found for pool {$poolId}");
+                $this->sendJsonResponse(true, 'Keine Fragen in diesem Pool gefunden.', [
+                    'questions' => [],
+                    'count' => 0
+                ]);
+                return;
+            }
+
+            error_log("FormCollectionController::handleLoadQuestionsAjax - Successfully loaded " . count($questions) . " questions");
 
             $this->sendJsonResponse(true, 'Fragen erfolgreich geladen.', [
                 'questions' => $questions,
@@ -388,6 +499,8 @@ class FormCollectionController
             }
 
             $exists = $this->model->checkNameExists($name, $excludeId);
+
+            error_log("FormCollectionController::handleCheckNameAjax - Name check for '{$name}': " . ($exists ? 'exists' : 'available'));
 
             $this->sendJsonResponse(true, $exists ? 'Name bereits vorhanden.' : 'Name verfügbar.', [
                 'exists' => $exists,
@@ -472,5 +585,33 @@ class FormCollectionController
     public function hasValidationError(string $field): bool
     {
         return isset($this->validationErrors[$field]);
+    }
+
+    /**
+     * Debug-Hilfsfunktion für Entwicklungsumgebung
+     */
+    private function debugLog(string $message, array $context = []): void
+    {
+        if (isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] === 'localhost') {
+            error_log("FormCollectionController DEBUG: {$message}" .
+                (!empty($context) ? " Context: " . json_encode($context) : ""));
+        }
+    }
+
+    /**
+     * Gibt Debug-Informationen über geladene Daten zurück
+     */
+    public function getDebugInfo(): array
+    {
+        return [
+            'collections_count' => count($this->collections),
+            'question_pools_count' => count($this->questionPools),
+            'stations_count' => count($this->stations),
+            'performance_stats_count' => count($this->performanceStats),
+            'team_progress_count' => count($this->teamProgress),
+            'has_message' => !empty($this->message),
+            'message_type' => $this->messageType,
+            'validation_errors_count' => count($this->validationErrors)
+        ];
     }
 }
