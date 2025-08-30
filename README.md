@@ -103,7 +103,7 @@ Hilfe bei der Einrichtung von Wettkämpfen und Schulungen sind auf Anfrage koste
 
 ## Lizenz
 
-Dieses Projekt wird ohne Gewährleistung bereitgestellt. Die Nutzung erfolgt auf eigene Verantwortung.
+Dieses Projekt wird ohne Gewährleistung bereitgestellt. Die Nutzung erfolgt auf eigene Verantwortung. 
 Mehr ist in den Nutzungsrichtlinien nachzulesen.
 
 ## Haftungsausschluss
