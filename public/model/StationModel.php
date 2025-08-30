@@ -12,22 +12,11 @@ class StationModel
 {
     private PDO $db;
 
-    /**
-     * Konstruktor.
-     *
-     * @param PDO $db Die PDO-Datenbankverbindung.
-     */
     public function __construct(PDO $db)
     {
         $this->db = $db;
     }
 
-    /**
-     * Erstellt eine neue Station in der Datenbank.
-     *
-     * @param array $entry Array mit den Stationsdaten (name, Nr)
-     * @return int|false Die ID der neuen Station oder false bei einem Fehler
-     */
     public function create(array $entry)
     {
         try {
@@ -42,12 +31,6 @@ class StationModel
         }
     }
 
-    /**
-     * Liest Stationen aus der Datenbank.
-     *
-     * @param int|null $id Die ID der Station (optional).
-     * @return array|null Die Station oder alle Stationen. Null bei Fehler.
-     */
     public function read(int $id = null): ?array
     {
         try {
@@ -66,14 +49,6 @@ class StationModel
         }
     }
 
-    /**
-     * Aktualisiert oder fügt eine Station hinzu.
-     *
-     * @param int $id Datenbank ID der Station
-     * @param string $name Name der Station.
-     * @param string $nr Nummer der Station.
-     * @return string Ergebnisstatus
-     */
     public function updateOrInsert(int $id, string $name, string $nr): string
     {
         try {
@@ -111,10 +86,10 @@ class StationModel
      *
      * Vorgehensweise:
      * 1. Starte eine Transaktion.
-     * 2. Hole alle ProtocolModel-IDs, die dieser Station zugeordnet sind.
+     * 2. Hole alle Protocol-IDs, die dieser Station zugeordnet sind.
      * 3. Lösche in MannschaftProtokoll alle Einträge, die zu diesen Protokollen gehören.
      * 4. Lösche die Protokolle, die der Station zugeordnet sind.
-     * 5. Lösche alle Frageformulare, die mit dieser Station verknüpft sind.
+     * 5. Lösche alle FormCollections und deren abhängige Daten, die mit dieser Station verknüpft sind.
      * 6. Lösche das Gewicht der Station aus der StationWeight-Tabelle.
      * 7. Lösche abschließend die Station.
      * 8. Committe die Transaktion.
@@ -128,7 +103,7 @@ class StationModel
             // Transaktion starten
             $this->db->beginTransaction();
 
-            // 1. ProtocolModel-IDs der Station abrufen
+            // 1. Protocol-IDs der Station abrufen
             $stmt = $this->db->prepare("SELECT Nr FROM Protokoll WHERE station_ID = :id");
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
@@ -136,7 +111,6 @@ class StationModel
 
             // 2. Falls Protokolle vorhanden sind, lösche die zugehörigen Einträge in MannschaftProtokoll
             if (!empty($protocolIds)) {
-                // Erstelle eine kommaseparierte Liste der ProtocolModel-IDs
                 $inClause = implode(',', array_map('intval', $protocolIds));
                 $stmt = $this->db->prepare("DELETE FROM MannschaftProtokoll WHERE protokoll_Nr IN ($inClause)");
                 $stmt->execute();
@@ -147,18 +121,25 @@ class StationModel
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
 
-            //ToDo - funktioniert noch nicht
-            // 4. Lösche alle Frageformulare, die dieser Station zugeordnet sind
-            $stmt = $this->db->prepare("DELETE FROM QuestionForm WHERE Station_ID = :id");
+            // 4. FormCollection-IDs der Station abrufen
+            $stmt = $this->db->prepare("SELECT ID FROM FormCollection WHERE station_ID = :id");
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
+            $collectionIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-            // 5. Lösche den Gewichtungseintrag, falls vorhanden
+            // 5. Lösche alle FormCollections, die dieser Station zugeordnet sind
+            if (!empty($collectionIds)) {
+                $inClause = implode(',', array_map('intval', $collectionIds));
+                $stmt = $this->db->prepare("DELETE FROM FormCollection WHERE ID IN ($inClause)");
+                $stmt->execute();
+            }
+
+            // 6. Lösche den Gewichtungseintrag, falls vorhanden
             $stmt = $this->db->prepare("DELETE FROM StationWeight WHERE station_ID = :id");
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
 
-            // 6. Lösche die Station selbst
+            // 7. Lösche die Station selbst
             $stmt = $this->db->prepare("DELETE FROM Station WHERE ID = :id");
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
@@ -173,12 +154,6 @@ class StationModel
         }
     }
 
-    /**
-     * Prüft, ob bereits eine Station mit dem gegebenen Namen existiert.
-     *
-     * @param string $name Der zu prüfende Stationsname
-     * @return int|false Die ID der existierenden Station oder false, wenn keine gefunden wurde
-     */
     public function existsByName(string $name)
     {
         try {
@@ -200,12 +175,6 @@ class StationModel
         }
     }
 
-    /**
-     * Prüft, ob bereits eine Station mit der gegebenen Nummer existiert.
-     *
-     * @param int $nr Die zu prüfende Stationsnummer
-     * @return int|false Die ID der existierenden Station oder false, wenn keine gefunden wurde
-     */
     public function existsByNr(int $nr)
     {
         try {
@@ -220,12 +189,6 @@ class StationModel
         }
     }
 
-    /**
-     * Holt alle Stationsnamen, sortiert nach Nummer oder Name.
-     *
-     * @param string $sortBy Sortierung nach 'nr' oder 'name' (Standard)
-     * @return array Array der Stationsnamen
-     */
     public function getStationNames(string $sortBy = 'name'): array
     {
         try {
@@ -238,12 +201,6 @@ class StationModel
         }
     }
 
-    /**
-     * Holt die Anzahl der Protokolle einer Station.
-     *
-     * @param int $stationId Die ID der Station
-     * @return int Die Anzahl der Protokolle
-     */
     public function getProtocolCount(int $stationId): int
     {
         try {
@@ -257,16 +214,10 @@ class StationModel
         }
     }
 
-    /**
-     * Holt die Anzahl der Frageformulare einer Station.
-     *
-     * @param int $stationId Die ID der Station
-     * @return int Die Anzahl der Frageformulare
-     */
     public function getQuestionFormCount(int $stationId): int
     {
         try {
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM QuestionForm WHERE Station_ID = :id");
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM FormCollection WHERE station_ID = :id");
             $stmt->bindParam(':id', $stationId, PDO::PARAM_INT);
             $stmt->execute();
             return (int)$stmt->fetchColumn();

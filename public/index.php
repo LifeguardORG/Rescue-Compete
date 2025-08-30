@@ -93,7 +93,7 @@ $userType = isset($_SESSION['acc_typ']) ? htmlspecialchars($_SESSION['acc_typ'])
                     <li>Automatische Berechnung und Auswertung</li>
                     <li>Mannschafts- und Stationsverwaltung</li>
                     <li>Quiz-System für Wartepunkte</li>
-                    <li>Benutzer- und Rechteverwaltung</li>
+                    <li>Benutzer- und Rollenverwaltung</li>
                     <li>Responsive Design für alle Endgeräte</li>
                 </ul>
             </div>
@@ -126,7 +126,7 @@ $userType = isset($_SESSION['acc_typ']) ? htmlspecialchars($_SESSION['acc_typ'])
                         Jede Gliederung kann die Software kostenlos nutzen, selbst hosten und
                         weiterentwickeln.
                     </p>
-                    <a href="#" class="github-link">
+                    <a href="https://github.com/LifeguardORG/Rescue-Compete" class="github-link">
                         GitHub Repository
                     </a>
                 </div>

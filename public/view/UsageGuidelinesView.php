@@ -105,7 +105,9 @@ include '../components/Navbar.php';
         </div>
     </main>
 
-    <?php include '../php_assets/Footer.php'; ?>
 </div>
+
+<?php include '../php_assets/Footer.php'; ?>
+
 </body>
     </html><?php

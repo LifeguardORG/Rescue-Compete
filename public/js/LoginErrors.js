@@ -9,19 +9,45 @@ document.addEventListener('DOMContentLoaded', function() {
     // Container für Fehlermeldungen finden
     let errorContainer = document.getElementById('error-message');
 
-    // Falls Container nicht existiert, erstellen
+    // Falls Container nicht existiert, erstellen und unter der Loginbox platzieren
     if (!errorContainer) {
         errorContainer = document.createElement('div');
         errorContainer.id = 'error-message';
-        errorContainer.style.color = 'red';
-        errorContainer.style.marginBottom = '15px';
-        errorContainer.style.textAlign = 'center';
+        errorContainer.className = 'message-container';
 
-        // Vor dem Login-Formular einfügen
-        const loginForm = document.getElementById('login_form');
-        if (loginForm) {
-            loginForm.insertBefore(errorContainer, loginForm.firstChild);
+        // Nach der Login-Form einfügen
+        const loginWrapper = document.querySelector('.login-wrapper');
+        const loginForm = document.querySelector('.form-section');
+
+        if (loginWrapper && loginForm) {
+            loginWrapper.appendChild(errorContainer);
+        } else {
+            // Fallback: nach dem body_container
+            const bodyContainer = document.getElementById('body_container');
+            if (bodyContainer) {
+                bodyContainer.appendChild(errorContainer);
+            }
         }
+    }
+
+    // Funktion zum Anzeigen einer Fehlermeldung
+    function showErrorMessage(message, type = 'error') {
+        // Vorhandene Meldungen entfernen
+        clearMessages();
+
+        // Neue Meldung erstellen
+        const messageDiv = document.createElement('div');
+        messageDiv.className = type === 'error' ? 'error-message' : 'notice-message';
+        messageDiv.textContent = message;
+
+        // Zur Container hinzufügen
+        errorContainer.appendChild(messageDiv);
+    }
+
+    // Funktion zum Entfernen aller Meldungen
+    function clearMessages() {
+        const existingMessages = errorContainer.querySelectorAll('.error-message, .notice-message');
+        existingMessages.forEach(msg => msg.remove());
     }
 
     // Funktion zum Markieren ungültiger Felder
@@ -39,8 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Fehlermeldung entfernen, wenn alle Felder wieder gültig sind
                     if (document.querySelectorAll('.invalid').length === 0) {
-                        errorContainer.textContent = '';
-                        errorContainer.style.display = 'none';
+                        clearMessages();
                     }
                 });
             }
@@ -49,33 +74,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Je nach Fehlercode entsprechende Meldung anzeigen
     if (errorCode) {
-        errorContainer.style.display = 'block';
-
         switch (errorCode) {
             case '1':
-                errorContainer.textContent = 'Bitte geben Sie einen Benutzernamen und ein Passwort ein.';
+                showErrorMessage('Bitte geben Sie einen Benutzernamen und ein Passwort ein.');
                 markInvalidFields(['username', 'password']);
                 break;
             case '2':
-                errorContainer.textContent = 'Dieser Benutzername ist nicht registriert.';
+                showErrorMessage('Dieser Benutzername ist nicht registriert.');
                 markInvalidFields(['username']);
                 break;
             case '3':
-                errorContainer.textContent = 'Falsches Passwort.';
+                showErrorMessage('Falsches Passwort.');
                 markInvalidFields(['password']);
                 break;
             case '4':
-                errorContainer.textContent = 'Sitzung abgelaufen. Bitte erneut anmelden.';
+                showErrorMessage('Sitzung abgelaufen. Bitte erneut anmelden.');
                 break;
             case '999':
-                errorContainer.textContent = 'Ein technischer Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+                showErrorMessage('Ein technischer Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.');
                 break;
             default:
-                errorContainer.textContent = 'Ein unbekannter Fehler ist aufgetreten.';
+                showErrorMessage('Ein unbekannter Fehler ist aufgetreten.');
         }
-    } else {
-        // Wenn kein Fehlercode, Fehlermeldung ausblenden
-        errorContainer.style.display = 'none';
     }
 
     // Formularvalidierung vor dem Absenden
@@ -89,8 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!username || !password) {
                 e.preventDefault();
 
-                errorContainer.textContent = 'Bitte füllen Sie alle Felder aus.';
-                errorContainer.style.display = 'block';
+                showErrorMessage('Bitte füllen Sie alle Felder aus.');
 
                 if (!username) markInvalidFields(['username']);
                 if (!password) markInvalidFields(['password']);

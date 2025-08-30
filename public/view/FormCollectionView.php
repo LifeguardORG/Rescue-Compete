@@ -155,9 +155,6 @@ $pageTitle = "Formular Verwaltung";
                                 <td><?php echo date('d.m.Y', strtotime($collection['createdAt'])); ?></td>
                                 <td class="action-cell">
                                     <div class="button-group">
-                                        <button class="btn small" onclick="viewCollection(<?php echo $collection['ID']; ?>)">
-                                            Details
-                                        </button>
                                         <button class="btn small" onclick="viewTokens(<?php echo $collection['ID']; ?>)">
                                             QR-Codes
                                         </button>

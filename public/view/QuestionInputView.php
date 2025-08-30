@@ -87,6 +87,7 @@ $pageTitle = "Fragen Verwaltung";
 <!DOCTYPE html>
 <html lang="de">
 <head>
+    <!-- ToDo: CSS Datei reihenfolge wie bei FormCollectionView -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RescueCompete - <?php echo htmlspecialchars($pageTitle); ?></title>
@@ -295,7 +296,6 @@ $pageTitle = "Fragen Verwaltung";
         <div id="question_create" class="tab-content <?php echo $currentView === 'question_create' ? 'active' : ''; ?>">
             <div class="data-container">
                 <h3>Fragen hinzufügen</h3>
-                <p class="info-text">Sie können eine oder mehrere Fragen gleichzeitig hinzufügen. Verwenden Sie die Buttons unten, um weitere Fragen hinzuzufügen oder zu entfernen.</p>
 
                 <form method="POST" id="createQuestionForm">
                     <input type="hidden" name="add_questions" value="1">

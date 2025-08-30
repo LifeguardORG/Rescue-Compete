@@ -1,0 +1,17 @@
+rescue-compete.de, www.rescue-compete.de {
+    encode zstd gzip
+    # Alles außer /pma* geht an die App
+    @pma path /pma*
+    handle @pma {
+        uri strip_prefix /pma
+        reverse_proxy phpmyadmin:80
+    }
+
+    reverse_proxy project:80
+}
+
+pma.rescue-compete.de {
+    encode zstd gzip
+    reverse_proxy phpmyadmin:80
+
+}

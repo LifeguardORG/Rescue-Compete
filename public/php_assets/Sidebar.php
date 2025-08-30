@@ -55,7 +55,7 @@ function getSidebarLinkClasses($targetPage, $currentPage, $currentPath) {
     <div class="sidebar-content">
         <!-- Grundsetup -->
         <div class="sidebar-section">
-            <h3 class="section-title">Grundsetup</h3>
+            <h3 class="section-title">Teams & Stationen</h3>
             <ul class="sidebar-menu">
                 <li>
                     <a href="../view/TeamInputView.php"
@@ -92,7 +92,7 @@ function getSidebarLinkClasses($targetPage, $currentPage, $currentPath) {
 
         <!-- Inhalte -->
         <div class="sidebar-section">
-            <h3 class="section-title">Inhalte</h3>
+            <h3 class="section-title">Quiz-System</h3>
             <ul class="sidebar-menu">
                 <li>
                     <a href="../view/QuestionInputView.php"

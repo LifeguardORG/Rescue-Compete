@@ -31,6 +31,8 @@ $pageTitle = "Login";
 
 // Fehlermeldung basierend auf dem Parameter anzeigen
 $errorMessage = '';
+$noticeMessage = '';
+
 if (isset($_GET['f'])) {
     switch ($_GET['f']) {
         case '1':
@@ -50,6 +52,11 @@ if (isset($_GET['f'])) {
     }
 }
 
+// QR-Code Weiterleitung Hinweis
+if (isset($_SESSION['redirect_code'])) {
+    $noticeMessage = 'Bitte melde dich an, um zum Formular zu gelangen.';
+}
+
 // Weiterleitung nach Login anpassen - verstecktes Feld für QR-Code-Weiterleitung
 $loginAction = '../controller/LoginManager.php';
 if (isset($_SESSION['redirect_code'])) {
@@ -60,7 +67,6 @@ if (isset($_SESSION['redirect_code'])) {
 
 <!DOCTYPE html>
 <html lang="de">
-<!-- Imports von css Dateien, js Scripts und der Navbar als auch PHP Dateien mit nötigen Methoden -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -75,48 +81,48 @@ if (isset($_SESSION['redirect_code'])) {
 </head>
 <body>
 
-<!-- Login Formular -->
 <div id="body_container">
-    <form class="form-section" method="post" action="<?php echo $loginAction; ?>" id="login_form">
-        <h2>Wettkampf-Software Login</h2>
+    <div class="login-wrapper">
+        <!-- Login Formular -->
+        <form class="form-section" method="post" action="<?php echo $loginAction; ?>" id="login_form">
+            <h2>Wettkampf-Software Login</h2>
 
-        <!-- Container für Fehlermeldungen -->
-        <div id="error-message">
+            <div class="form-group">
+                <label for="username">Benutzername:</label>
+                <input type="text" class="valid" id="username" name="username" placeholder="Benutzername eingeben" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Passwort:</label>
+                <div class="password-container">
+                    <input type="password" class="valid" id="password" name="password" placeholder="Passwort eingeben" required>
+                    <button type="button" id="toggle-password" class="toggle-password" title="Passwort anzeigen">
+                        <span id="toggle-icon" class="eye-icon eye-closed"></span>
+                    </button>
+                </div>
+            </div>
+
+            <?php if (isset($_SESSION['redirect_code'])): ?>
+                <!-- Versteckte Felder für die Weiterleitung -->
+                <input type="hidden" name="redirect_qrcode" value="<?php echo htmlspecialchars($_SESSION['redirect_code']); ?>">
+            <?php endif; ?>
+
+            <div class="button-group">
+                <input type="submit" value="Einloggen">
+            </div>
+        </form>
+
+        <!-- Container für Fehlermeldungen außerhalb der Loginbox -->
+        <div id="error-message" class="message-container">
             <?php if (!empty($errorMessage)): ?>
                 <div class="error-message"><?php echo htmlspecialchars($errorMessage); ?></div>
             <?php endif; ?>
 
-            <?php if (isset($_SESSION['redirect_code'])): ?>
-                <div class="notice-message" style="color: #008ccd; margin-bottom: 15px;">
-                    Bitte melde dich an, um zum Formular zu gelangen.
-                </div>
+            <?php if (!empty($noticeMessage)): ?>
+                <div class="notice-message"><?php echo htmlspecialchars($noticeMessage); ?></div>
             <?php endif; ?>
         </div>
-
-        <div class="form-group">
-            <label for="username">Benutzername:</label>
-            <input type="text" class="valid" id="username" name="username" placeholder="Benutzername eingeben" required>
-        </div>
-
-        <div class="form-group">
-            <label for="password">Passwort:</label>
-            <div class="password-container">
-                <input type="password" class="valid" id="password" name="password" placeholder="Passwort eingeben" required>
-                <button type="button" id="toggle-password" class="toggle-password" title="Passwort anzeigen">
-                    <span id="toggle-icon" class="eye-icon eye-closed"></span>
-                </button>
-            </div>
-        </div>
-
-        <?php if (isset($_SESSION['redirect_code'])): ?>
-            <!-- Versteckte Felder für die Weiterleitung -->
-            <input type="hidden" name="redirect_qrcode" value="<?php echo htmlspecialchars($_SESSION['redirect_code']); ?>">
-        <?php endif; ?>
-
-        <div class="button-group">
-            <input type="submit" value="Einloggen">
-        </div>
-    </form>
+    </div>
 </div>
 
 </body>

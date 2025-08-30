@@ -4,9 +4,20 @@
 #body_container {
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100vh;
+    align-items: flex-start;
+    min-height: 100vh;
     background-color: #f5f0e6;
+    padding: 20px;
+    padding-top: 80px; /* Reduzierter Abstand zum oberen Rand */
+    box-sizing: border-box;
+}
+
+.login-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
 }
 
 .form-section {
@@ -14,8 +25,10 @@
     border-radius: 8px;
     padding: 30px;
     width: 100%;
-    max-width: 400px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-height: 280px; /* Feste Mindesthöhe für konstante Größe */
+    box-sizing: border-box;
+    margin-bottom: 15px; /* Abstand zur Fehlermeldung */
 }
 
 /* Input-Styling */
@@ -36,8 +49,6 @@ input.valid:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(0, 140, 205, 0.2);
 }
-
-/* Ungültige Eingabefelder */
 
 /* Button-Styling */
 .button-group {
@@ -66,17 +77,95 @@ input[type="button"] {
     background-color: var(--ww-blue-60);
 }
 
-/* Fehlermeldungs-Container */
-#error-message {
-    padding: 10px;
-    margin-bottom: 20px;
-    color: var(--drk-rot);
-    font-weight: bold;
+/* Container für Meldungen außerhalb der Loginbox */
+.message-container {
+    width: 100%;
+    min-height: 50px; /* Reservierter Platz für Meldungen */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+/* Fehlermeldungen */
+.error-message {
     background-color: rgba(230, 0, 5, 0.1);
-    border-radius: 4px;
+    color: var(--drk-rot);
+    padding: 12px 15px;
+    border-radius: 6px;
+    border: 1px solid var(--drk-rot);
+    border-left: 4px solid var(--drk-rot);
+    font-weight: 500;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 8px;
+    animation: slideInMessage 0.4s ease-out;
+}
+
+/* Info-/Notice-Meldungen */
+.notice-message {
+    background-color: rgba(0, 140, 205, 0.1);
+    color: var(--ww-blue-100);
+    padding: 12px 15px;
+    border-radius: 6px;
+    border: 1px solid var(--ww-blue-100);
+    border-left: 4px solid var(--ww-blue-100);
+    font-weight: 500;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 8px;
+    animation: slideInMessage 0.4s ease-out;
+}
+
+@keyframes slideInMessage {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Legacy Support - verstecke #error-message wenn es leer ist */
+#error-message:empty {
     display: none;
 }
 
-#error-message:not(:empty) {
-    display: block;
+/* Responsive Design */
+@media (max-width: 480px) {
+    #body_container {
+        padding: 10px;
+    }
+
+    .form-section {
+        padding: 20px;
+        min-height: 260px;
+    }
+
+    .message-container {
+        min-height: 40px;
+    }
+
+    .error-message,
+    .notice-message {
+        padding: 10px 12px;
+        font-size: 0.9em;
+    }
+}
+
+@media (max-width: 320px) {
+    .form-section {
+        padding: 15px;
+        min-height: 240px;
+    }
+
+    .error-message,
+    .notice-message {
+        padding: 8px 10px;
+        font-size: 0.85em;
+    }
 }

@@ -7,7 +7,7 @@
     justify-content: center;
     padding: 10px 14px;
     margin: 12px 0;
-    background-color: var(--ww-darkblue-100);
+    background-color: var(--ww-blue-100);
     color: white;
     border: none;
     border-radius: 4px;
@@ -19,7 +19,7 @@
 }
 
 .pdf-export-btn:hover {
-    background-color: var(--ww-blue-100);
+    background-color: var(--ww-blue-30);
     transform: translateY(-1px);
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
 }

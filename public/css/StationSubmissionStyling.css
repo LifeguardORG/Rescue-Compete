@@ -57,7 +57,7 @@ h1 {
 
 /* Button zur Ergebniseingabe */
 .station-button {
-    background-color: var(--ww-darkblue-100);
+    background-color: var(--ww-blue-100);
     color: var(--white);
     border: none;
     border-radius: 4px;
@@ -160,7 +160,7 @@ select {
 .btn {
     display: inline-block;
     padding: 10px 20px;
-    background-color: var(--ww-darkblue-100);
+    background-color: var(--ww-blue-100);
     color: var(--white);
     border: none;
     border-radius: 4px;
