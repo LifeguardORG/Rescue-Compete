@@ -10,11 +10,12 @@ include '../components/Navbar.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $pageTitle; ?> - RescueCompete</title>
     <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
     <link rel="stylesheet" href="../css/Footer.css">
     <link rel="stylesheet" href="../css/UsageGuidelines.css">
 </head>
-<body>
+<body class="has-navbar">
 <?php include '../php_assets/Navbar.php'; ?>
 
 <div class="page-container">

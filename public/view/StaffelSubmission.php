@@ -17,12 +17,15 @@ require_once '../php_assets/CustomAlertBox.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RescueCompete</title>
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
+    <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
-    <link rel="stylesheet" href="../css/InputStyling.css">
+    <link rel="stylesheet" href="../css/Footer.css">
+    <link rel="stylesheet" href="../css/Components.css">
     <link rel="stylesheet" href="../css/StaffelSubmissionStyling.css">
 </head>
 <!-- Übergabe des submittedTeams-Arrays als Data-Attribut und spezifische CSS-Klasse -->
-<body class="staffel-submission-page" data-submitted-teams='<?php echo json_encode(array_map('strval', $submittedTeams ?? [])); ?>'>
+<body class="has-navbar staffel-submission-page" data-submitted-teams='<?php echo json_encode(array_map('strval', $submittedTeams ?? [])); ?>'>
 <?php include '../php_assets/Navbar.php'; ?>
 <div class="container">
     <div class="header-with-back">

@@ -85,17 +85,6 @@ function initializeFormValidation() {
     if (createForm) {
         createForm.addEventListener('submit', validateCreateCollectionForm);
 
-        // Live-Validierung für Felder
-        const formsCountInput = document.getElementById('forms_count');
-        if (formsCountInput) {
-            formsCountInput.addEventListener('input', validateFormsCount);
-        }
-
-        const timeLimitInput = document.getElementById('time_limit');
-        if (timeLimitInput) {
-            timeLimitInput.addEventListener('input', validateTimeLimit);
-        }
-
         const nameInput = document.getElementById('name');
         if (nameInput) {
             nameInput.addEventListener('blur', validateName);
@@ -108,10 +97,6 @@ function initializeFormValidation() {
             });
         }
 
-        const descriptionTextarea = document.getElementById('description');
-        if (descriptionTextarea) {
-            descriptionTextarea.addEventListener('input', validateDescription);
-        }
     }
 }
 
@@ -341,7 +326,6 @@ function loadQuestions() {
                 }
 
                 updateTotalQuestionsCount(data.questions.length);
-                hideValidationMessage('question_pool');
             } else {
                 throw new Error(data.message || 'Unbekannter Fehler');
             }
@@ -381,11 +365,6 @@ function renderQuestionsList(questions) {
         questionsList.appendChild(div);
     });
 
-    // Event-Listener für neue Checkboxen hinzufügen
-    const checkboxes = questionsList.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', validateQuestionSelection);
-    });
 }
 
 /**
@@ -396,8 +375,6 @@ function updateTotalQuestionsCount(count) {
     if (totalQuestionsInput) {
         totalQuestionsInput.value = count;
     }
-
-    validateQuestionSelection();
 }
 
 /**
@@ -408,7 +385,6 @@ function selectAllQuestions() {
     checkboxes.forEach(cb => {
         cb.checked = true;
     });
-    validateQuestionSelection();
 }
 
 /**
@@ -419,7 +395,6 @@ function deselectAllQuestions() {
     checkboxes.forEach(cb => {
         cb.checked = false;
     });
-    validateQuestionSelection();
 }
 
 /**
@@ -669,10 +644,10 @@ function downloadQrCode(index, title) {
             document.body.removeChild(link);
         } catch (error) {
             console.error('Error downloading QR code:', error);
-            alert('Fehler beim Herunterladen des QR-Codes');
+            showAlert('Fehler', 'Fehler beim Herunterladen des QR-Codes.');
         }
     } else {
-        alert('QR-Code noch nicht vollständig geladen. Bitte versuchen Sie es erneut.');
+        showAlert('Hinweis', 'QR-Code noch nicht vollständig geladen. Bitte versuchen Sie es erneut.');
     }
 }
 
@@ -741,13 +716,16 @@ function assignToAllTeamsConfirmed() {
  * Abgelaufene Formulare verarbeiten
  */
 function processExpiredForms() {
-    if (confirm('Möchten Sie alle abgelaufenen Formulare verarbeiten? Diese Aktion kann nicht rückgängig gemacht werden.')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.innerHTML = '<input type="hidden" name="action" value="process_expired">';
-        document.body.appendChild(form);
-        form.submit();
-    }
+    showConfirm('Abgelaufene Formulare',
+        'Möchten Sie alle abgelaufenen Formulare verarbeiten? Diese Aktion kann nicht rückgängig gemacht werden.',
+        function() {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.innerHTML = '<input type="hidden" name="action" value="process_expired">';
+            document.body.appendChild(form);
+            form.submit();
+        }
+    );
 }
 
 /**
@@ -804,13 +782,6 @@ function formatTime(seconds) {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
-// Event-Listener für dynamische Elemente
-document.addEventListener('change', function(event) {
-    // Checkbox-Änderungen für Fragenauswahl
-    if (event.target.matches('input[name="question_ids[]"]')) {
-        validateQuestionSelection();
-    }
-});
 
 // Globale Fehlerbehandlung
 window.addEventListener('error', function(event) {

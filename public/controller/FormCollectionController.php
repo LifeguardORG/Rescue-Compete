@@ -23,6 +23,7 @@ class FormCollectionController
     public array $collectionTokens = [];
     public array $performanceStats = [];
     public array $teamProgress = [];
+    public array $teamFormDetails = [];
     public array $validationErrors = [];
 
     public function __construct(PDO $db)
@@ -147,6 +148,9 @@ class FormCollectionController
                 error_log("FormCollectionController::loadBaseData - Loaded " . count($this->teamProgress) . " team progress records");
             }
 
+            // Team-Formular-Details laden
+            $this->teamFormDetails = $this->model->getTeamFormDetails();
+
             error_log("FormCollectionController::loadBaseData - Data loading completed");
 
         } catch (Exception $e) {
@@ -158,6 +162,7 @@ class FormCollectionController
             if (!is_array($this->stations)) $this->stations = [];
             if (!is_array($this->performanceStats)) $this->performanceStats = [];
             if (!is_array($this->teamProgress)) $this->teamProgress = [];
+            if (!is_array($this->teamFormDetails)) $this->teamFormDetails = [];
 
             $this->message = 'Fehler beim Laden der Daten. Bitte versuchen Sie es erneut oder kontaktieren Sie den Administrator.';
             $this->messageType = 'error';

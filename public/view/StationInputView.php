@@ -22,7 +22,7 @@ if(!isset($_SESSION["acc_typ"]) || !in_array($_SESSION["acc_typ"], $allowedAccou
 
 // Überprüfen, ob die Datenbankverbindung ($conn) verfügbar ist
 if (!isset($conn)) {
-    die("<script>alert('Datenbankverbindung nicht verfügbar.');</script>");
+    require __DIR__ . '/../php_assets/DbErrorPage.php'; die();
 }
 
 // Instanzierung des Models und des Controllers
@@ -56,12 +56,14 @@ $pageTitle = "Verwaltung der Stationen";
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
     <!-- CSS-Dateien einbinden -->
     <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
     <link rel="stylesheet" href="../css/Sidebar.css">
-    <link rel="stylesheet" href="../css/InputStyling.css">
+    <link rel="stylesheet" href="../css/Footer.css">
+    <link rel="stylesheet" href="../css/Components.css">
     <link rel="stylesheet" href="../css/StationInputStyling.css">
 </head>
-<body>
+<body class="has-navbar">
 
 <!-- Navbar wird eingebunden -->
 <?php include '../php_assets/Navbar.php'; ?>
@@ -72,7 +74,6 @@ $pageTitle = "Verwaltung der Stationen";
 
     <!-- Hauptinhalt -->
     <div class="main-content vertical">
-        <h2><?php echo htmlspecialchars($pageTitle); ?></h2>
 
         <!-- Navigation Tabs -->
         <div class="tab-navigation">
@@ -109,9 +110,9 @@ $pageTitle = "Verwaltung der Stationen";
                     <table class="data-table">
                         <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Stationsnummer</th>
-                            <th>Aktionen</th>
+                            <th data-sort-key="name" width="50%">Name</th>
+                            <th data-sort-key="nr" data-sort-type="number" width="30%">Stationsnummer</th>
+                            <th width="20%">Aktionen</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -202,6 +203,7 @@ echo CustomAlertBox::renderSimpleConfirm(
 ?>
 
 <!-- JavaScript einbinden -->
+<script src="../js/TableSortUtils.js"></script>
 <script src="../js/StationInputScript.js"></script>
 
 <!-- Tab-Initialisierung sicherstellen -->
@@ -210,6 +212,8 @@ echo CustomAlertBox::renderSimpleConfirm(
         // Sicherstellen, dass der korrekte Tab angezeigt wird
         const currentView = '<?php echo $currentView; ?>';
         showTab(currentView);
+
+        initSortableTable(document.querySelector('.data-table'));
     });
 </script>
 

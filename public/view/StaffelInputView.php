@@ -22,7 +22,7 @@ if(!isset($_SESSION["acc_typ"]) || !in_array($_SESSION["acc_typ"], $allowedAccou
 
 // Überprüfen, ob die Datenbankverbindung ($conn) verfügbar ist
 if (!isset($conn)) {
-    die("<script>alert('Datenbankverbindung nicht verfügbar.');</script>");
+    require __DIR__ . '/../php_assets/DbErrorPage.php'; die();
 }
 
 // Instanzierung des Models und des Controllers
@@ -55,12 +55,14 @@ $pageTitle = "Verwaltung der Staffeln";
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
     <!-- CSS-Dateien einbinden -->
     <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
     <link rel="stylesheet" href="../css/Sidebar.css">
-    <link rel="stylesheet" href="../css/InputStyling.css">
+    <link rel="stylesheet" href="../css/Footer.css">
+    <link rel="stylesheet" href="../css/Components.css">
     <link rel="stylesheet" href="../css/StaffelInputStyling.css">
 </head>
-<body>
+<body class="has-navbar">
 
 <!-- Navbar wird eingebunden -->
 <?php include '../php_assets/Navbar.php'; ?>
@@ -71,7 +73,6 @@ $pageTitle = "Verwaltung der Staffeln";
 
     <!-- Hauptinhalt -->
     <div class="main-content vertical">
-        <h2><?php echo htmlspecialchars($pageTitle); ?></h2>
 
         <!-- Navigation Tabs -->
         <div class="tab-navigation">
@@ -108,8 +109,8 @@ $pageTitle = "Verwaltung der Staffeln";
                     <table class="data-table">
                         <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Aktionen</th>
+                            <th data-sort-key="name" width="80%">Name</th>
+                            <th width="20%">Aktionen</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -145,7 +146,7 @@ $pageTitle = "Verwaltung der Staffeln";
                     <div class="form-group">
                         <label for="name">Staffelname *</label>
                         <input type="text" id="name" name="name" required
-                               placeholder="z.B. Jugend A, Damen, Herren"
+                               placeholder="z.B. Tauchstaffel, Transportstaffel"
                                value="<?= htmlspecialchars($name); ?>">
                         <small>Geben Sie einen eindeutigen Namen für die Staffel ein</small>
                     </div>
@@ -180,6 +181,7 @@ echo CustomAlertBox::renderSimpleConfirm(
 ?>
 
 <!-- JavaScript einbinden -->
+<script src="../js/TableSortUtils.js"></script>
 <script src="../js/StaffelInputScript.js"></script>
 
 <!-- Tab-Initialisierung sicherstellen -->
@@ -188,6 +190,8 @@ echo CustomAlertBox::renderSimpleConfirm(
         // Sicherstellen, dass der korrekte Tab angezeigt wird
         const currentView = '<?php echo $currentView; ?>';
         showTab(currentView);
+
+        initSortableTable(document.querySelector('.data-table'));
     });
 </script>
 

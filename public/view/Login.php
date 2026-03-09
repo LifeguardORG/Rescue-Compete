@@ -73,7 +73,8 @@ if (isset($_SESSION['redirect_code'])) {
     <title>RescueCompete - <?php echo $pageTitle; ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
     <link rel="stylesheet" href="../css/Colors.css">
-    <link rel="stylesheet" href="../css/InputStyling.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
+    <link rel="stylesheet" href="../css/Components.css">
     <link rel="stylesheet" href="../css/Login.css">
     <link rel="stylesheet" href="../css/PasswordVisibility.css">
     <script src="../js/LoginErrors.js"></script>

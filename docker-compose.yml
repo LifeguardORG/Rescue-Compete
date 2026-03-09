@@ -5,30 +5,31 @@ services:
       - "80"
     environment:
       MYSQL_SERVER: db
-      MYSQL_DATABASE: webappdb
-      MYSQL_USER: webapp
-      MYSQL_PASSWORD: 05N3tl9MZFAZ
-      DB_USER: webapp
-      DB_PASSWORD: 05N3tl9MZFAZ
-      DATABASE_USER: webapp
-      DATABASE_PASSWORD: 05N3tl9MZFAZ
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - ./public:/var/www/html/
     restart: unless-stopped
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
-    image: mariadb:10
+    image: mariadb:11
     environment:
-      MYSQL_ROOT_PASSWORD: change-me
-      MYSQL_DATABASE: webappdb
-      MYSQL_USER: webapp
-      MYSQL_PASSWORD: 05N3tl9MZFAZ
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - dbvolume:/var/lib/mysql
-      # Init-SQL
       - ./sql-scheme/webappdb-V6-1.sql:/docker-entrypoint-initdb.d/webappdb-init.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     restart: unless-stopped
 
   phpmyadmin:
@@ -39,23 +40,8 @@ services:
       - "80"
     restart: unless-stopped
     depends_on:
-      - db
-
-  caddy:
-    image: caddy:2
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    restart: unless-stopped
-    depends_on:
-      - project
-      - phpmyadmin
+      db:
+        condition: service_healthy
 
 volumes:
   dbvolume: {}
-  caddy_data: {}
-  caddy_config: {}

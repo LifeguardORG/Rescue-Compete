@@ -9,7 +9,7 @@ use Station\StationWeightModel;
 use Station\Controller\StationWeightController;
 
 if (!isset($conn)) {
-    die("<script>alert('Datenbankverbindung nicht verfügbar.');</script>");
+    require __DIR__ . '/../php_assets/DbErrorPage.php'; die();
 }
 
 $stationModel = new StationModel($conn);
@@ -31,13 +31,15 @@ $pageTitle = "Verwaltung der Stationsgewichtungen";
     <title>RescueCompete - <?php echo htmlspecialchars($pageTitle); ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
     <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
     <link rel="stylesheet" href="../css/Sidebar.css">
-    <link rel="stylesheet" href="../css/InputStyling.css">
+    <link rel="stylesheet" href="../css/Footer.css">
+    <link rel="stylesheet" href="../css/Components.css">
     <link rel="stylesheet" href="../css/UserInputViewStyling.css">
     <link rel="stylesheet" href="../css/StationWeightsStyling.css">
 </head>
-<body>
+<body class="has-navbar">
 <?php include '../php_assets/Navbar.php'; ?>
 
 <div class="container">
@@ -45,7 +47,6 @@ $pageTitle = "Verwaltung der Stationsgewichtungen";
 
     <!-- Hauptinhalt -->
     <div class="main-content vertical">
-        <h2 class="main-title"><?php echo htmlspecialchars($pageTitle); ?></h2>
 
         <!-- Statusmeldungen -->
         <?php if (!empty($message)): ?>

@@ -72,8 +72,8 @@ class QuestionInputController {
                     continue;
                 }
 
-                if (strlen($questionText) > 100) {
-                    $errors[] = "Frage " . ($index + 1) . ": Fragetext darf maximal 100 Zeichen haben.";
+                if (strlen($questionText) > 200) {
+                    $errors[] = "Frage " . ($index + 1) . ": Fragetext darf maximal 200 Zeichen haben.";
                     continue;
                 }
 
@@ -195,8 +195,8 @@ class QuestionInputController {
                 return;
             }
 
-            if (strlen($questionText) > 100) {
-                $this->message = "Fragetext darf maximal 100 Zeichen haben.";
+            if (strlen($questionText) > 200) {
+                $this->message = "Fragetext darf maximal 200 Zeichen haben.";
                 $this->db->rollBack();
                 return;
             }

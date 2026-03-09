@@ -111,11 +111,6 @@ function updateUserPassword(userId) {
         return;
     }
 
-    if (newPassword.length < 8) {
-        showAlert('Fehler', 'Das Passwort muss mindestens 8 Zeichen lang sein.', 'error');
-        return;
-    }
-
     // Button temporär deaktivieren
     const button = passwordInput.nextElementSibling;
     const originalText = button.textContent;
@@ -259,9 +254,6 @@ function validateAdminForm() {
     // Passwort prüfen
     if (!password) {
         showFieldError('password', 'Passwort ist erforderlich');
-        isValid = false;
-    } else if (password.length < 8) {
-        showFieldError('password', 'Passwort muss mindestens 8 Zeichen lang sein');
         isValid = false;
     } else {
         clearFieldError('password');

@@ -1,4 +1,3 @@
-@import "Colors.css";  /* Importiert Farbvariablen */
 
 /* Basis-Reset und Grundlayout */
 html, body {
@@ -215,9 +214,45 @@ select {
 
 /* Submission-Form: Feste Breite und zentriert durch Flex-Container */
 .submission-form {
+    position: relative;
     width: 100%;
-    max-width: 600px; /* Maximale Breite für größere Bildschirme */
-    margin: 0 auto; /* Zentrieren */
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Erfolgs-Häkchen Overlay */
+.success-check-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 100;
+    transition: opacity 0.5s ease;
+}
+
+.success-check-circle {
+    width: 80px;
+    height: 80px;
+    background-color: #28a745;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(40, 167, 69, 0.4);
+    animation: pop-in 0.3s ease-out;
+}
+
+.success-check-circle svg {
+    width: 44px;
+    height: 44px;
+}
+
+@keyframes pop-in {
+    0% { transform: scale(0); }
+    70% { transform: scale(1.15); }
+    100% { transform: scale(1); }
 }
 
 /* Responsive Anpassungen */

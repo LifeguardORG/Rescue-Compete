@@ -257,7 +257,7 @@ function exportResultsToPdf(documentTitle) {
 
         } catch (error) {
             console.error('Fehler beim PDF-Export:', error);
-            alert('Beim PDF-Export ist ein Fehler aufgetreten: ' + error.message);
+            showAlert('Fehler', 'Beim PDF-Export ist ein Fehler aufgetreten: ' + error.message);
             hideLoadingIndicator();
         }
     }, 100);

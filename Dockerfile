@@ -3,13 +3,13 @@ FROM php:8.3-apache
 
 # Installiere die benötigten PHP-Extensions
 RUN apt-get update && apt-get install -y \
-    libpq-dev \
     libzip-dev \
     unzip \
     && docker-php-ext-install \
     mysqli \
     pdo_mysql \
-    pdo
+    pdo \
+    && rm -rf /var/lib/apt/lists/*
 
 # Produktions-PHP-Konfiguration aktivieren
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"

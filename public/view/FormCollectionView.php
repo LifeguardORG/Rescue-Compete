@@ -58,14 +58,16 @@ $pageTitle = "Formular Verwaltung";
     <title>RescueCompete - <?php echo htmlspecialchars($pageTitle); ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
     <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
     <link rel="stylesheet" href="../css/Sidebar.css">
-    <link rel="stylesheet" href="../css/InputStyling.css">
+    <link rel="stylesheet" href="../css/Footer.css">
+    <link rel="stylesheet" href="../css/Components.css">
     <link rel="stylesheet" href="../css/FormCollectionViewStyling.css">
     <!-- QR-Code-Bibliothek -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
-<body>
+<body class="has-navbar">
 <!-- Navbar -->
 <?php include '../php_assets/Navbar.php'; ?>
 
@@ -75,7 +77,6 @@ $pageTitle = "Formular Verwaltung";
 
     <!-- Hauptinhalt -->
     <div class="main-content vertical">
-        <h2><?php echo htmlspecialchars($pageTitle); ?></h2>
 
         <!-- Navigation Tabs -->
         <div class="tab-navigation">
@@ -121,14 +122,14 @@ $pageTitle = "Formular Verwaltung";
                     <table class="data-table">
                         <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Station</th>
-                            <th>Fragen</th>
-                            <th>Formulare</th>
-                            <th>Abgeschlossen</th>
-                            <th>Zeitlimit</th>
-                            <th>Erstellt</th>
-                            <th>Aktionen</th>
+                            <th width="20%">Name</th>
+                            <th width="12%">Station</th>
+                            <th width="8%">Fragen</th>
+                            <th width="8%">Formulare</th>
+                            <th width="12%">Abgeschlossen</th>
+                            <th width="10%">Zeitlimit</th>
+                            <th width="12%">Erstellt</th>
+                            <th width="18%">Aktionen</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -330,74 +331,106 @@ $pageTitle = "Formular Verwaltung";
         <!-- Tab: Statistiken -->
         <div id="performance" class="tab-content <?php echo $currentView === 'performance' ? 'active' : ''; ?>">
             <div class="data-container">
-                <h3>Performance-Statistiken</h3>
-
-                <!-- Formular-Gruppen-Performance -->
-                <?php if (!empty($performanceStats)): ?>
-                    <h4>Formular-Gruppen-Performance</h4>
-                    <table class="data-table">
-                        <thead>
-                        <tr>
-                            <th>Formular-Gruppe</th>
-                            <th>Formulare</th>
-                            <th>Fragen</th>
-                            <th>Teams</th>
-                            <th>Abgeschlossen</th>
-                            <th>Durchschnitt</th>
-                            <th>Completion Rate</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($performanceStats as $stat): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($stat['collectionName']); ?></td>
-                                <td class="numeric-cell"><?php echo $stat['formsCount']; ?></td>
-                                <td class="numeric-cell"><?php echo $stat['totalQuestions']; ?></td>
-                                <td class="numeric-cell"><?php echo $stat['teamsAssigned']; ?></td>
-                                <td class="numeric-cell"><?php echo $stat['completedInstances']; ?>/<?php echo $stat['totalInstances']; ?></td>
-                                <td class="numeric-cell"><?php echo round($stat['averageScore'], 1); ?> Punkte</td>
-                                <td class="numeric-cell"><?php echo $stat['completionRate']; ?>%</td>
-                            </tr>
-                        <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                <?php endif; ?>
-
-                <!-- Team-Fortschritt -->
-                <?php if (!empty($teamProgress)): ?>
-                    <h4>Team-Fortschritt</h4>
-                    <table class="data-table">
-                        <thead>
-                        <tr>
-                            <th>Team</th>
-                            <th>Kreisverband</th>
-                            <th>Formular-Gruppe</th>
-                            <th>Formulare</th>
-                            <th>Abgeschlossen</th>
-                            <th>Punkte</th>
-                            <th>Fortschritt</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($teamProgress as $progress): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($progress['Teamname']); ?></td>
-                                <td><?php echo htmlspecialchars($progress['Kreisverband']); ?></td>
-                                <td><?php echo htmlspecialchars($progress['collectionName']); ?></td>
-                                <td class="numeric-cell"><?php echo $progress['totalForms']; ?></td>
-                                <td class="numeric-cell"><?php echo $progress['completedForms']; ?></td>
-                                <td class="numeric-cell"><?php echo $progress['totalPoints']; ?></td>
-                                <td class="numeric-cell"><?php echo $progress['completionPercentage']; ?>%</td>
-                            </tr>
-                        <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                <?php endif; ?>
+                <h3>Statistiken</h3>
 
                 <?php if (empty($performanceStats) && empty($teamProgress)): ?>
                     <div class="no-data">
-                        <p>Keine Statistiken verfügbar.</p>
+                        <p>Keine Statistiken verfügbar. Erstellen Sie zuerst Formular-Gruppen und lassen Sie Teams Formulare ausfüllen.</p>
                     </div>
+                <?php else: ?>
+
+                    <?php
+                    // Team-Fortschritt nach Formular-Gruppen gruppieren
+                    $groupedByCollection = [];
+                    foreach ($teamProgress as $progress) {
+                        $collId = $progress['collectionId'];
+                        if (!isset($groupedByCollection[$collId])) {
+                            $groupedByCollection[$collId] = [
+                                'name' => $progress['collectionName'],
+                                'teams' => []
+                            ];
+                        }
+                        $groupedByCollection[$collId]['teams'][] = $progress;
+                    }
+
+                    // Performance-Daten als Lookup
+                    $perfLookup = [];
+                    foreach ($performanceStats as $stat) {
+                        $perfLookup[$stat['collectionId']] = $stat;
+                    }
+                    ?>
+
+                    <?php foreach ($groupedByCollection as $collId => $group): ?>
+                        <?php $perf = $perfLookup[$collId] ?? null; ?>
+                        <div class="collection-stats-block">
+                            <h4><?php echo htmlspecialchars($group['name']); ?></h4>
+
+                            <?php if ($perf): ?>
+                                <?php
+                                $completionPct = $perf['totalInstances'] > 0
+                                    ? round(($perf['completedInstances'] / $perf['totalInstances']) * 100)
+                                    : 0;
+                                ?>
+                                <div class="stats-cards-row">
+                                    <div class="stat-card">
+                                        <div class="stat-value"><?php echo $perf['formsCount']; ?></div>
+                                        <div class="stat-label">Formulare</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-value"><?php echo $perf['totalQuestions']; ?></div>
+                                        <div class="stat-label">Fragen</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-value"><?php echo $perf['teamsAssigned']; ?></div>
+                                        <div class="stat-label">Teams</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-value"><?php echo $perf['completedInstances']; ?><span class="stat-value-sub">/<?php echo $perf['totalInstances']; ?></span></div>
+                                        <div class="stat-label">Abgeschlossen</div>
+                                        <div class="stat-bar">
+                                            <div class="stat-bar-fill" style="width:<?php echo $completionPct; ?>%;background:<?php echo $completionPct == 100 ? '#28a745' : 'var(--ww-blue-100)'; ?>;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+
+                            <table class="data-table">
+                                <thead>
+                                <tr>
+                                    <th width="30%">Mannschaft</th>
+                                    <th width="25%">Kreisverband</th>
+                                    <th width="15%">Abgeschlossen</th>
+                                    <th width="10%">Punkte</th>
+                                    <th width="20%">Fortschritt</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <?php
+                                // Teams nach Punkten absteigend sortieren
+                                $teams = $group['teams'];
+                                usort($teams, function($a, $b) {
+                                    return $b['totalPoints'] - $a['totalPoints'];
+                                });
+                                ?>
+                                <?php foreach ($teams as $team): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($team['Teamname']); ?></td>
+                                        <td><?php echo htmlspecialchars($team['Kreisverband']); ?></td>
+                                        <td class="numeric-cell"><?php echo $team['completedForms']; ?>/<?php echo $team['totalForms']; ?></td>
+                                        <td class="numeric-cell"><strong><?php echo $team['totalPoints']; ?></strong></td>
+                                        <td class="numeric-cell">
+                                            <div class="progress-bar-container" style="display:inline-block;width:80px;height:12px;background:#e0e0e0;border-radius:6px;vertical-align:middle;">
+                                                <div style="width:<?php echo $team['completionPercentage']; ?>%;height:100%;background:<?php echo $team['completionPercentage'] == 100 ? '#28a745' : '#007bff'; ?>;border-radius:6px;"></div>
+                                            </div>
+                                            <?php echo $team['completionPercentage']; ?>%
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endforeach; ?>
+
                 <?php endif; ?>
             </div>
         </div>
@@ -429,6 +462,7 @@ endif;
 ?>
 
 <!-- JavaScript einbinden -->
+<script src="../js/ModalUtils.js"></script>
 <script src="../js/FormCollectionViewScript.js"></script>
 
 <!-- Tab-Initialisierung sicherstellen -->

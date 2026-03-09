@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const teamSelect = document.getElementById('team_id');
         if (teamSelect && !teamSelect.value) {
             e.preventDefault();
-            alert('Bitte wählen Sie Ihre Mannschaft aus.');
+            showAlert('Hinweis', 'Bitte wählen Sie Ihre Mannschaft aus.');
             return false;
         }
 

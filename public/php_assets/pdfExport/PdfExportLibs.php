@@ -7,6 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <!-- Eigene Skripte für die PDF-Erzeugung -->
+<script src="../../js/ModalUtils.js"></script>
 <script src="../../js/TableOptimizer.js"></script>
 <script src="../../js/PdfExport.js"></script>
 

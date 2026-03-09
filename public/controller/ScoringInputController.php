@@ -62,15 +62,37 @@ class ScoringInputController {
             }
         }
 
-        // Hinzufügen eines Teams zu einer Wertungsklasse
+        // Teams einer Wertungsklasse zuweisen (Checkbox-basiert: Zustand wird synchronisiert)
         if (isset($_POST['add_team'])) {
             $wertungsklasse = trim($_POST['wertung']);
             $wertungsID = $this->model->reverseRead($wertungsklasse);
+
+            // Gewünschte Teams aus den Checkboxen sammeln
+            $gewuenschteTeams = [];
+            if (isset($_POST['teams']) && is_array($_POST['teams'])) {
+                foreach ($_POST['teams'] as $teamData) {
+                    if (!empty($teamData['name'])) {
+                        $gewuenschteTeams[] = trim($teamData['name']);
+                    }
+                }
+            }
+
+            // Aktuell zugewiesene Teams abrufen
+            $aktuelleTeams = $this->model->getAssignedTeams($wertungsklasse) ?? [];
+            $aktuelleNamen = array_map(fn($t) => $t['Teamname'], $aktuelleTeams);
+
+            // Teams entfernen, die nicht mehr angehakt sind
+            $zuEntfernen = array_diff($aktuelleNamen, $gewuenschteTeams);
+            foreach ($zuEntfernen as $teamname) {
+                $mannschaftsID = $this->model->reverseReadMannschaft($teamname);
+                $this->model->killMannschaftWertung($mannschaftsID, $wertungsID);
+            }
+
+            // Teams hinzufügen, die neu angehakt sind
+            $hinzuzufuegen = array_diff($gewuenschteTeams, $aktuelleNamen);
             $successCount = 0;
             $errorCount = 0;
-
-            if (isset($_POST['teamname']) && !empty(trim($_POST['teamname']))) {
-                $teamname = trim($_POST['teamname']);
+            foreach ($hinzuzufuegen as $teamname) {
                 $mannschaftsID = $this->model->reverseReadMannschaft($teamname);
                 $result = $this->model->MannschaftWertung($mannschaftsID, $wertungsID);
                 if ($result !== false) {
@@ -81,26 +103,19 @@ class ScoringInputController {
                 }
             }
 
-            if (isset($_POST['teams']) && is_array($_POST['teams'])) {
-                foreach ($_POST['teams'] as $teamData) {
-                    if (!empty($teamData['name'])) {
-                        $teamname = trim($teamData['name']);
-                        $mannschaftsID = $this->model->reverseReadMannschaft($teamname);
-                        $result = $this->model->MannschaftWertung($mannschaftsID, $wertungsID);
-                        if ($result !== false) {
-                            $successCount++;
-                        } else {
-                            $errorCount++;
-                            $this->message .= "Fehler beim Hinzufügen von Team: $teamname<br>";
-                        }
-                    }
+            $removedCount = count($zuEntfernen);
+            if ($errorCount === 0) {
+                $messages = [];
+                if ($successCount > 0) {
+                    $messages[] = "$successCount " . ($successCount === 1 ? 'Team' : 'Teams') . " hinzugefügt";
                 }
-            }
-
-            // Erfolgsmeldung bei erfolgreicher Zuweisung
-            if ($successCount > 0 && $errorCount === 0) {
-                $teamText = $successCount === 1 ? 'Team' : 'Teams';
-                $_SESSION['success_message'] = "$successCount $teamText erfolgreich zugewiesen.";
+                if ($removedCount > 0) {
+                    $messages[] = "$removedCount " . ($removedCount === 1 ? 'Team' : 'Teams') . " entfernt";
+                }
+                if (empty($messages)) {
+                    $messages[] = "Keine Änderungen vorgenommen";
+                }
+                $_SESSION['success_message'] = implode(', ', $messages) . ".";
                 header("Location: " . $this->redirectUrl . "?view=assign");
                 exit;
             }

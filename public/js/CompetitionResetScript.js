@@ -68,7 +68,7 @@ function initializeResetForms() {
             console.log(`CompetitionReset: Button für ${resetType} geklickt`);
 
             if (!checkbox.checked) {
-                alert('Bitte bestätigen Sie die Löschung durch Aktivieren der Checkbox.');
+                showAlert('Hinweis', 'Bitte bestätigen Sie die Löschung durch Aktivieren der Checkbox.');
                 return;
             }
 
@@ -104,7 +104,7 @@ function showModal(modalId) {
 
     } else {
         console.error(`CompetitionReset: Modal ${modalId} nicht gefunden!`);
-        alert('Fehler: Bestätigungsdialog konnte nicht angezeigt werden.');
+        showAlert('Fehler', 'Bestätigungsdialog konnte nicht angezeigt werden.');
 
         // Debug: Alle verfügbaren Modals auflisten
         const allModals = document.querySelectorAll('.modal');
@@ -140,7 +140,7 @@ function submitResetForm(resetType) {
 
     if (!form) {
         console.error(`CompetitionReset: Formular ${formId} nicht gefunden`);
-        alert('Fehler: Formular konnte nicht gefunden werden.');
+        showAlert('Fehler', 'Formular konnte nicht gefunden werden.');
         return;
     }
 

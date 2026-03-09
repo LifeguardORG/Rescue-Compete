@@ -76,12 +76,6 @@ class UserController {
                 return;
             }
 
-            if (strlen($password) < 8) {
-                $this->message = "Passwort muss mindestens 8 Zeichen lang sein.";
-                $this->messageType = "error";
-                return;
-            }
-
             if ($password !== $passwordConfirm) {
                 $this->message = "Passwörter stimmen nicht überein.";
                 $this->messageType = "error";
@@ -163,11 +157,6 @@ class UserController {
         // Validierung
         if (empty($newPassword)) {
             echo json_encode(['success' => false, 'message' => 'Passwort darf nicht leer sein.']);
-            exit;
-        }
-
-        if (strlen($newPassword) < 8) {
-            echo json_encode(['success' => false, 'message' => 'Passwort muss mindestens 8 Zeichen lang sein.']);
             exit;
         }
 

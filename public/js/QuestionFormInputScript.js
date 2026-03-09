@@ -62,7 +62,7 @@ function initializePoolSelection() {
             if (poolId) {
                 fetchQuestions(poolId);
             } else {
-                alert('Bitte wählen Sie zuerst einen Fragenpool aus.');
+                showAlert('Hinweis', 'Bitte wählen Sie zuerst einen Fragenpool aus.');
             }
         });
     }
@@ -162,7 +162,7 @@ function initializeValidation() {
             const stationId = document.getElementById('station').value;
             if (!stationId) {
                 e.preventDefault();
-                alert('Bitte wählen Sie eine Station aus.');
+                showAlert('Hinweis', 'Bitte wählen Sie eine Station aus.');
                 return;
             }
 
@@ -170,14 +170,14 @@ function initializeValidation() {
             const formTitle = document.getElementById('form_title').value.trim();
             if (!formTitle) {
                 e.preventDefault();
-                alert('Bitte geben Sie einen Titel für das Formular ein.');
+                showAlert('Hinweis', 'Bitte geben Sie einen Titel für das Formular ein.');
                 return;
             }
 
             // Prüfe auf ausgewählte Fragen
             if (selectedQuestions.size === 0) {
                 e.preventDefault();
-                alert('Bitte wählen Sie mindestens eine Frage aus.');
+                showAlert('Hinweis', 'Bitte wählen Sie mindestens eine Frage aus.');
                 return;
             }
 
@@ -187,7 +187,7 @@ function initializeValidation() {
                 const formCount = parseInt(document.getElementById('form_count').value, 10);
                 if (selectedQuestions.size < formCount) {
                     e.preventDefault();
-                    alert(`Sie müssen mindestens ${formCount} Fragen auswählen, um sie auf ${formCount} Formulare zu verteilen.`);
+                    showAlert("Hinweis", "Sie müssen mindestens " + formCount + " Fragen auswählen, um sie auf " + formCount + " Formulare zu verteilen.");
                     return;
                 }
             }
@@ -219,7 +219,7 @@ function fetchQuestions(poolId) {
             if (data.success) {
                 displayQuestions(data.questions);
             } else {
-                alert('Fehler beim Laden der Fragen: ' + (data.message || 'Unbekannter Fehler'));
+                showAlert('Fehler', 'Fehler beim Laden der Fragen: ' + (data.message || 'Unbekannter Fehler'));
             }
         })
         .catch(error => {

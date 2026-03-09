@@ -87,18 +87,19 @@ $pageTitle = "Fragen Verwaltung";
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <!-- ToDo: CSS Datei reihenfolge wie bei FormCollectionView -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RescueCompete - <?php echo htmlspecialchars($pageTitle); ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
     <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
     <link rel="stylesheet" href="../css/Sidebar.css">
-    <link rel="stylesheet" href="../css/InputStyling.css">
+    <link rel="stylesheet" href="../css/Footer.css">
+    <link rel="stylesheet" href="../css/Components.css">
     <link rel="stylesheet" href="../css/QuestionInputStyling.css">
 </head>
-<body>
+<body class="has-navbar">
 <!-- Navbar -->
 <?php include '../php_assets/Navbar.php'; ?>
 
@@ -108,7 +109,6 @@ $pageTitle = "Fragen Verwaltung";
 
     <!-- Hauptinhalt -->
     <div class="main-content vertical">
-        <h2><?php echo htmlspecialchars($pageTitle); ?></h2>
 
         <!-- Navigation Tabs -->
         <div class="tab-navigation">
@@ -157,10 +157,10 @@ $pageTitle = "Fragen Verwaltung";
                     <table class="data-table">
                         <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Anzahl Fragen</th>
-                            <th>Erstellt</th>
-                            <th>Aktionen</th>
+                            <th width="40%">Name</th>
+                            <th width="15%">Anzahl Fragen</th>
+                            <th width="20%">Erstellt</th>
+                            <th width="25%">Aktionen</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -249,9 +249,9 @@ $pageTitle = "Fragen Verwaltung";
                                     <table class="answers-table">
                                         <thead>
                                         <tr>
-                                            <th>Antwort</th>
-                                            <th>Korrekt</th>
-                                            <th>Aktion</th>
+                                            <th width="60%">Antwort</th>
+                                            <th width="20%">Korrekt</th>
+                                            <th width="20%">Aktion</th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -424,6 +424,7 @@ endif;
 ?>
 
 <!-- JavaScript einbinden -->
+<script src="../js/ModalUtils.js"></script>
 <script src="../js/QuestionInputScript.js"></script>
 
 <!-- Tab-Initialisierung sicherstellen -->
@@ -434,6 +435,8 @@ endif;
         showTab(currentView);
     });
 </script>
+
+<?php include '../php_assets/Footer.php'; ?>
 
 </body>
 </html>

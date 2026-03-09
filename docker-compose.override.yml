@@ -1,0 +1,9 @@
+# Lokale Entwicklung — wird automatisch geladen bei `docker compose up`
+services:
+  project:
+    ports:
+      - "80:80"
+
+  phpmyadmin:
+    ports:
+      - "8080:80"

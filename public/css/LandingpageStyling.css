@@ -1,11 +1,5 @@
-@import "Colors.css";
 
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: var(--beige);
+body {
     line-height: 1.6;
 }
 

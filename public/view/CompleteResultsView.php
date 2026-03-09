@@ -15,7 +15,7 @@ use Controllers\CompleteResultsController;
 
 // Überprüfen, ob eine Datenbankverbindung besteht
 if (!isset($conn)) {
-    die("Datenbankverbindung nicht verfügbar.");
+    require __DIR__ . '/../php_assets/DbErrorPage.php'; die();
 }
 
 // Modelle und Controller instanziieren
@@ -39,13 +39,16 @@ $config['TOTAL_POINTS']   = $config['TOTAL_POINTS'] ?? 12000;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RescueCompete</title>
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
+    <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
+    <link rel="stylesheet" href="../css/Footer.css">
     <link rel="stylesheet" href="../css/ResultStyling.css">
 
     <!-- PDF-Export-Skripte und Styles einbinden -->
     <?php include __DIR__ . '/../php_assets/pdfExport/PdfExportLibs.php'; ?>
 </head>
-<body>
+<body class="has-navbar">
 
 <?php include __DIR__ . '/../php_assets/Navbar.php'; ?>
 

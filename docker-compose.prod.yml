@@ -1,0 +1,10 @@
+# Produktion — starten mit: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+services:
+  project:
+    ports:
+      - "80:80"
+    volumes: []
+
+  phpmyadmin:
+    ports:
+      - "8080:80"

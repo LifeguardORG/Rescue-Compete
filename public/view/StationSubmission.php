@@ -9,11 +9,15 @@ $pageTitle = "Eingabe der Parcours-Ergebnisse";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RescueCompete</title>
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
+    <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
+    <link rel="stylesheet" href="../css/Footer.css">
+    <link rel="stylesheet" href="../css/Components.css">
     <link rel="stylesheet" href="../css/StationSubmissionStyling.css">
 </head>
 <!-- Übergabe des submittedTeams-Arrays als Data-Attribut -->
-<body data-submitted-teams='<?php echo json_encode(array_map('strval', $submittedTeams ?? [])); ?>'>
+<body class="has-navbar" data-submitted-teams='<?php echo json_encode(array_map('strval', $submittedTeams ?? [])); ?>'>
 <?php include '../php_assets/Navbar.php'; ?>
 <div class="container">
     <div class="wrapper">
@@ -80,6 +84,7 @@ $pageTitle = "Eingabe der Parcours-Ergebnisse";
 <?php include '../php_assets/Footer.php'; ?>
 
 <!-- Externes JavaScript am Ende des Bodys einbinden -->
+<script src="../js/ModalUtils.js"></script>
 <script src="../js/StationSubmissionScript.js"></script>
 </body>
 </html>

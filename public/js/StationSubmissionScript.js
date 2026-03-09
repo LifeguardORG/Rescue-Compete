@@ -7,26 +7,31 @@ document.addEventListener("DOMContentLoaded", function() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('status')) {
         const status = urlParams.get('status');
-        const statusContainer = document.createElement('div');
 
         if (status === 'success') {
-            statusContainer.className = 'status-message success-message';
-            statusContainer.textContent = 'Die Ergebnisse wurden erfolgreich gespeichert!';
+            const overlay = document.createElement('div');
+            overlay.className = 'success-check-overlay';
+            overlay.innerHTML = '<div class="success-check-circle"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"></polyline></svg></div>';
+            document.querySelector('.submission-form').appendChild(overlay);
+
+            // Nach kurzem Anzeigen ausblenden
+            setTimeout(() => {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 500);
+            }, 1500);
         } else if (status === 'failure') {
+            const statusContainer = document.createElement('div');
             statusContainer.className = 'status-message error-message';
             statusContainer.textContent = 'Fehler beim Speichern der Ergebnisse!';
-        }
-
-        const submissionBox = document.querySelector('.submission-box');
-        if (submissionBox) {
-            submissionBox.parentNode.insertBefore(statusContainer, submissionBox);
-
-            // Status-Nachricht nach 5 Sekunden automatisch ausblenden
-            setTimeout(() => {
-                statusContainer.style.opacity = '0';
-                statusContainer.style.transition = 'opacity 1s';
-                setTimeout(() => statusContainer.remove(), 1000);
-            }, 5000);
+            const submissionBox = document.querySelector('.submission-box');
+            if (submissionBox) {
+                submissionBox.parentNode.insertBefore(statusContainer, submissionBox);
+                setTimeout(() => {
+                    statusContainer.style.opacity = '0';
+                    statusContainer.style.transition = 'opacity 1s';
+                    setTimeout(() => statusContainer.remove(), 1000);
+                }, 5000);
+            }
         }
     }
 
@@ -105,22 +110,23 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             // Überprüfen, ob bereits eingetragene Teams geändert werden
-            if (hasChanges && submittedTeams.includes(teamSelect.value)) {
+            if (hasChanges && submittedTeams.includes(teamSelect.value) && form.dataset.confirmed !== 'true') {
+                event.preventDefault();
                 const teamName = teamSelect.options[teamSelect.selectedIndex].text;
-                const confirmOverwrite = confirm(
-                    "Für die Mannschaft " + teamName + " wurden bereits Ergebnisse eingetragen. " +
-                    "Möchten Sie die bestehenden Ergebnisse überschreiben?"
+                showConfirm('Ergebnisse überschreiben',
+                    'Für die Mannschaft ' + teamName + ' wurden bereits Ergebnisse eingetragen. Möchten Sie die bestehenden Ergebnisse überschreiben?',
+                    function() {
+                        form.dataset.confirmed = 'true';
+                        form.submit();
+                    }
                 );
-
-                if (!confirmOverwrite) {
-                    event.preventDefault();
-                    return false;
-                }
+                return false;
             }
+            delete form.dataset.confirmed;
 
             if (!formIsValid) {
                 event.preventDefault();
-                alert("Bitte korrigieren Sie die folgenden Fehler:\n" + errorMessages.join("\n"));
+                showAlert('Validierungsfehler', 'Bitte korrigieren Sie die folgenden Fehler:\n' + errorMessages.join('\n'));
                 return false;
             }
 
@@ -129,7 +135,7 @@ document.addEventListener("DOMContentLoaded", function() {
             /*
             if (!hasChanges) {
                 event.preventDefault();
-                alert("Bitte geben Sie mindestens einen Punktwert ein.");
+                showAlert('Hinweis', 'Bitte geben Sie mindestens einen Punktwert ein.');
                 return false;
             }
             */

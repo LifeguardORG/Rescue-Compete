@@ -25,7 +25,7 @@ if(!isset($_SESSION["acc_typ"]) || !in_array($_SESSION["acc_typ"], $allowedAccou
 
 // Überprüfen, ob die Datenbankverbindung ($conn) verfügbar ist
 if (!isset($conn)) {
-    die("<script>alert('Datenbankverbindung nicht verfügbar.');</script>");
+    require __DIR__ . '/../php_assets/DbErrorPage.php'; die();
 }
 
 // Instanzierung des Models und des Controllers
@@ -77,9 +77,11 @@ $pageTitle = "Verwaltung der Wertungsklassen";
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
     <!-- CSS-Dateien einbinden -->
     <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
     <link rel="stylesheet" href="../css/Sidebar.css">
-    <link rel="stylesheet" href="../css/InputStyling.css">
+    <link rel="stylesheet" href="../css/Footer.css">
+    <link rel="stylesheet" href="../css/Components.css">
     <link rel="stylesheet" href="../css/ScoringInputViewStyling.css">
 
     <!-- JavaScript-Konstanten übergeben -->
@@ -89,7 +91,7 @@ $pageTitle = "Verwaltung der Wertungsklassen";
         const selectedWertung = <?php echo json_encode($selectedWertung, JSON_HEX_TAG); ?>;
     </script>
 </head>
-<body>
+<body class="has-navbar">
 
 <!-- Navbar wird eingebunden -->
 <?php include '../php_assets/Navbar.php'; ?>
@@ -100,7 +102,6 @@ $pageTitle = "Verwaltung der Wertungsklassen";
 
     <!-- Hauptinhalt -->
     <div class="main-content vertical">
-        <h2><?php echo htmlspecialchars($pageTitle); ?></h2>
 
         <!-- Navigation Tabs -->
         <div class="tab-navigation">
@@ -156,10 +157,10 @@ $pageTitle = "Verwaltung der Wertungsklassen";
                     <table class="data-table">
                         <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Zugehörige Mannschaften</th>
-                            <th>Anzahl Teams</th>
-                            <th>Aktionen</th>
+                            <th data-sort-key="name" width="20%">Name</th>
+                            <th width="40%">Zugehörige Mannschaften</th>
+                            <th data-sort-key="count" data-sort-type="number" width="15%">Anzahl Teams</th>
+                            <th width="25%">Aktionen</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -168,7 +169,7 @@ $pageTitle = "Verwaltung der Wertungsklassen";
                                 <td>
                                     <strong><?php echo htmlspecialchars($wertung['wertung_name'] ?? "nicht gefunden"); ?></strong>
                                 </td>
-                                <td><?php echo htmlspecialchars($wertung['teams'] ?? "keine Teams"); ?></td>
+                                <td><?php echo nl2br(htmlspecialchars(str_replace(', ', "\n", $wertung['teams'] ?? "keine Teams"))); ?></td>
                                 <td class="numeric-cell">
                                     <?php
                                     $teamsCount = !empty($wertung['teams']) && $wertung['teams'] !== 'keine Teams'
@@ -225,44 +226,35 @@ $pageTitle = "Verwaltung der Wertungsklassen";
         <!-- Tab: Teams zuweisen -->
         <div id="assign" class="tab-content <?php echo $currentView === 'assign' ? 'active' : ''; ?>">
             <div class="data-container">
-                <h3>Teams zu einer Wertungsklasse hinzufügen</h3>
+                <h3>Teams zu einer Wertungsklasse zuweisen</h3>
 
                 <form id="assignTeamsForm" method="POST">
                     <div class="form-group">
                         <label for="wertung">Zugehörige Wertungsklasse *</label>
-                        <select id="wertung" name="wertung" required>
+                        <select id="wertung" name="wertung" required onchange="loadTeamCheckboxes()">
                             <option value="" disabled selected hidden>Bitte auswählen</option>
                         </select>
                         <small>Wählen Sie die Wertungsklasse aus, der Sie Teams zuweisen möchten</small>
                     </div>
 
-                    <!-- Container für dynamische Team-Eingabefelder -->
-                    <div id="teamsContainer">
-                        <div class="team-entry">
-                            <h4>1. Team:</h4>
-                            <div class="form-group">
-                                <label for="teamname">Teamname:</label>
-                                <select id="teamname" name="teams[0][name]" required>
-                                    <option value="" disabled selected hidden>Bitte auswählen</option>
-                                </select>
+                    <!-- Container für Team-Checkboxen -->
+                    <div id="teamCheckboxContainer" style="display: none;">
+                        <div class="form-group">
+                            <label>Mannschaften auswählen</label>
+                            <div class="team-selection-actions">
+                                <button type="button" class="btn secondary-btn small" onclick="selectAllAssignTeams()">Alle auswählen</button>
+                                <button type="button" class="btn secondary-btn small" onclick="deselectAllAssignTeams()">Alle abwählen</button>
+                            </div>
+                            <div id="teamCheckboxList" class="assigned-teams-list">
+                                <!-- Dynamisch geladen -->
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Team-Management Buttons -->
-                    <div class="team-management">
-                        <button type="button" class="btn secondary-btn" id="addTeamBtn" onclick="addTeam()">
-                            Weiteres Team hinzufügen
-                        </button>
-                        <button type="button" class="btn secondary-btn" id="removeTeamBtn" onclick="removeTeam()">
-                            Letztes Team entfernen
-                        </button>
-                    </div>
-
-                    <!-- Aktionen -->
-                    <div class="form-actions">
-                        <button type="submit" name="add_team" class="btn primary-btn">Teams zuweisen</button>
-                        <button type="button" class="btn" onclick="showTab('overview')">Abbrechen</button>
+                        <!-- Aktionen -->
+                        <div class="form-actions">
+                            <button type="submit" name="add_team" class="btn primary-btn">Teams zuweisen</button>
+                            <button type="button" class="btn" onclick="showTab('overview')">Abbrechen</button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -345,6 +337,7 @@ echo CustomAlertBox::renderSimpleConfirm(
 ?>
 
 <!-- JavaScript einbinden -->
+<script src="../js/TableSortUtils.js"></script>
 <script src="../js/ScoringInputScript.js"></script>
 
 <!-- Tab-Initialisierung sicherstellen -->
@@ -353,6 +346,8 @@ echo CustomAlertBox::renderSimpleConfirm(
         // Sicherstellen, dass der korrekte Tab angezeigt wird
         const currentView = '<?php echo $currentView; ?>';
         showTab(currentView);
+
+        initSortableTable(document.querySelector('.data-table'));
 
         // Wenn eine Wertung nach dem Entfernen ausgewählt bleiben soll
         if (selectedWertung && currentView === 'remove') {

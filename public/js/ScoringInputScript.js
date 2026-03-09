@@ -5,7 +5,6 @@
 
 // Globale Variablen
 let currentTab = 'overview';
-let teamCounter = 1;
 let deleteWertungId = null;
 let selectedTeamsForRemoval = [];
 let formSubmissionInProgress = false;
@@ -15,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initializePage();
     populateDropdowns();
     initializeEventListeners();
-    updateTeamManagementButtons();
 });
 
 /**
@@ -82,9 +80,7 @@ function showTab(tabName) {
 function handleTabSpecificActions(tabName) {
     switch (tabName) {
         case 'assign':
-            // Sicherstellen, dass Dropdowns gefüllt sind
             populateDropdowns();
-            updateTeamManagementButtons();
             break;
         case 'create':
             // Fokus auf das Name-Feld setzen
@@ -122,8 +118,6 @@ function populateDropdowns() {
         });
     }
 
-    // Team-Dropdowns füllen
-    populateTeamDropdowns();
 }
 
 /**
@@ -148,64 +142,82 @@ function populateRemoveDropdowns() {
 }
 
 /**
- * Füllt alle Team-Dropdown-Menüs und erhält bestehende Auswahlen
+ * Lädt die Team-Checkboxen für den Assign-Tab.
+ * Zeigt alle Mannschaften als Checkboxen, bereits zugewiesene sind vormarkiert.
  */
-function populateTeamDropdowns() {
-    const teamSelects = document.querySelectorAll('select[name^="teams["]');
+function loadTeamCheckboxes() {
+    const wertungSelect = document.getElementById('wertung');
+    const container = document.getElementById('teamCheckboxContainer');
+    const list = document.getElementById('teamCheckboxList');
 
-    teamSelects.forEach(select => {
-        if (typeof mannschaften !== 'undefined') {
-            // Aktuelle Auswahl speichern
-            const currentValue = select.value;
+    if (!wertungSelect || !container || !list) return;
 
-            // Bestehende Optionen entfernen (außer der ersten)
-            while (select.children.length > 1) {
-                select.removeChild(select.lastChild);
-            }
-
-            // Neue Optionen hinzufügen
-            mannschaften.forEach(mannschaft => {
-                const option = document.createElement('option');
-                option.value = mannschaft.Teamname;
-                option.textContent = mannschaft.Teamname;
-                select.appendChild(option);
-            });
-
-            // Vorherige Auswahl wiederherstellen
-            if (currentValue) {
-                select.value = currentValue;
-            }
-        }
-    });
-}
-
-/**
- * Füllt ein einzelnes Team-Dropdown-Menü
- * @param {HTMLSelectElement} selectElement - Das zu befüllende Select-Element
- */
-function populateSingleTeamDropdown(selectElement) {
-    if (!selectElement || typeof mannschaften === 'undefined') {
+    const selectedWertung = wertungSelect.value;
+    if (!selectedWertung) {
+        container.style.display = 'none';
         return;
     }
 
-    // Leere Option hinzufügen falls nicht vorhanden
-    if (selectElement.children.length === 0) {
-        const emptyOption = document.createElement('option');
-        emptyOption.value = '';
-        emptyOption.disabled = true;
-        emptyOption.selected = true;
-        emptyOption.hidden = true;
-        emptyOption.textContent = 'Bitte auswählen';
-        selectElement.appendChild(emptyOption);
-    }
+    list.innerHTML = '<div class="loading-spinner"></div> Teams werden geladen...';
+    container.style.display = 'block';
 
-    // Team-Optionen hinzufügen
-    mannschaften.forEach(mannschaft => {
-        const option = document.createElement('option');
-        option.value = mannschaft.Teamname;
-        option.textContent = mannschaft.Teamname;
-        selectElement.appendChild(option);
-    });
+    // Zugewiesene Teams per AJAX laden
+    const url = `ScoringInputView.php?action=getAssignedTeams&wertung=${encodeURIComponent(selectedWertung)}`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            const assignedIds = new Set();
+            if (data.success && data.teams) {
+                data.teams.forEach(t => assignedIds.add(String(t.mannschaft_id)));
+            }
+
+            list.innerHTML = '';
+
+            if (typeof mannschaften === 'undefined' || mannschaften.length === 0) {
+                list.innerHTML = '<p>Keine Mannschaften vorhanden.</p>';
+                return;
+            }
+
+            mannschaften.forEach((mannschaft, index) => {
+                const item = document.createElement('div');
+                item.className = 'team-checkbox-item';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = 'assign_team_' + mannschaft.ID;
+                checkbox.name = 'teams[' + index + '][name]';
+                checkbox.value = mannschaft.Teamname;
+                checkbox.checked = assignedIds.has(String(mannschaft.ID));
+
+                const label = document.createElement('label');
+                label.htmlFor = 'assign_team_' + mannschaft.ID;
+                label.innerHTML = '<strong>' + escapeHtml(mannschaft.Teamname) + '</strong>' +
+                    '<span class="team-details">' + escapeHtml(mannschaft.Kreisverband || '') + '</span>';
+
+                item.appendChild(checkbox);
+                item.appendChild(label);
+                list.appendChild(item);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading teams:', error);
+            list.innerHTML = '<p>Fehler beim Laden der Teams.</p>';
+        });
+}
+
+/**
+ * Alle Checkboxen im Assign-Tab auswählen
+ */
+function selectAllAssignTeams() {
+    document.querySelectorAll('#teamCheckboxList input[type="checkbox"]').forEach(cb => cb.checked = true);
+}
+
+/**
+ * Alle Checkboxen im Assign-Tab abwählen
+ */
+function deselectAllAssignTeams() {
+    document.querySelectorAll('#teamCheckboxList input[type="checkbox"]').forEach(cb => cb.checked = false);
 }
 
 /**
@@ -552,7 +564,6 @@ function validateCreateForm() {
  */
 function validateAssignForm() {
     const wertungSelect = document.getElementById('wertung');
-    const teamSelects = document.querySelectorAll('select[name^="teams["]');
     let isValid = true;
 
     // Wertung-Validierung
@@ -563,35 +574,10 @@ function validateAssignForm() {
         clearValidationError(wertungSelect);
     }
 
-    // Team-Validierung
-    let hasValidTeam = false;
-    teamSelects.forEach(select => {
-        if (select.value) {
-            hasValidTeam = true;
-            clearValidationError(select);
-        }
-    });
-
-    if (!hasValidTeam) {
-        teamSelects[0] && showValidationError(teamSelects[0], 'Bitte wählen Sie mindestens ein Team aus.');
-        isValid = false;
-    }
-
-    // Duplikat-Prüfung
-    const selectedTeams = Array.from(teamSelects)
-        .map(select => select.value)
-        .filter(value => value);
-
-    const duplicates = selectedTeams.filter((team, index) =>
-        selectedTeams.indexOf(team) !== index
-    );
-
-    if (duplicates.length > 0) {
-        teamSelects.forEach(select => {
-            if (duplicates.includes(select.value)) {
-                showValidationError(select, 'Jedes Team kann nur einmal ausgewählt werden.');
-            }
-        });
+    // Mindestens eine Checkbox muss angehakt sein
+    const checkedBoxes = document.querySelectorAll('#teamCheckboxList input[type="checkbox"]:checked');
+    if (checkedBoxes.length === 0) {
+        showMessage('Bitte wählen Sie mindestens ein Team aus.', 'error');
         isValid = false;
     }
 
@@ -657,106 +643,6 @@ function clearValidationError(element) {
     }
 }
 
-/**
- * Fügt ein neues Team-Eingabefeld hinzu
- */
-function addTeam() {
-    const container = document.getElementById('teamsContainer');
-    if (!container) return;
-
-    teamCounter++;
-
-    // Neues Team-Entry-Element erstellen
-    const teamEntry = document.createElement('div');
-    teamEntry.className = 'team-entry';
-    teamEntry.innerHTML = `
-        <h4>${teamCounter}. Team:</h4>
-        <div class="form-group">
-            <label for="teamname_${teamCounter}">Teamname:</label>
-            <select id="teamname_${teamCounter}" name="teams[${teamCounter - 1}][name]" required>
-                <option value="" disabled selected hidden>Bitte auswählen</option>
-            </select>
-        </div>
-    `;
-
-    // Element zum Container hinzufügen
-    container.appendChild(teamEntry);
-
-    // Nur das neue Dropdown füllen
-    const newSelect = teamEntry.querySelector('select');
-    if (newSelect) {
-        populateSingleTeamDropdown(newSelect);
-    }
-
-    // Button-Status aktualisieren
-    updateTeamManagementButtons();
-
-    // Animation hinzufügen
-    setTimeout(() => {
-        teamEntry.style.opacity = '1';
-        teamEntry.style.transform = 'translateY(0)';
-    }, 10);
-}
-
-/**
- * Entfernt das letzte Team-Eingabefeld
- */
-function removeTeam() {
-    const container = document.getElementById('teamsContainer');
-    if (!container) return;
-
-    const teamEntries = container.querySelectorAll('.team-entry');
-
-    // Mindestens ein Team muss bleiben
-    if (teamEntries.length > 1) {
-        const lastEntry = teamEntries[teamEntries.length - 1];
-
-        // Animation für das Entfernen
-        lastEntry.style.opacity = '0';
-        lastEntry.style.transform = 'translateY(-10px)';
-
-        setTimeout(() => {
-            lastEntry.remove();
-            teamCounter--;
-            updateTeamManagementButtons();
-        }, 300);
-    }
-}
-
-/**
- * Aktualisiert die Verfügbarkeit der Team-Management-Buttons
- */
-function updateTeamManagementButtons() {
-    const addBtn = document.getElementById('addTeamBtn');
-    const removeBtn = document.getElementById('removeTeamBtn');
-    const container = document.getElementById('teamsContainer');
-
-    if (!container) return;
-
-    const teamCount = container.querySelectorAll('.team-entry').length;
-
-    // Remove-Button nur aktivieren, wenn mehr als ein Team vorhanden
-    if (removeBtn) {
-        if (teamCount <= 1) {
-            removeBtn.disabled = true;
-            removeBtn.classList.add('disabled');
-        } else {
-            removeBtn.disabled = false;
-            removeBtn.classList.remove('disabled');
-        }
-    }
-
-    // Add-Button limitieren (optional)
-    if (addBtn && typeof mannschaften !== 'undefined') {
-        if (teamCount >= mannschaften.length) {
-            addBtn.disabled = true;
-            addBtn.classList.add('disabled');
-        } else {
-            addBtn.disabled = false;
-            addBtn.classList.remove('disabled');
-        }
-    }
-}
 
 /**
  * Zeigt den Assignment-Tab für eine bestimmte Wertungsklasse
@@ -766,11 +652,12 @@ function showAssignmentForWertung(wertungName) {
     // Zum Assignment-Tab wechseln
     showTab('assign');
 
-    // Wertungsklasse im Dropdown auswählen
+    // Wertungsklasse im Dropdown auswählen und Checkboxen laden
     setTimeout(() => {
         const wertungSelect = document.getElementById('wertung');
         if (wertungSelect) {
             wertungSelect.value = wertungName;
+            loadTeamCheckboxes();
         }
     }, 100);
 }
@@ -959,8 +846,9 @@ document.addEventListener('click', function(event) {
 
 // Globale Funktionen für HTML-Inline-Events
 window.showTab = showTab;
-window.addTeam = addTeam;
-window.removeTeam = removeTeam;
+window.loadTeamCheckboxes = loadTeamCheckboxes;
+window.selectAllAssignTeams = selectAllAssignTeams;
+window.deselectAllAssignTeams = deselectAllAssignTeams;
 window.showAssignmentForWertung = showAssignmentForWertung;
 window.showRemovalForWertung = showRemovalForWertung;
 window.confirmDeleteWertung = confirmDeleteWertung;

@@ -80,10 +80,13 @@ if (!$result || !$result['mannschaft_ID']) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RescueCompete - <?php echo htmlspecialchars($pageTitle); ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
-    <link rel="stylesheet" href="../css/FormViewStyling.css">
+    <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
+    <link rel="stylesheet" href="../css/Footer.css">
+    <link rel="stylesheet" href="../css/FormViewStyling.css">
 </head>
-<body>
+<body class="has-navbar">
 <?php include '../php_assets/Navbar.php'; ?>
 
 <div class="form-container">

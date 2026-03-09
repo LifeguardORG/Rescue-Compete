@@ -63,13 +63,15 @@ $pageTitle = "Admin-Accounts Verwaltung";
     <title>RescueCompete - <?php echo htmlspecialchars($pageTitle); ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
     <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
     <link rel="stylesheet" href="../css/Sidebar.css">
-    <link rel="stylesheet" href="../css/InputStyling.css">
+    <link rel="stylesheet" href="../css/Footer.css">
+    <link rel="stylesheet" href="../css/Components.css">
     <link rel="stylesheet" href="../css/FormCollectionViewStyling.css">
     <link rel="stylesheet" href="../css/AdminUserInputViewStyling.css">
 </head>
-<body>
+<body class="has-navbar">
 <!-- Navbar -->
 <?php include '../php_assets/Navbar.php'; ?>
 
@@ -79,7 +81,6 @@ $pageTitle = "Admin-Accounts Verwaltung";
 
     <!-- Hauptinhalt -->
     <div class="main-content vertical">
-        <h2 class="main-title"><?php echo htmlspecialchars($pageTitle); ?></h2>
 
         <!-- Navigation Tabs -->
         <div class="tab-navigation">
@@ -188,7 +189,7 @@ $pageTitle = "Admin-Accounts Verwaltung";
                         <label for="password">Passwort *</label>
                         <input type="password" id="password" name="password" required
                                placeholder="Sicheres Passwort eingeben">
-                        <small>Verwenden Sie ein starkes Passwort mit mindestens 8 Zeichen.</small>
+                        <small>Das Passwort kann beliebig gewählt werden</small>
                     </div>
 
                     <div class="form-group">

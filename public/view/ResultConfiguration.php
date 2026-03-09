@@ -26,12 +26,14 @@ $parcoursPoints = ($totalPoints * $parcoursShare) / 100;
     <title>RescueCompete - <?php echo htmlspecialchars($pageTitle); ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
     <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
     <link rel="stylesheet" href="../css/Sidebar.css">
-    <link rel="stylesheet" href="../css/InputStyling.css">
+    <link rel="stylesheet" href="../css/Footer.css">
+    <link rel="stylesheet" href="../css/Components.css">
     <link rel="stylesheet" href="../css/ResultConfigurationStyling.css">
 </head>
-<body>
+<body class="has-navbar">
 <?php include '../php_assets/Navbar.php'; ?>
 
 <div class="container">
@@ -39,7 +41,6 @@ $parcoursPoints = ($totalPoints * $parcoursShare) / 100;
 
     <!-- Hauptinhalt -->
     <div class="main-content vertical">
-        <h2 class="main-title"><?php echo htmlspecialchars($pageTitle); ?></h2>
 
         <!-- Statusmeldungen -->
         <?php if (isset($_GET['status']) && $_GET['status'] === 'success'): ?>
@@ -184,6 +185,7 @@ $parcoursPoints = ($totalPoints * $parcoursShare) / 100;
 
 <?php include '../php_assets/Footer.php'; ?>
 
+<script src="../js/ModalUtils.js"></script>
 <script src="../js/ResultConfiguration.js"></script>
 </body>
 </html>s

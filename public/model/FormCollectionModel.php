@@ -607,6 +607,113 @@ class FormCollectionModel
     }
 
     /**
+     * Holt detaillierte Scan-/Bearbeitungsdaten pro Collection:
+     * Welche Mannschaft hat welches Formular (QR-Code) gescannt und in welchem Status ist es.
+     *
+     * @return array Gruppiert nach collection_ID, enthält Teams mit Formular-Status
+     */
+    public function getTeamFormDetails(): array
+    {
+        try {
+            $stmt = $this->db->query(
+                "SELECT tfi.collection_ID, fc.name AS collectionName, fc.formsCount,
+                        tfi.formNumber, tfi.completed, tfi.points,
+                        tfi.startTime, tfi.completionDate,
+                        m.ID AS teamId, m.Teamname, m.Kreisverband
+                 FROM TeamFormInstance tfi
+                 JOIN FormCollection fc ON tfi.collection_ID = fc.ID
+                 JOIN Mannschaft m ON tfi.team_ID = m.ID
+                 ORDER BY fc.name, m.Teamname, tfi.formNumber"
+            );
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error in FormCollectionModel::getTeamFormDetails: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Löst einen QR-Code-Token auf und gibt die zugehörige Collection-Info zurück
+     *
+     * @param string $token Der QR-Code-Token (12 Zeichen)
+     * @return array|null Array mit 'collection_ID', 'formNumber', 'collection_name' oder null
+     */
+    public function resolveFormToken(string $token): ?array
+    {
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT cft.collection_ID, cft.formNumber, fc.name as collection_name
+                 FROM CollectionFormToken cft
+                 JOIN FormCollection fc ON cft.collection_ID = fc.ID
+                 WHERE cft.token = :token
+                 LIMIT 1"
+            );
+            $stmt->execute([':token' => $token]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $result ?: null;
+        } catch (PDOException $e) {
+            error_log("Error in FormCollectionModel::resolveFormToken: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Erstellt oder findet eine TeamFormInstance für ein Team und gibt sie zurück
+     *
+     * @param int $teamId ID des Teams
+     * @param int $collectionId ID der Collection
+     * @param int $formNumber Formularnummer
+     * @return array|null Array mit Instance-Daten inkl. 'token' oder null bei Fehler
+     */
+    public function createTeamFormInstanceOnDemand(int $teamId, int $collectionId, int $formNumber): ?array
+    {
+        try {
+            // Prüfen ob Instance bereits existiert
+            $stmt = $this->db->prepare(
+                "SELECT * FROM TeamFormInstance
+                 WHERE team_ID = :teamId AND collection_ID = :collectionId AND formNumber = :formNumber"
+            );
+            $stmt->execute([
+                ':teamId' => $teamId,
+                ':collectionId' => $collectionId,
+                ':formNumber' => $formNumber
+            ]);
+            $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($existing) {
+                return $existing;
+            }
+
+            // Neue Instance über Stored Procedure erstellen
+            $stmt = $this->db->prepare("CALL createTeamFormInstance(:teamId, :collectionId, :formNumber)");
+            $stmt->execute([
+                ':teamId' => $teamId,
+                ':collectionId' => $collectionId,
+                ':formNumber' => $formNumber
+            ]);
+            $stmt->closeCursor();
+
+            // Erstellte Instance abrufen (Token wird per Trigger generiert)
+            $stmt = $this->db->prepare(
+                "SELECT * FROM TeamFormInstance
+                 WHERE team_ID = :teamId AND collection_ID = :collectionId AND formNumber = :formNumber"
+            );
+            $stmt->execute([
+                ':teamId' => $teamId,
+                ':collectionId' => $collectionId,
+                ':formNumber' => $formNumber
+            ]);
+            $instance = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $instance ?: null;
+        } catch (PDOException $e) {
+            error_log("Error in FormCollectionModel::createTeamFormInstanceOnDemand: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Prüft abgelaufene Timer und schließt entsprechende Instances ab
      *
      * @return array Statistik der verarbeiteten Instances

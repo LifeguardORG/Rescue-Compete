@@ -1,12 +1,3 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Footer Demo</title>
-    <link rel="stylesheet" href="../css/Footer.css">
-</head>
-<body>
 <!-- Footer -->
 <footer class="footer">
     <div class="footer-content">
@@ -32,7 +23,7 @@
                 <a href="../view/UsageGuidelinesView.php">Nutzungsrichtlinien</a>
             </div>
             <div class="footer-copyright">
-                © 2025 RescueCompete - OpenSource Software für die Wasserwacht
+                © 2026 RescueCompete - OpenSource Software für die Wasserwacht
             </div>
         </div>
     </div>
@@ -40,5 +31,3 @@
 
 <!-- JavaScript für Footer-Funktionen -->
 <script src="../js/FooterScript.js"></script>
-</body>
-</html>

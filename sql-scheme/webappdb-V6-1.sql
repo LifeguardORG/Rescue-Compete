@@ -33,37 +33,8 @@ CREATE TABLE IF NOT EXISTS `CollectionFormToken` (
     `createdAt` timestamp NULL DEFAULT current_timestamp()
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Stand-in-Tabellen für Views (werden später gedroppt/ersetzt)
-CREATE TABLE IF NOT EXISTS `CollectionOverview` (
-                                                    `ID` int(11),
-    `name` varchar(255),
-    `description` text,
-    `timeLimit` int(11),
-    `totalQuestions` int(11),
-    `formsCount` int(11),
-    `createdAt` timestamp,
-    `stationName` varchar(32),
-    `assignedTeams` bigint(21),
-    `completedForms` bigint(21),
-    `totalInstances` bigint(21),
-    `averagePoints` decimal(14,4),
-    `completionRate` decimal(25,1)
-    );
-
-CREATE TABLE IF NOT EXISTS `CollectionPerformance` (
-                                                       `collectionId` int(11),
-    `collectionName` varchar(255),
-    `formsCount` int(11),
-    `totalQuestions` int(11),
-    `timeLimit` int(11),
-    `teamsAssigned` bigint(21),
-    `totalInstances` bigint(21),
-    `completedInstances` bigint(21),
-    `averageScore` decimal(14,4),
-    `maxScore` bigint(11),
-    `minScore` bigint(11),
-    `completionRate` decimal(25,1)
-    );
+-- Stand-in-Tabellen für Views werden nicht mehr benötigt
+-- Views werden am Ende des Schemas direkt erstellt
 
 CREATE TABLE IF NOT EXISTS `CollectionQuestion` (
                                                     `collection_ID` int(11) NOT NULL,
@@ -147,19 +118,6 @@ CREATE TABLE IF NOT EXISTS `StationWeight` (
     `weight` int(11) NOT NULL DEFAULT 100
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Stand-in für View
-CREATE TABLE IF NOT EXISTS `TeamCollectionProgress` (
-                                                        `teamId` int(11),
-    `Teamname` varchar(100),
-    `Kreisverband` varchar(32),
-    `collectionId` int(11),
-    `collectionName` varchar(255),
-    `totalForms` bigint(21),
-    `completedForms` bigint(21),
-    `totalPoints` decimal(32,0),
-    `completionPercentage` decimal(25,1)
-    );
-
 CREATE TABLE IF NOT EXISTS `TeamFormAnswer` (
                                                 `ID` int(11) NOT NULL,
     `teamFormInstance_ID` int(11) NOT NULL,
@@ -181,23 +139,6 @@ CREATE TABLE IF NOT EXISTS `TeamFormInstance` (
     `assignedQuestions` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Array der zugewiesenen Fragen-IDs' CHECK (json_valid(`assignedQuestions`)),
     `createdAt` timestamp NULL DEFAULT current_timestamp()
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Stand-in für View
-CREATE TABLE IF NOT EXISTS `TeamFormStatistics` (
-                                                    `instanceId` int(11),
-    `Teamname` varchar(100),
-    `Kreisverband` varchar(32),
-    `collectionName` varchar(255),
-    `formNumber` int(11),
-    `completed` tinyint(1),
-    `points` int(11),
-    `assignedQuestionsCount` int(10),
-    `answeredQuestions` bigint(21),
-    `status` varchar(15),
-    `startTime` datetime,
-    `completionDate` datetime,
-    `token` varchar(32)
-    );
 
 CREATE TABLE IF NOT EXISTS `User` (
                                       `ID` int(11) NOT NULL,

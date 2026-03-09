@@ -18,7 +18,7 @@ error_log("Session-ID: " . session_id());
 // Prüfe die Datenbankverbindung
 if (!isset($conn) || !($conn instanceof PDO)) {
     error_log("Datenbankverbindung nicht verfügbar");
-    die("<script>alert('Datenbankverbindung nicht verfügbar.'); window.location.href='../view/Login.php?f=999';</script>");
+    require __DIR__ . '/../php_assets/DbErrorPage.php'; die();
 }
 
 // Initialisiere das UserModel

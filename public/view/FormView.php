@@ -41,7 +41,7 @@ $answerModel = new AnswerModel($conn);
 $mannschaftModel = new TeamModel($conn);
 
 // Instance anhand Token laden
-$instance = $formCollectionModel->getInstanceByToken($instanceToken);
+$instance = $teamFormInstanceModel->getInstanceByToken($instanceToken);
 if (!$instance) {
     die("Formular-Instance nicht gefunden oder ungültiger Token.");
 }
@@ -92,6 +92,7 @@ $questionsWithAnswers = [];
 
 foreach ($assignedQuestions as $question) {
     $answers = $answerModel->getAnswersByQuestion($question['ID']);
+    shuffle($answers);
     $question['answers'] = $answers;
     $questionsWithAnswers[] = $question;
 }
@@ -115,6 +116,13 @@ $stationName = $instance['stationName'] ?? 'Unbekannt';
 
 // Seitentitel
 $pageTitle = $instance['collectionName'] ?? "Formular";
+
+// Timer starten wenn angefordert
+if (!$formSubmitted && isset($_GET['timer_started']) && $_GET['timer_started'] === '1' && empty($instance['startTime'])) {
+    $teamFormInstanceModel->startTimer($instanceId);
+    // Instance neu laden um aktuelle startTime zu erhalten
+    $instance = $teamFormInstanceModel->getInstanceByToken($instanceToken);
+}
 
 // Timer-Parameter (nur wenn nicht abgeschlossen)
 $timerStarted = !empty($instance['startTime']);
@@ -161,11 +169,16 @@ if ($formSubmitted) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RescueCompete - <?php echo htmlspecialchars($pageTitle); ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
+    <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
+    <link rel="stylesheet" href="../css/Footer.css">
+    <link rel="stylesheet" href="../css/Components.css">
     <link rel="stylesheet" href="../css/FormViewStyling.css">
     <link rel="manifest" href="../json/WebAppManifest.json">
+    <script src="../js/ModalUtils.js"></script>
 </head>
-<body>
+<body class="has-navbar">
 
 <div class="form-container">
     <?php if ($formSubmitted): ?>
@@ -174,24 +187,9 @@ if ($formSubmitted) {
             <h2>Formular abgeschlossen</h2>
             <p><?php echo htmlspecialchars($message); ?></p>
 
-            <?php if (!empty($submissionData)): ?>
-                <div class="result-summary">
-                    <?php if (isset($submissionData['points']) && isset($submissionData['totalQuestions'])): ?>
-                        <p>
-                            <strong>Ergebnis:</strong>
-                            <?php echo intval($submissionData['points']); ?> von
-                            <?php echo intval($submissionData['totalQuestions']); ?> Punkten
-                        </p>
-                    <?php endif; ?>
-
-                    <?php if (isset($submissionData['completion_date'])): ?>
-                        <p>
-                            <strong>Abgeschlossen am:</strong>
-                            <?php echo date('d.m.Y H:i:s', strtotime($submissionData['completion_date'])); ?>
-                        </p>
-                    <?php endif; ?>
-                </div>
-            <?php endif; ?>
+            <div class="result-summary">
+                <p>Vielen Dank für die Teilnahme! Die Ergebnisse werden von der Wettkampfleitung ausgewertet.</p>
+            </div>
         </div>
 
     <?php elseif (!$timerStarted): ?>

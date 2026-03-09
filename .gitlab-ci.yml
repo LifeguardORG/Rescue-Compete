@@ -25,8 +25,8 @@ secrets:
     - >
       kubectl create secret generic despj-$CI_PROJECT_ID-secret
       --from-literal=MYSQL_SERVER=mariadb.stud-itd-despj-richter.svc.cluster.local
-      --from-literal=MYSQL_USERNAME=despj_user
-      --from-literal=MYSQL_USERPASS=$DB_PASSWORD
+      --from-literal=MYSQL_USER=despj_user
+      --from-literal=MYSQL_PASSWORD=$DB_PASSWORD
       --from-literal=MYSQL_DATABASE=despj
       -n $NS
 

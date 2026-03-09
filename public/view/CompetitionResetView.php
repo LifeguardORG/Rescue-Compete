@@ -10,7 +10,7 @@ use Competition\CompetitionResetController;
 
 // Überprüfen, ob eine Datenbankverbindung besteht
 if (!isset($conn)) {
-    die("<script>alert('Datenbankverbindung nicht verfügbar.');</script>");
+    require __DIR__ . '/../php_assets/DbErrorPage.php'; die();
 }
 
 // Weiterleitung, wenn der Nutzer nicht eingeloggt ist
@@ -46,13 +46,17 @@ $pageTitle = "Wettkampf zurücksetzen";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RescueCompete - <?php echo htmlspecialchars($pageTitle); ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
+    <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
+    <link rel="stylesheet" href="../css/Footer.css">
+    <link rel="stylesheet" href="../css/Components.css">
     <link rel="stylesheet" href="../css/CompetitionResetStyling.css">
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 </head>
-<body>
+<body class="has-navbar">
 <!-- Navbar -->
 <?php include '../php_assets/Navbar.php'; ?>
 
@@ -245,6 +249,7 @@ if (!empty($message)) {
 <?php include '../php_assets/Footer.php'; ?>
 
 <!-- JavaScript für Funktionalität -->
+<script src="../js/ModalUtils.js"></script>
 <script src="../js/CompetitionResetScript.js"></script>
 </body>
 </html>

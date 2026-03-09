@@ -1,5 +1,4 @@
-/* Sidebar.css - Einfache Wettkampf-Sidebar Styles */
-@import "Colors.css";
+/* Sidebar.css - Sidebar Styles + Admin-Page Layout Overrides */
 
 /* ===== GRUNDLEGENDE SIDEBAR-STRUKTUR ===== */
 .competition-sidebar {
@@ -15,10 +14,29 @@
     flex-direction: column;
 }
 
-/* Hauptinhalt Anpassung */
+/* ===== ADMIN-PAGE LAYOUT OVERRIDES ===== */
+/* Diese Styles gelten nur auf Seiten, die Sidebar.css laden (Admin-Seiten) */
+
+.container {
+    justify-content: space-between;
+    gap: 40px;
+    width: 80%;
+    align-items: flex-start;
+    margin-left: 5%;
+}
+
 .main-content {
     margin-left: 200px;
     transition: margin-left 0.3s ease;
+    display: flex;
+    flex-direction: row;
+    gap: 40px;
+    margin-top: 40px;
+}
+
+.main-content.vertical {
+    flex-direction: column;
+    gap: 20px;
 }
 
 /* ===== SIDEBAR CONTENT ===== */
@@ -110,6 +128,18 @@
 
     .main-content {
         margin-left: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        margin-left: 2.5%;
+    }
+
+    .main-content {
+        margin-top: 20px;
+        gap: 20px;
     }
 }
 

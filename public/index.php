@@ -36,17 +36,18 @@ $userType = isset($_SESSION['acc_typ']) ? htmlspecialchars($_SESSION['acc_typ'])
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="css/Colors.css">
+    <link rel="stylesheet" href="css/GlobalLayout.css">
     <link rel="stylesheet" href="css/Navbar.css">
+    <link rel="stylesheet" href="css/Footer.css">
     <link rel="stylesheet" href="css/LandingpageStyling.css">
 
     <!-- Preload wichtiger Ressourcen -->
     <link rel="preload" href="assets/images/logos/ww-rundlogo.png" as="image">
     <link rel="preload" href="assets/images/logos/th-logo.png" as="image">
 </head>
-<body>
+<body class="has-navbar">
 <!-- Navbar -->
 <?php include 'php_assets/Navbar.php'; ?>
-<br>
 <div class="landing-container">
     <!-- Hero Section für alle Benutzer -->
     <section class="hero-section">

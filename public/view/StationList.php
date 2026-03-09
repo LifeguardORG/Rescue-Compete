@@ -36,10 +36,13 @@ if (!isset($stations)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RescueCompete</title>
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
+    <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
+    <link rel="stylesheet" href="../css/Footer.css">
     <link rel="stylesheet" href="../css/StationSubmissionStyling.css">
 </head>
-<body>
+<body class="has-navbar">
 <?php include '../php_assets/Navbar.php'; ?>
 <div class="container">
     <div class="wrapper">

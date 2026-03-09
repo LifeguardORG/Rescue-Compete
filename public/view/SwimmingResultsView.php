@@ -12,7 +12,7 @@ use Controllers\SwimmingResultsController;
 
 // Überprüfen, ob eine Datenbankverbindung besteht
 if (!isset($conn)) {
-    die("<script>alert('Datenbankverbindung nicht verfügbar.');</script>");
+    require __DIR__ . '/../php_assets/DbErrorPage.php'; die();
 }
 
 // Instanziiere das Model und den Controller
@@ -32,13 +32,16 @@ $pageTitle = "Schwimm Ergebnisse";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RescueCompete</title>
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
+    <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
+    <link rel="stylesheet" href="../css/Footer.css">
     <link rel="stylesheet" href="../css/ResultStyling.css">
 
     <!-- PDF-Export-Skripte und Styles einbinden -->
     <?php include __DIR__ . '/../php_assets/pdfExport/PdfExportLibs.php'; ?>
 </head>
-<body>
+<body class="has-navbar">
 <?php include '../php_assets/Navbar.php'; ?>
 
 <div class="container">

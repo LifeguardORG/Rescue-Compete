@@ -21,7 +21,7 @@ if(!isset($_SESSION["acc_typ"]) || !in_array($_SESSION["acc_typ"], $allowedAccou
 
 // Datenbankverbindung prüfen
 if (!isset($conn)) {
-    die("<script>alert('Datenbankverbindung nicht verfügbar.');</script>");
+    require __DIR__ . '/../php_assets/DbErrorPage.php'; die();
 }
 
 // Model und Controller initialisieren
@@ -70,12 +70,14 @@ $pageTitle = "Verwaltung der Mannschaften";
     <title><?php echo htmlspecialchars($pageTitle); ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
     <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
     <link rel="stylesheet" href="../css/Sidebar.css">
-    <link rel="stylesheet" href="../css/InputStyling.css">
+    <link rel="stylesheet" href="../css/Footer.css">
+    <link rel="stylesheet" href="../css/Components.css">
     <link rel="stylesheet" href="../css/TeamInputStyling.css">
 </head>
-<body>
+<body class="has-navbar">
 
 <?php include '../php_assets/Navbar.php'; ?>
 
@@ -83,7 +85,6 @@ $pageTitle = "Verwaltung der Mannschaften";
     <?php include '../php_assets/Sidebar.php'; ?>
 
     <div class="main-content vertical">
-        <h2><?php echo htmlspecialchars($pageTitle); ?></h2>
 
         <!-- Navigation Tabs -->
         <div class="tab-navigation">
@@ -113,11 +114,11 @@ $pageTitle = "Verwaltung der Mannschaften";
                     <table class="data-table">
                         <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Mannschafts-Name</th>
-                            <th>Kreisverband</th>
-                            <th>Landesverband</th>
-                            <th>Aktionen</th>
+                            <th data-sort-key="id" data-sort-type="number" width="8%">ID</th>
+                            <th data-sort-key="name" width="30%">Mannschafts-Name</th>
+                            <th data-sort-key="kreisverband" width="25%">Kreisverband</th>
+                            <th data-sort-key="landesverband" width="25%">Landesverband</th>
+                            <th width="12%">Aktionen</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -157,7 +158,7 @@ $pageTitle = "Verwaltung der Mannschaften";
                         <label for="teamname">Mannschafts-Name *</label>
                         <input type="text" id="teamname" name="teamname" required
                                maxlength="100"
-                               placeholder="z.B. THW Lübeck, DRK München"
+                               placeholder="z.B. Erfurt Damen"
                                value="<?= htmlspecialchars($teamname); ?>">
                         <small>Geben Sie einen eindeutigen Namen für die Mannschaft ein (max. 100 Zeichen)</small>
                     </div>
@@ -166,7 +167,7 @@ $pageTitle = "Verwaltung der Mannschaften";
                         <label for="kreisverband">Kreisverband *</label>
                         <input type="text" id="kreisverband" name="kreisverband" required
                                maxlength="32"
-                               placeholder="z.B. Lübeck, München"
+                               placeholder="zB. KV Greiz"
                                value="<?= htmlspecialchars($kreisverband); ?>">
                         <small>Der zugehörige Kreisverband der Mannschaft (max. 32 Zeichen)</small>
                     </div>
@@ -175,7 +176,7 @@ $pageTitle = "Verwaltung der Mannschaften";
                         <label for="landesverband">Landesverband *</label>
                         <input type="text" id="landesverband" name="landesverband" required
                                maxlength="32"
-                               placeholder="z.B. Schleswig-Holstein, Bayern"
+                               placeholder="z.B. Thüringen"
                                value="<?= htmlspecialchars($landesverband); ?>">
                         <small>Der zugehörige Landesverband der Mannschaft (max. 32 Zeichen)</small>
                     </div>
@@ -229,10 +230,12 @@ echo CustomAlertBox::renderSimpleConfirm(
 );
 ?>
 
+<script src="../js/TableSortUtils.js"></script>
 <script src="../js/TeamInputScript.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        initSortableTable(document.querySelector('.data-table'));
         const currentView = '<?php echo $currentView; ?>';
         showTab(currentView);
 

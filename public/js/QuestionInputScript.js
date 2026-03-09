@@ -318,7 +318,7 @@ function validateCreateQuestionForm(event) {
  */
 function addQuestion() {
     if (questionCount >= maxQuestions) {
-        alert(`Maximal ${maxQuestions} Fragen möglich.`);
+        showAlert("Hinweis", "Maximal " + maxQuestions + " Fragen möglich.");
         return;
     }
 
@@ -390,7 +390,7 @@ function addQuestion() {
  */
 function removeQuestion() {
     if (questionCount <= minQuestions) {
-        alert(`Mindestens ${minQuestions} Frage erforderlich.`);
+        showAlert("Hinweis", "Mindestens " + minQuestions + " Frage erforderlich.");
         return;
     }
 
@@ -498,7 +498,7 @@ function forceLayoutRecalculation() {
             const originalPosition = navbar.style.position;
             navbar.style.position = 'relative';
             navbar.offsetHeight;
-            navbar.style.position = originalPosition || 'sticky';
+            navbar.style.position = '';
         }
 
         const body = document.body;

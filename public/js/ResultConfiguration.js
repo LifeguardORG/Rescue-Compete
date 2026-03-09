@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
         form.addEventListener('submit', function(event) {
             if (!validatePercentageSum()) {
                 event.preventDefault();
-                alert('Die Prozentanteile müssen zusammen 100% ergeben!');
+                showAlert('Validierungsfehler', 'Die Prozentanteile müssen zusammen 100% ergeben!');
                 return false;
             }
 
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const totalPoints = parseFloat(totalPointsInput.value) || 0;
             if (totalPoints < 1000) {
                 event.preventDefault();
-                alert('Die Gesamtpunkte müssen mindestens 1000 betragen!');
+                showAlert('Validierungsfehler', 'Die Gesamtpunkte müssen mindestens 1000 betragen!');
                 return false;
             }
         });

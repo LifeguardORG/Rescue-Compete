@@ -24,7 +24,7 @@ if(!isset($_SESSION["acc_typ"]) || !in_array($_SESSION["acc_typ"], $allowedAccou
 
 // Überprüfen, ob die Datenbankverbindung ($conn) verfügbar ist
 if (!isset($conn)) {
-    die("<script>alert('Datenbankverbindung nicht verfügbar.');</script>");
+    require __DIR__ . '/../php_assets/DbErrorPage.php'; die();
 }
 
 // Instanzierung des Models und des Controllers
@@ -62,9 +62,11 @@ $pageTitle = "Verwaltung der Protokolle";
     <link rel="icon" type="image/x-icon" href="../assets/images/logos/ww-favicon.ico">
     <!-- CSS-Dateien einbinden -->
     <link rel="stylesheet" href="../css/Colors.css">
+    <link rel="stylesheet" href="../css/GlobalLayout.css">
     <link rel="stylesheet" href="../css/Navbar.css">
     <link rel="stylesheet" href="../css/Sidebar.css">
-    <link rel="stylesheet" href="../css/InputStyling.css">
+    <link rel="stylesheet" href="../css/Footer.css">
+    <link rel="stylesheet" href="../css/Components.css">
     <link rel="stylesheet" href="../css/ProtocolInputStyling.css">
 
     <!-- JavaScript-Konstanten übergeben -->
@@ -72,7 +74,7 @@ $pageTitle = "Verwaltung der Protokolle";
         const stationen = <?php echo json_encode($stationen, JSON_HEX_TAG); ?>;
     </script>
 </head>
-<body>
+<body class="has-navbar">
 
 <!-- Navbar wird eingebunden -->
 <?php include '../php_assets/Navbar.php'; ?>
@@ -83,7 +85,6 @@ $pageTitle = "Verwaltung der Protokolle";
 
     <!-- Hauptinhalt -->
     <div class="main-content vertical">
-        <h2><?php echo htmlspecialchars($pageTitle); ?></h2>
 
         <!-- Navigation Tabs -->
         <div class="tab-navigation">
@@ -126,10 +127,10 @@ $pageTitle = "Verwaltung der Protokolle";
                     <table class="data-table">
                         <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Maximale Punkte</th>
-                            <th>Station</th>
-                            <th>Aktionen</th>
+                            <th data-sort-key="name" width="35%">Name</th>
+                            <th data-sort-key="punkte" data-sort-type="number" width="20%">Maximale Punkte</th>
+                            <th data-sort-key="station" width="30%">Station</th>
+                            <th width="15%">Aktionen</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -179,7 +180,7 @@ $pageTitle = "Verwaltung der Protokolle";
                             <div class="form-group">
                                 <label for="Name">Protokollname:</label>
                                 <input type="text" id="Name" name="Name" required
-                                       placeholder="z.B. Erste Hilfe Maßnahmen"
+                                       placeholder="z.B. bewusstlose Person"
                                        value="<?= htmlspecialchars($name); ?>">
                             </div>
                             <div class="form-group">
@@ -241,6 +242,7 @@ echo CustomAlertBox::renderSimpleConfirm(
 ?>
 
 <!-- JavaScript einbinden -->
+<script src="../js/TableSortUtils.js"></script>
 <script src="../js/ProtocolInputScript.js"></script>
 
 <!-- Tab-Initialisierung sicherstellen -->
@@ -249,6 +251,8 @@ echo CustomAlertBox::renderSimpleConfirm(
         // Sicherstellen, dass der korrekte Tab angezeigt wird
         const currentView = '<?php echo $currentView; ?>';
         showTab(currentView);
+
+        initSortableTable(document.querySelector('.data-table'));
     });
 </script>
 
