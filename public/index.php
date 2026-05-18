@@ -28,7 +28,7 @@ $userType = isset($_SESSION['acc_typ']) ? htmlspecialchars($_SESSION['acc_typ'])
     <title>RescueCompete - Digitale Wettkampfsoftware</title>
     <meta name="description" content="RescueCompete - Professionelle Software für die Organisation und Auswertung von Wasserwacht-Wettkämpfen">
     <meta name="keywords" content="Wasserwacht, Wettkampf, Rettungsschwimmen, Software, Digital, Auswertung">
-    <meta name="author" content="Jonas Richter, Sven Meiburg - TH Lübeck">
+    <meta name="author" content="Jonas Richter">
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="assets/images/logos/ww-favicon.ico">
@@ -43,7 +43,6 @@ $userType = isset($_SESSION['acc_typ']) ? htmlspecialchars($_SESSION['acc_typ'])
 
     <!-- Preload wichtiger Ressourcen -->
     <link rel="preload" href="assets/images/logos/ww-rundlogo.png" as="image">
-    <link rel="preload" href="assets/images/logos/th-logo.png" as="image">
 </head>
 <body class="has-navbar">
 <!-- Navbar -->
@@ -67,22 +66,23 @@ $userType = isset($_SESSION['acc_typ']) ? htmlspecialchars($_SESSION['acc_typ'])
                 <h3>Über das Projekt</h3>
                 <p>
                     RescueCompete ist eine speziell entwickelte Web-Anwendung für die digitale
-                    Verwaltung und Auswertung von Wasserwacht-Wettkämpfen. Die Software wurde
-                    im Rahmen eines Designprojekts an der Technischen Hochschule Lübeck entwickelt.
+                    Verwaltung und Auswertung von Wasserwacht-Wettkämpfen. Das Projekt wird von
+                    Jonas Richter und Teresa Schaser aktiv weiterentwickelt und wächst mit den
+                    Anforderungen aus dem realen Wettkampfbetrieb.
                 </p>
                 <div class="project-details">
-                    <h4>Entwicklungsteam</h4>
+                    <h4>Team & Partner</h4>
                     <div class="team-member">
                         <strong>Jonas Richter</strong><br>
-                        Projektmanager
+                        Entwickler & Projektleiter
                     </div>
                     <div class="team-member">
-                        <strong>Sven Meiburg</strong><br>
-                        Entwickler
+                        <strong>Teresa Schaser</strong><br>
+                        Organisationspartnerin
                     </div>
                     <div class="team-member">
-                        <strong>Prof. Dr. Monique Janneck</strong><br>
-                        Projektbetreuung
+                        <strong>Wasserwacht Sachsen</strong><br>
+                        Unterstützer & Förderer
                     </div>
                 </div>
             </div>
@@ -156,7 +156,7 @@ $userType = isset($_SESSION['acc_typ']) ? htmlspecialchars($_SESSION['acc_typ'])
                     </a>
                     <p class="contact-info">
                         <strong>E-Mail:</strong> jonas-richter@email.de<br>
-                        <strong>Rolle:</strong> Student im Bereich "Informationstechnologie und Design"
+                        <strong>Rolle:</strong> Entwickler & Projektleiter
                     </p>
                 </div>
             </div>

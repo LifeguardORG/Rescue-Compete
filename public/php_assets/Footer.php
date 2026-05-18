@@ -6,18 +6,15 @@
             <a href="https://www.drk.de/wasserwacht/" target="_blank" rel="noopener noreferrer" class="footerLogo">
                 <img src="../assets/images/logos/ww-rundlogo.png" alt="Wasserwacht Logo">
             </a>
-            <a href="https://www.th-luebeck.de/" target="_blank" rel="noopener noreferrer" class="footerLogo">
-                <img src="../assets/images/logos/th-logo.png" alt="TH Lübeck Logo">
-            </a>
         </div>
 
         <!-- Text-Bereich -->
         <div class="footer-text">
             <div class="footer-title">
-                RescueCompete - Entwickelt an der Technischen Hochschule Lübeck
+                RescueCompete - Digitale Wettkampfsoftware für die Wasserwacht
             </div>
             <div class="footer-subtitle">
-                Ein Projekt von Jonas Richter & Sven Meiburg unter der Leitung von Prof. Dr. Monique Janneck
+                Ein Projekt von Jonas Richter & Teresa Schaser, gefördert durch die Wasserwacht Sachsen
             </div>
             <div class="footer-links">
                 <a href="../view/UsageGuidelinesView.php">Nutzungsrichtlinien</a>
