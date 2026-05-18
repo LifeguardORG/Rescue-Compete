@@ -163,6 +163,18 @@
     font-size: 0.9em;
 }
 
+.selection-counter {
+    margin-left: auto;
+    align-self: center;
+    font-size: 0.9em;
+    color: var(--ww-darkblue-60, var(--ww-darkblue));
+}
+
+.selection-counter strong {
+    font-size: 1.05em;
+    color: var(--ww-darkblue);
+}
+
 /* ===== QR-CODES GRID ===== */
 .qr-codes-grid {
     display: grid;

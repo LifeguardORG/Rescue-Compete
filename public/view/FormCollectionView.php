@@ -266,12 +266,18 @@ $pageTitle = "Formular Verwaltung";
                                 <button type="button" class="btn secondary-btn" onclick="deselectAllQuestions()">
                                     Alle abwählen
                                 </button>
+                                <span id="selection-counter" class="selection-counter">
+                                    <strong>0</strong> Fragen ausgewählt
+                                </span>
                             </div>
                             <div id="questionsList" class="questions-list">
                                 <!-- Dynamisch geladen via JavaScript -->
                             </div>
                         </div>
                     </div>
+
+                    <!-- Container für Fragen aus zuvor gewählten Pools (pool-übergreifende Auswahl) -->
+                    <div id="hiddenSelectedQuestions" style="display: none;"></div>
 
                     <div class="form-actions">
                         <button type="submit" class="btn primary-btn">Formular-Gruppe erstellen</button>

@@ -9,6 +9,10 @@ let currentDeleteId = null;
 let currentAssignId = null;
 let nameCheckTimeout = null;
 
+// Pool-übergreifende Fragen-Auswahl (Single Source of Truth)
+const selectedQuestionIds = new Set();    // alle ausgewählten IDs, pool-übergreifend
+const poolQuestionIds = new Map();        // poolId(string) -> Set<questionId(number)>, für Dropdown-Suffixe
+
 // DOM-Ready
 document.addEventListener('DOMContentLoaded', function() {
     initializeFormCollectionView();
@@ -52,6 +56,21 @@ function initializeFormCollectionView() {
     const questionPoolSelect = document.getElementById('question_pool');
     if (questionPoolSelect) {
         questionPoolSelect.addEventListener('change', loadQuestions);
+    }
+
+    // Delegated change-Listener: pflegt selectedQuestionIds bei jeder Checkbox-Änderung
+    const questionsList = document.getElementById('questionsList');
+    if (questionsList) {
+        questionsList.addEventListener('change', function(e) {
+            const target = e.target;
+            if (target && target.matches('input[name="question_ids[]"]')) {
+                const id = parseInt(target.value, 10);
+                if (target.checked) selectedQuestionIds.add(id);
+                else selectedQuestionIds.delete(id);
+                updateSelectionCounter();
+                refreshPoolDropdownLabels();
+            }
+        });
     }
 
     const qrCollectionSelect = document.getElementById('qr_collection_select');
@@ -346,25 +365,102 @@ function renderQuestionsList(questions) {
     const questionsList = document.getElementById('questionsList');
     if (!questionsList) return;
 
+    // Pool-IDs für Dropdown-Suffixe registrieren
+    const poolSelect = document.getElementById('question_pool');
+    const currentPoolId = poolSelect ? poolSelect.value : null;
+    if (currentPoolId) {
+        const idSet = new Set(questions.map(q => parseInt(q.ID, 10)));
+        poolQuestionIds.set(currentPoolId, idSet);
+    }
+
+    // Vor dem Wegwerfen der Checkboxen: nicht nötig, das State-Set ist
+    // bereits via change-Listener aktuell.
     questionsList.innerHTML = '';
 
     if (questions.length === 0) {
         questionsList.innerHTML = '<div class="no-data">Keine Fragen in diesem Pool vorhanden.</div>';
+        updateSelectionCounter();
+        refreshPoolDropdownLabels();
+        syncHiddenSelectedQuestions();
         return;
     }
 
     questions.forEach(question => {
+        const qid = parseInt(question.ID, 10);
+        const isChecked = selectedQuestionIds.has(qid);
         const div = document.createElement('div');
         div.className = 'question-item';
         div.innerHTML = `
             <label>
-                <input type="checkbox" name="question_ids[]" value="${question.ID}">
+                <input type="checkbox" name="question_ids[]" value="${qid}"${isChecked ? ' checked' : ''}>
                 ${escapeHtml(question.Text)}
             </label>
         `;
         questionsList.appendChild(div);
     });
 
+    updateSelectionCounter();
+    refreshPoolDropdownLabels();
+    syncHiddenSelectedQuestions();
+}
+
+/**
+ * Aktualisiert den Counter "X Fragen ausgewählt"
+ */
+function updateSelectionCounter() {
+    const span = document.querySelector('#selection-counter strong');
+    if (span) span.textContent = String(selectedQuestionIds.size);
+}
+
+/**
+ * Hängt an jedes <option> im Pool-Dropdown ein Suffix " (N ausgewählt)",
+ * falls für den Pool bereits IDs ausgewählt sind. Der ursprüngliche Pool-Name
+ * wird einmalig in option.dataset.baseLabel gemerkt, damit das Suffix bei
+ * wiederholten Aufrufen nicht akkumuliert.
+ */
+function refreshPoolDropdownLabels() {
+    const poolSelect = document.getElementById('question_pool');
+    if (!poolSelect) return;
+    for (const option of poolSelect.options) {
+        if (!option.value) continue;
+        if (option.dataset.baseLabel === undefined) {
+            option.dataset.baseLabel = option.textContent.trim();
+        }
+        const base = option.dataset.baseLabel;
+        const poolIds = poolQuestionIds.get(option.value);
+        let selectedInPool = 0;
+        if (poolIds) {
+            for (const id of poolIds) {
+                if (selectedQuestionIds.has(id)) selectedInPool++;
+            }
+        }
+        option.textContent = selectedInPool > 0
+            ? `${base} (${selectedInPool} ausgewählt)`
+            : base;
+    }
+}
+
+/**
+ * Synchronisiert den Hidden-Container für Fragen-IDs, die NICHT im aktuell
+ * sichtbaren Pool als Checkbox vorliegen — diese müssen beim Submit trotzdem
+ * mit POST gesendet werden, sonst geht die pool-übergreifende Auswahl verloren.
+ */
+function syncHiddenSelectedQuestions() {
+    const hiddenContainer = document.getElementById('hiddenSelectedQuestions');
+    if (!hiddenContainer) return;
+    const visibleIds = new Set();
+    document.querySelectorAll('#questionsList input[name="question_ids[]"]').forEach(cb => {
+        visibleIds.add(parseInt(cb.value, 10));
+    });
+    hiddenContainer.innerHTML = '';
+    for (const id of selectedQuestionIds) {
+        if (visibleIds.has(id)) continue;
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'question_ids[]';
+        input.value = String(id);
+        hiddenContainer.appendChild(input);
+    }
 }
 
 /**
@@ -378,23 +474,31 @@ function updateTotalQuestionsCount(count) {
 }
 
 /**
- * Alle Fragen auswählen
+ * Alle Fragen des aktuell sichtbaren Pools auswählen
+ * (Auswahl aus anderen Pools bleibt unberührt)
  */
 function selectAllQuestions() {
-    const checkboxes = document.querySelectorAll('input[name="question_ids[]"]');
+    const checkboxes = document.querySelectorAll('#questionsList input[name="question_ids[]"]');
     checkboxes.forEach(cb => {
         cb.checked = true;
+        selectedQuestionIds.add(parseInt(cb.value, 10));
     });
+    updateSelectionCounter();
+    refreshPoolDropdownLabels();
 }
 
 /**
- * Alle Fragen abwählen
+ * Alle Fragen des aktuell sichtbaren Pools abwählen
+ * (Auswahl aus anderen Pools bleibt unberührt)
  */
 function deselectAllQuestions() {
-    const checkboxes = document.querySelectorAll('input[name="question_ids[]"]');
+    const checkboxes = document.querySelectorAll('#questionsList input[name="question_ids[]"]');
     checkboxes.forEach(cb => {
         cb.checked = false;
+        selectedQuestionIds.delete(parseInt(cb.value, 10));
     });
+    updateSelectionCounter();
+    refreshPoolDropdownLabels();
 }
 
 /**
@@ -439,13 +543,13 @@ function validateDescription() {
  * Validiert die Fragenauswahl
  */
 function validateQuestionSelection() {
-    const selectedQuestions = document.querySelectorAll('input[name="question_ids[]"]:checked');
+    const count = selectedQuestionIds.size;
     const formsCount = parseInt(document.getElementById('forms_count')?.value || 1);
 
-    if (selectedQuestions.length === 0) {
+    if (count === 0) {
         showValidationMessage('question_pool', 'Bitte wählen Sie mindestens eine Frage aus.');
         return false;
-    } else if (selectedQuestions.length < formsCount) {
+    } else if (count < formsCount) {
         showValidationMessage('question_pool', `Sie müssen mindestens ${formsCount} Fragen auswählen (mindestens eine pro Formular).`);
         return false;
     } else {
@@ -528,6 +632,10 @@ function validateCreateCollectionForm(event) {
 
         return false;
     }
+
+    // Hidden-Inputs für Fragen aus zuvor gewählten Pools ergänzen,
+    // damit alle pool-übergreifend ausgewählten IDs als question_ids[] gepostet werden.
+    syncHiddenSelectedQuestions();
 
     // Show loading state
     const submitButton = event.target.querySelector('button[type="submit"]');
