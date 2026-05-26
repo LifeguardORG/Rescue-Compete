@@ -1,8 +1,8 @@
 <?php
 // Verbindung zur Datenbank über Umgebungsvariablen
 $servername = getenv('MYSQL_SERVER') ?: 'localhost';
-$username   = getenv('MYSQL_USER') ?: 'webapp';  // Geändert von MYSQL_USERNAME
-$password   = getenv('MYSQL_PASSWORD') ?: '05N3tl9MZFAZ';  // Geändert von MYSQL_USERPASS
+$username   = getenv('MYSQL_USER') ?: 'MYSQL_USERNAME';
+$password   = getenv('MYSQL_PASSWORD') ?: 'MYSQL_USERPASS';
 $dbname     = getenv('MYSQL_DATABASE') ?: 'webappdb';
 
 $options = [
