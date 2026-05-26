@@ -134,6 +134,7 @@ CREATE TABLE IF NOT EXISTS `TeamFormInstance` (
     `completed` tinyint(1) DEFAULT 0,
     `points` int(11) DEFAULT 0,
     `startTime` datetime DEFAULT NULL,
+    `timeLimit` int(11) DEFAULT NULL COMMENT 'Snapshot bei Timer-Start; NULL = nutze FormCollection.timeLimit',
     `completionDate` datetime DEFAULT NULL,
     `token` varchar(32) DEFAULT NULL,
     `assignedQuestions` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Array der zugewiesenen Fragen-IDs' CHECK (json_valid(`assignedQuestions`)),

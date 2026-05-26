@@ -901,6 +901,46 @@ window.addEventListener('load', function() {
     debugLog('Page fully loaded');
 });
 
+/**
+ * Wechselt in den Edit-Tab und wählt die übergebene Collection vor.
+ * Aufgerufen vom „Zeit"-Button in der Übersichtstabelle.
+ */
+function editTimeLimit(collectionId) {
+    showTab('edit');
+    const select = document.getElementById('edit_collection_id');
+    if (select) {
+        select.value = String(collectionId);
+        onEditCollectionChange();
+    }
+}
+
+/**
+ * Befüllt das Anzeigefeld „Aktuelles Zeitlimit" und den Default des Number-Inputs,
+ * basierend auf data-current-time der ausgewählten Option.
+ */
+function onEditCollectionChange() {
+    const select = document.getElementById('edit_collection_id');
+    const display = document.getElementById('edit_current_time_display');
+    const input = document.getElementById('edit_time_limit');
+    if (!select || !display) return;
+
+    const option = select.options[select.selectedIndex];
+    const seconds = option ? parseInt(option.getAttribute('data-current-time'), 10) : NaN;
+
+    if (!Number.isFinite(seconds) || seconds <= 0) {
+        display.value = '—';
+        return;
+    }
+
+    const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const ss = String(seconds % 60).padStart(2, '0');
+    display.value = `${mm}:${ss} min (${seconds} Sekunden)`;
+
+    if (input && !input.value) {
+        input.value = seconds;
+    }
+}
+
 // Expose functions for inline event handlers (legacy support)
 window.showTab = showTab;
 window.loadQuestions = loadQuestions;
@@ -917,3 +957,5 @@ window.assignToAllTeamsConfirmed = assignToAllTeamsConfirmed;
 window.processExpiredForms = processExpiredForms;
 window.closeModal = closeModal;
 window.initializeCharacterCounter = initializeCharacterCounter;
+window.editTimeLimit = editTimeLimit;
+window.onEditCollectionChange = onEditCollectionChange;

@@ -163,6 +163,9 @@ class StaffelSubmissionController {
 }
 
 // Routing basierend auf dem GET-Parameter 'action'
+require_once __DIR__ . '/../php_assets/RequireLogin.php';
+requireLogin();
+
 $action = $_GET['action'] ?? 'list';
 debug_log("Routing für Action", $action);
 

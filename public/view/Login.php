@@ -7,12 +7,28 @@ $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' 
 $host = htmlspecialchars($_SERVER["HTTP_HOST"]);
 $baseUrl = $protocol . $host . rtrim(dirname(htmlspecialchars($_SERVER["PHP_SELF"]), 2), "/\\");
 
+// Validiert einen Return-Pfad gegen Open-Redirect-Angriffe.
+// Akzeptiert nur absolute Pfade auf derselben Domain.
+function isValidReturnPath($path): bool {
+    if (!is_string($path) || $path === '') return false;
+    if ($path[0] !== '/') return false;
+    if (str_starts_with($path, '//')) return false;
+    if (strpos($path, '://') !== false) return false;
+    if (strpos($path, "\r") !== false || strpos($path, "\n") !== false) return false;
+    return true;
+}
+
 // QR-Code aus der URL-Weiterleitung erfassen
 if (isset($_GET['redirect']) && $_GET['redirect'] === 'form' && isset($_GET['code'])) {
     $_SESSION['redirect_code'] = $_GET['code'];
 }
 
-// Leite den Nutzer zur Index.php weiter, wenn er bereits eingeloggt ist
+// Return-URL aus der URL erfassen (von einem geschützten Controller geschickt)
+if (isset($_GET['return']) && isValidReturnPath($_GET['return'])) {
+    $_SESSION['return_after_login'] = $_GET['return'];
+}
+
+// Leite den Nutzer weiter, wenn er bereits eingeloggt ist
 if(isset($_SESSION["login"]) && $_SESSION["login"] === "ok"){
     // Falls ein redirect_code in der Session existiert, leite zum entsprechenden Formular weiter
     if (isset($_SESSION['redirect_code'])) {
@@ -20,6 +36,14 @@ if(isset($_SESSION["login"]) && $_SESSION["login"] === "ok"){
         // Code aus Session entfernen um Weiterleitungsschleifen zu verhindern
         unset($_SESSION['redirect_code']);
         header("location: FormRedirect.php?code=" . urlencode($code));
+        exit;
+    }
+
+    // Falls eine return-URL gespeichert ist, dorthin zurückspringen
+    if (!empty($_SESSION['return_after_login']) && isValidReturnPath($_SESSION['return_after_login'])) {
+        $target = $_SESSION['return_after_login'];
+        unset($_SESSION['return_after_login']);
+        header("location: $baseUrl" . $target);
         exit;
     }
 

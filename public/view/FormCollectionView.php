@@ -43,8 +43,9 @@ $performanceStats = $controller->performanceStats;
 $teamProgress = $controller->teamProgress;
 $validationErrors = $controller->validationErrors;
 
-// Aktuelle Ansicht bestimmen
-$currentView = $_GET['view'] ?? 'overview';
+// Aktuelle Ansicht bestimmen — Controller kann den Tab nach POST-Aktionen
+// erzwingen (z. B. Edit-Tab nach update_time_limit-Fehler).
+$currentView = $controller->currentView ?? ($_GET['view'] ?? 'overview');
 $collectionId = isset($_GET['collection_id']) ? intval($_GET['collection_id']) : null;
 
 $pageTitle = "Formular Verwaltung";
@@ -86,6 +87,9 @@ $pageTitle = "Formular Verwaltung";
             <button class="tab-button <?php echo $currentView === 'create' ? 'active' : ''; ?>"
                     data-tab="create"
                     onclick="showTab('create')">Neue Formular-Gruppe</button>
+            <button class="tab-button <?php echo $currentView === 'edit' ? 'active' : ''; ?>"
+                    data-tab="edit"
+                    onclick="showTab('edit')">Zeit bearbeiten</button>
             <button class="tab-button <?php echo $currentView === 'qrcodes' ? 'active' : ''; ?>"
                     data-tab="qrcodes"
                     onclick="showTab('qrcodes')">QR-Codes</button>
@@ -158,6 +162,9 @@ $pageTitle = "Formular Verwaltung";
                                     <div class="button-group">
                                         <button class="btn small" onclick="viewTokens(<?php echo $collection['ID']; ?>)">
                                             QR-Codes
+                                        </button>
+                                        <button class="btn small" onclick="editTimeLimit(<?php echo $collection['ID']; ?>)">
+                                            Zeit
                                         </button>
                                         <button class="btn warning-btn small" onclick="confirmDeleteCollection(<?php echo $collection['ID']; ?>, '<?php echo addslashes($collection['name']); ?>')">
                                             Löschen
@@ -284,6 +291,68 @@ $pageTitle = "Formular Verwaltung";
                         <button type="button" class="btn" onclick="showTab('overview')">Abbrechen</button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- Tab: Zeit bearbeiten -->
+        <div id="edit" class="tab-content <?php echo $currentView === 'edit' ? 'active' : ''; ?>">
+            <div class="data-container">
+                <h3>Zeitlimit einer Formular-Gruppe ändern</h3>
+
+                <div class="message-box info" style="margin-bottom: 1rem;">
+                    <strong>Hinweis:</strong> Die Änderung gilt nur für Formulare, die ab jetzt
+                    <em>neu gestartet</em> werden. Bereits laufende oder abgeschlossene Formulare
+                    behalten ihr ursprüngliches Zeitlimit.
+                </div>
+
+                <?php if (empty($collections)): ?>
+                    <div class="no-data">
+                        <p>Keine Formular-Gruppen vorhanden.</p>
+                        <p><a href="#" onclick="showTab('create')">Erstellen Sie zuerst eine Formular-Gruppe</a></p>
+                    </div>
+                <?php else: ?>
+                    <form method="POST" id="updateTimeLimitForm">
+                        <input type="hidden" name="action" value="update_time_limit">
+
+                        <div class="form-group">
+                            <label for="edit_collection_id">Formular-Gruppe *</label>
+                            <select id="edit_collection_id" name="collection_id" required onchange="onEditCollectionChange()">
+                                <option value="">Bitte wählen...</option>
+                                <?php foreach ($collections as $collection): ?>
+                                    <option value="<?php echo $collection['ID']; ?>"
+                                            data-current-time="<?php echo intval($collection['timeLimit']); ?>"
+                                        <?php echo (isset($_POST['collection_id']) && $_POST['collection_id'] == $collection['ID']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($collection['name']); ?>
+                                        (aktuell: <?php echo gmdate("i:s", $collection['timeLimit']); ?> min)
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Aktuelles Zeitlimit</label>
+                            <input type="text" id="edit_current_time_display" readonly
+                                   value="—"
+                                   style="background-color: var(--ww-grey-50, #f5f5f5);">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_time_limit">Neues Zeitlimit (Sekunden) *</label>
+                            <input type="number" id="edit_time_limit" name="time_limit"
+                                   min="10" max="1800" value="<?php echo htmlspecialchars($_POST['time_limit'] ?? ''); ?>" required
+                                   class="<?php echo $controller->hasValidationError('timeLimit') ? 'error' : ''; ?>">
+                            <small>Erlaubt: 10 – 1800 Sekunden (max. 30 Minuten)</small>
+                            <?php if ($controller->hasValidationError('timeLimit')): ?>
+                                <div class="validation-message show"><?php echo htmlspecialchars($controller->getValidationError('timeLimit')); ?></div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn primary-btn">Zeitlimit speichern</button>
+                            <button type="button" class="btn" onclick="showTab('overview')">Abbrechen</button>
+                        </div>
+                    </form>
+                <?php endif; ?>
             </div>
         </div>
 

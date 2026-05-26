@@ -81,6 +81,9 @@ class StationSubmissionController {
 }
 
 // Routing: Falls die Datei direkt aufgerufen wird, wird anhand des GET-Parameters die entsprechende Aktion ausgeführt.
+require_once __DIR__ . '/../php_assets/RequireLogin.php';
+requireLogin();
+
 $action = $_GET['action'] ?? 'list';
 $controller = new StationSubmissionController($connection);
 

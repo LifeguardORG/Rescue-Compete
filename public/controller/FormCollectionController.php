@@ -25,6 +25,7 @@ class FormCollectionController
     public array $teamProgress = [];
     public array $teamFormDetails = [];
     public array $validationErrors = [];
+    public ?string $currentView = null;
 
     public function __construct(PDO $db)
     {
@@ -188,6 +189,10 @@ class FormCollectionController
 
             case 'process_expired':
                 $this->handleProcessExpired();
+                break;
+
+            case 'update_time_limit':
+                $this->handleUpdateTimeLimit();
                 break;
 
             default:
@@ -373,6 +378,59 @@ class FormCollectionController
         } catch (Exception $e) {
             error_log("Error in FormCollectionController::handleProcessExpired: " . $e->getMessage());
             $this->message = 'Fehler beim Verarbeiten abgelaufener Formulare.';
+            $this->messageType = 'error';
+        }
+    }
+
+    /**
+     * Aktualisiert das Zeitlimit einer bestehenden FormCollection.
+     * Laufende Instanzen sind durch ihren Snapshot in TeamFormInstance.timeLimit geschützt.
+     */
+    private function handleUpdateTimeLimit(): void
+    {
+        // Bei dieser Action gehört der Edit-Tab auf den Bildschirm
+        $this->currentView = 'edit';
+
+        try {
+            $collectionId = intval($_POST['collection_id'] ?? 0);
+            $newTimeLimit = intval($_POST['time_limit'] ?? 0);
+
+            if ($collectionId <= 0) {
+                $this->message = 'Bitte wählen Sie eine Formular-Gruppe aus.';
+                $this->messageType = 'error';
+                return;
+            }
+
+            if ($newTimeLimit < 10 || $newTimeLimit > 1800) {
+                $this->validationErrors['timeLimit'] = 'Das Zeitlimit muss zwischen 10 und 1800 Sekunden liegen.';
+                $this->message = 'Bitte korrigieren Sie das Zeitlimit.';
+                $this->messageType = 'error';
+                return;
+            }
+
+            $result = $this->model->updateTimeLimit($collectionId, $newTimeLimit);
+
+            if (!$result['success']) {
+                $this->message = $result['error'] ?? 'Fehler beim Aktualisieren des Zeitlimits.';
+                $this->messageType = 'error';
+                return;
+            }
+
+            $running = (int)$result['runningSnapshotted'];
+            $base = "Zeitlimit erfolgreich auf {$newTimeLimit} Sekunden aktualisiert.";
+            if ($running > 0) {
+                $this->message = "{$base} {$running} bereits laufende Formular(e) behalten ihr ursprüngliches Zeitlimit.";
+            } else {
+                $this->message = $base;
+            }
+            $this->messageType = 'success';
+
+            // Aktualisierte Daten neu laden
+            $this->loadBaseData();
+            $this->validationErrors = [];
+        } catch (Exception $e) {
+            error_log("Error in FormCollectionController::handleUpdateTimeLimit: " . $e->getMessage());
+            $this->message = 'Ein unerwarteter Fehler ist aufgetreten.';
             $this->messageType = 'error';
         }
     }

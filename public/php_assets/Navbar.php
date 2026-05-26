@@ -93,6 +93,7 @@ $userType = isset($_SESSION['acc_typ']) ? $_SESSION['acc_typ'] : null;
                         <li><a href="../view/UserInputView.php">Benutzer</a></li>
                         <li><a href="../view/ResultConfiguration.php">Punkte-Gewichtung</a></li>
                         <li><a href="../view/StationWeightInputView.php">Stationsgewichtung</a></li>
+                        <li><a href="../view/QrCodes.php">QR-Codes</a></li>
                         <li><a href="../view/CompetitionResetView.php">Wettkampf Reset</a></li>
                     </ul>
                 </li>

@@ -73,7 +73,9 @@ class TeamFormInstanceModel
             } else {
                 // Spezifische Instance mit Details
                 $stmt = $this->db->prepare(
-                    "SELECT tfi.*, fc.name as collectionName, fc.timeLimit, fc.totalQuestions,
+                    "SELECT tfi.*, fc.name as collectionName,
+                            COALESCE(tfi.timeLimit, fc.timeLimit) AS timeLimit,
+                            fc.totalQuestions,
                             m.Teamname, m.Kreisverband, s.name as stationName
                      FROM TeamFormInstance tfi
                      JOIN FormCollection fc ON tfi.collection_ID = fc.ID
@@ -167,7 +169,8 @@ class TeamFormInstanceModel
     {
         try {
             $stmt = $this->db->prepare(
-                "SELECT tfi.*, fc.name as collectionName, fc.timeLimit,
+                "SELECT tfi.*, fc.name as collectionName,
+                        COALESCE(tfi.timeLimit, fc.timeLimit) AS timeLimit,
                         m.Teamname, m.Kreisverband
                  FROM TeamFormInstance tfi
                  JOIN FormCollection fc ON tfi.collection_ID = fc.ID
@@ -196,7 +199,9 @@ class TeamFormInstanceModel
     {
         try {
             $stmt = $this->db->prepare(
-                "SELECT tfi.*, fc.name as collectionName, fc.timeLimit, fc.totalQuestions,
+                "SELECT tfi.*, fc.name as collectionName,
+                        COALESCE(tfi.timeLimit, fc.timeLimit) AS timeLimit,
+                        fc.totalQuestions,
                         m.Teamname, m.Kreisverband, s.name as stationName
                  FROM TeamFormInstance tfi
                  JOIN FormCollection fc ON tfi.collection_ID = fc.ID
@@ -222,7 +227,8 @@ class TeamFormInstanceModel
     {
         try {
             $stmt = $this->db->prepare(
-                "SELECT tfi.*, fc.name as collectionName, fc.timeLimit,
+                "SELECT tfi.*, fc.name as collectionName,
+                        COALESCE(tfi.timeLimit, fc.timeLimit) AS timeLimit,
                         s.name as stationName
                  FROM TeamFormInstance tfi
                  JOIN FormCollection fc ON tfi.collection_ID = fc.ID
@@ -271,9 +277,15 @@ class TeamFormInstanceModel
     public function startTimer(int $instanceId): bool
     {
         try {
+            // Snapshot des aktuellen Collection-Zeitlimits in tfi.timeLimit kopieren,
+            // damit spätere Änderungen am FormCollection.timeLimit diese laufende
+            // Instanz nicht mehr beeinflussen.
             $stmt = $this->db->prepare(
-                "UPDATE TeamFormInstance SET startTime = NOW() 
-                 WHERE ID = :instanceId AND startTime IS NULL"
+                "UPDATE TeamFormInstance tfi
+                 JOIN FormCollection fc ON tfi.collection_ID = fc.ID
+                 SET tfi.startTime = NOW(),
+                     tfi.timeLimit = fc.timeLimit
+                 WHERE tfi.ID = :instanceId AND tfi.startTime IS NULL"
             );
             $stmt->execute([':instanceId' => $instanceId]);
             return $stmt->rowCount() > 0;
@@ -409,14 +421,14 @@ class TeamFormInstanceModel
         try {
             $stats = ['processed' => 0, 'expired' => 0, 'errors' => 0];
 
-            // Abgelaufene Instances finden
+            // Abgelaufene Instances finden — Snapshot bevorzugt, sonst Collection-Wert
             $stmt = $this->db->prepare(
-                "SELECT tfi.ID, tfi.startTime, fc.timeLimit
+                "SELECT tfi.ID, tfi.startTime, COALESCE(tfi.timeLimit, fc.timeLimit) AS timeLimit
                  FROM TeamFormInstance tfi
                  JOIN FormCollection fc ON tfi.collection_ID = fc.ID
-                 WHERE tfi.completed = 0 
+                 WHERE tfi.completed = 0
                    AND tfi.startTime IS NOT NULL
-                   AND TIMESTAMPDIFF(SECOND, tfi.startTime, NOW()) > fc.timeLimit"
+                   AND TIMESTAMPDIFF(SECOND, tfi.startTime, NOW()) > COALESCE(tfi.timeLimit, fc.timeLimit)"
             );
             $stmt->execute();
             $expiredInstances = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -550,7 +562,8 @@ class TeamFormInstanceModel
     {
         try {
             $stmt = $this->db->prepare(
-                "SELECT tfi.startTime, fc.timeLimit,
+                "SELECT tfi.startTime,
+                        COALESCE(tfi.timeLimit, fc.timeLimit) AS timeLimit,
                         TIMESTAMPDIFF(SECOND, tfi.startTime, NOW()) as elapsedSeconds
                  FROM TeamFormInstance tfi
                  JOIN FormCollection fc ON tfi.collection_ID = fc.ID

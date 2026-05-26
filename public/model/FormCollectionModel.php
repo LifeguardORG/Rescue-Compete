@@ -285,6 +285,69 @@ class FormCollectionModel
     }
 
     /**
+     * Aktualisiert nur das Zeitlimit einer bestehenden FormCollection.
+     * Laufende und abgeschlossene TeamFormInstances behalten ihren Snapshot
+     * (gesetzt durch startTimer()) und sind von dieser Änderung nicht betroffen.
+     *
+     * @param int $collectionId ID der Collection
+     * @param int $newTimeLimit Neues Zeitlimit in Sekunden
+     * @return array ['success' => bool, 'runningSnapshotted' => int, 'error' => ?string]
+     */
+    public function updateTimeLimit(int $collectionId, int $newTimeLimit): array
+    {
+        if ($newTimeLimit < 10 || $newTimeLimit > 1800) {
+            return [
+                'success' => false,
+                'runningSnapshotted' => 0,
+                'error' => 'Das Zeitlimit muss zwischen 10 und 1800 Sekunden liegen.'
+            ];
+        }
+
+        try {
+            $check = $this->db->prepare("SELECT ID FROM FormCollection WHERE ID = :id");
+            $check->execute([':id' => $collectionId]);
+            if (!$check->fetchColumn()) {
+                return [
+                    'success' => false,
+                    'runningSnapshotted' => 0,
+                    'error' => 'Formular-Gruppe nicht gefunden.'
+                ];
+            }
+
+            $stmt = $this->db->prepare(
+                "UPDATE FormCollection SET timeLimit = :tl WHERE ID = :id"
+            );
+            $stmt->execute([':tl' => $newTimeLimit, ':id' => $collectionId]);
+
+            // Anzahl laufender Instanzen mit eigenem Snapshot ermitteln
+            $countStmt = $this->db->prepare(
+                "SELECT COUNT(*) FROM TeamFormInstance
+                 WHERE collection_ID = :id
+                   AND startTime IS NOT NULL
+                   AND completed = 0
+                   AND timeLimit IS NOT NULL"
+            );
+            $countStmt->execute([':id' => $collectionId]);
+            $runningSnapshotted = (int)$countStmt->fetchColumn();
+
+            error_log("FormCollectionModel::updateTimeLimit - Collection {$collectionId} timeLimit set to {$newTimeLimit}s ({$runningSnapshotted} laufende Instanzen unverändert)");
+
+            return [
+                'success' => true,
+                'runningSnapshotted' => $runningSnapshotted,
+                'error' => null
+            ];
+        } catch (PDOException $e) {
+            error_log("Error in FormCollectionModel::updateTimeLimit: " . $e->getMessage());
+            return [
+                'success' => false,
+                'runningSnapshotted' => 0,
+                'error' => 'Datenbankfehler beim Aktualisieren des Zeitlimits.'
+            ];
+        }
+    }
+
+    /**
      * Weist Fragen einer Collection zu
      *
      * @param int $collectionId ID der Collection
@@ -723,14 +786,14 @@ class FormCollectionModel
         try {
             $stats = ['processed' => 0, 'expired' => 0, 'errors' => 0];
 
-            // Abgelaufene Instances finden
+            // Abgelaufene Instances finden — Snapshot bevorzugt, sonst Collection-Wert
             $stmt = $this->db->prepare(
-                "SELECT tfi.ID, tfi.startTime, fc.timeLimit
+                "SELECT tfi.ID, tfi.startTime, COALESCE(tfi.timeLimit, fc.timeLimit) AS timeLimit
                  FROM TeamFormInstance tfi
                  JOIN FormCollection fc ON tfi.collection_ID = fc.ID
-                 WHERE tfi.completed = 0 
+                 WHERE tfi.completed = 0
                    AND tfi.startTime IS NOT NULL
-                   AND TIMESTAMPDIFF(SECOND, tfi.startTime, NOW()) > fc.timeLimit"
+                   AND TIMESTAMPDIFF(SECOND, tfi.startTime, NOW()) > COALESCE(tfi.timeLimit, fc.timeLimit)"
             );
             $stmt->execute();
             $expiredInstances = $stmt->fetchAll(PDO::FETCH_ASSOC);

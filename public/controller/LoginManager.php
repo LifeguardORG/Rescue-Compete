@@ -24,17 +24,12 @@ if (!isset($conn) || !($conn instanceof PDO)) {
 // Initialisiere das UserModel
 $model = new UserModel($conn);
 
-// Absolute URLs für die Weiterleitung
-$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
-$host = htmlspecialchars($_SERVER["HTTP_HOST"]);
-$baseUrl = $protocol . $host . rtrim(dirname(htmlspecialchars($_SERVER["PHP_SELF"]), 2), "/\\");
-
 // QR-Code-Weiterleitung prüfen
 $hasQrRedirect = !empty($_POST['redirect_qrcode']);
 $qrCode = $hasQrRedirect ? $_POST['redirect_qrcode'] : '';
 
-// Standardmäßig auf Login-Seite zurückleiten
-$redirectPath = "$baseUrl/view/Login.php";
+// Standardmäßig auf Login-Seite zurückleiten (relative Pfade — Protokoll/Host bleibt unverändert)
+$redirectPath = "/view/Login.php";
 $errorFlag = "1"; // Standardfehler: Fehlende Eingabe
 
 // Formularwerte validieren und verarbeiten
@@ -82,13 +77,20 @@ if (!empty($username) && !empty($password)) {
 
             // Bei QR-Code-Weiterleitung direkt zum FormRedirect gehen
             if ($hasQrRedirect) {
-                $redirectPath = "$baseUrl/view/FormRedirect.php?code=" . urlencode($qrCode);
-                $errorFlag = null; // Kein Fehler bei erfolgreichem Login
+                $redirectPath = "/view/FormRedirect.php?code=" . urlencode($qrCode);
+            } elseif (!empty($_SESSION['return_after_login'])
+                      && is_string($_SESSION['return_after_login'])
+                      && $_SESSION['return_after_login'][0] === '/'
+                      && !str_starts_with($_SESSION['return_after_login'], '//')
+                      && strpos($_SESSION['return_after_login'], '://') === false) {
+                // Zurück zur ursprünglich angeforderten Seite
+                $redirectPath = $_SESSION['return_after_login'];
+                unset($_SESSION['return_after_login']);
             } else {
                 // Auf die Startseite weiterleiten
-                $redirectPath = "$baseUrl/index.php";
-                $errorFlag = null; // Kein Fehler bei erfolgreichem Login
+                $redirectPath = "/index.php";
             }
+            $errorFlag = null; // Kein Fehler bei erfolgreichem Login
         } else {
             // Passwort falsch
             error_log("Falsches Passwort für Benutzer: " . $username);

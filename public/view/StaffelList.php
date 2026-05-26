@@ -4,6 +4,9 @@
 
 $pageTitle = "Schwimmen - Staffel Ergebnisse";
 
+require_once __DIR__ . '/../php_assets/RequireLogin.php';
+requireLogin();
+
 // DbConnection einbinden und die globale Verbindung übernehmen
 require_once '../db/DbConnection.php';
 if (!isset($GLOBALS['conn'])) {
