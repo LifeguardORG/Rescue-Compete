@@ -1,4 +1,8 @@
 <?php
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 // StaffelSubmission.php
 // Erwartet werden:
 //   $staffelID        : die aktuelle Staffel ID

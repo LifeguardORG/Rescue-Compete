@@ -1,6 +1,9 @@
 <?php
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 $pageTitle = "Nutzungsrichtlinien";
-include '../components/Navbar.php';
 ?>
 
     <!DOCTYPE html>

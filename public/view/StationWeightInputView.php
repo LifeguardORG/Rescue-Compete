@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../php_assets/RequireLogin.php';
+requireLogin();
+
 require_once '../db/DbConnection.php';
 require_once '../model/StationModel.php';
 require_once '../model/StationWeightModel.php';

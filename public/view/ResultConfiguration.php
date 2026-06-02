@@ -1,5 +1,8 @@
 <?php
 
+require_once __DIR__ . '/../php_assets/RequireLogin.php';
+requireLogin();
+
 $pageTitle = "Verwaltung der Ergebnis-Berechnung";
 
 // Den Controller einbinden und ausführen

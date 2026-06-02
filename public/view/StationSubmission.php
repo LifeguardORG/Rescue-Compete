@@ -1,5 +1,9 @@
 <?php
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 $pageTitle = "Eingabe der Parcours-Ergebnisse";
 ?>
 <!DOCTYPE html>

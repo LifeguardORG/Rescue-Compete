@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../php_assets/RequireLogin.php';
+requireLogin();
 
 // DEBUG CODE für view
 error_reporting(E_ALL);
