@@ -1,14 +1,8 @@
 <?php
 /**
  * Export-Button-Komponente für Ergebnisseiten
- * Diese Komponente fügt einen PDF-Export-Button hinzu
- *
- * @param string $pageTitle Optional - Titel für das PDF (Standard ist der Seiten-Titel)
+ * Fügt einen PDF- und einen Excel-Export-Button hinzu.
  */
-
-// Prüfe, ob ein Seitentitel übergeben wurde
-$buttonTitle = $pageTitle ?? "Ergebnisse";
-
 ?>
 
 <div class="export-button-container">
@@ -19,7 +13,7 @@ $buttonTitle = $pageTitle ?? "Ergebnisse";
             <line x1="12" y1="18" x2="12" y2="12"></line>
             <line x1="9" y1="15" x2="15" y2="15"></line>
         </svg>
-        <?php echo htmlspecialchars($buttonTitle); ?> als PDF exportieren
+        PDF Export
     </button>
     <button class="excel-export-btn" id="exportExcelBtn" title="Ergebnisse als Excel exportieren">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -29,7 +23,7 @@ $buttonTitle = $pageTitle ?? "Ergebnisse";
             <line x1="8" y1="17" x2="16" y2="17"></line>
             <line x1="10" y1="9" x2="14" y2="9"></line>
         </svg>
-        <?php echo htmlspecialchars($buttonTitle); ?> als Excel exportieren
+        Excel Export
     </button>
 </div>
 

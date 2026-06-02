@@ -17,6 +17,13 @@
 
 <!-- Styles NUR für die Export-Buttons und Ladeanimation, nicht für Tabellen -->
 <style>
+    /* Buttons untereinander darstellen */
+    .export-button-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
     /* Export-Button-Stil */
     .pdf-export-btn {
         display: inline-flex;
@@ -56,7 +63,7 @@
         align-items: center;
         justify-content: center;
         padding: 10px 14px;
-        margin: 12px 0 12px 8px;
+        margin: 0 0 12px 0;
         background-color: #1d6f42;
         color: white;
         border: none;
