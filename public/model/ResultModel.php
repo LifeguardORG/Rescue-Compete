@@ -85,13 +85,14 @@ class ResultModel
 
         $configData['WEIGHTS'] = $weights;
 
-        // DEBUG: Ausgabe der geladenen Konfiguration
-        error_log("DEBUG ResultModel - Loaded configuration:");
-        foreach ($configData as $key => $value) {
-            if ($key === 'WEIGHTS') {
-                error_log("  $key: " . json_encode($value));
-            } else {
-                error_log("  $key: $value");
+        if (getenv('APP_DEBUG')) {
+            error_log("DEBUG ResultModel - Loaded configuration:");
+            foreach ($configData as $key => $value) {
+                if ($key === 'WEIGHTS') {
+                    error_log("  $key: " . json_encode($value));
+                } else {
+                    error_log("  $key: $value");
+                }
             }
         }
 

@@ -6,10 +6,14 @@
 <!-- html2canvas für die Konvertierung von HTML zu Canvas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+<!-- ExcelJS-Bibliothek für den Excel-Export (unterstützt Bild-Einbettung) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+
 <!-- Eigene Skripte für die PDF-Erzeugung -->
 <script src="../../js/ModalUtils.js"></script>
 <script src="../../js/TableOptimizer.js"></script>
 <script src="../../js/PdfExport.js"></script>
+<script src="../../js/ExcelExport.js"></script>
 
 <!-- Styles NUR für die Export-Buttons und Ladeanimation, nicht für Tabellen -->
 <style>
@@ -43,6 +47,39 @@
     }
 
     .pdf-export-btn svg {
+        margin-right: 8px;
+    }
+
+    /* Excel-Export-Button-Stil (grüne Akzentfarbe zur Unterscheidung vom PDF-Button) */
+    .excel-export-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 14px;
+        margin: 12px 0 12px 8px;
+        background-color: #1d6f42;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .excel-export-btn:hover {
+        background-color: #25885180;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .excel-export-btn:active {
+        transform: translateY(1px);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .excel-export-btn svg {
         margin-right: 8px;
     }
 
@@ -117,6 +154,7 @@
     /* Ausblenden der Buttons bei Druck */
     @media print {
         .pdf-export-btn,
+        .excel-export-btn,
         .export-button-container,
         #pdf-loading-indicator {
             display: none !important;

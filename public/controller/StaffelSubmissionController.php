@@ -123,7 +123,7 @@ class StaffelSubmissionController {
             exit;
         }
 
-        // Prüfen auf Strafzeiten ohne geschwommene Zeit
+        // Prüfen auf Strafzeiten ohne geschwommene Zeit + Format-/Bereichsvalidierung
         foreach ($results as $teamID => $teamResults) {
             $schwimmzeit = trim($teamResults['geschwommene_zeit'] ?? '');
             $strafzeit = trim($teamResults['strafzeit'] ?? '');
@@ -135,6 +135,24 @@ class StaffelSubmissionController {
                 ]);
                 header("Location: ../controller/StaffelSubmissionController.php?action=input&staffel=" . $staffelID . "&status=failure&message=Für mindestens ein Team wurde eine Strafzeit ohne geschwommene Zeit eingegeben");
                 exit;
+            }
+
+            // Format prüfen, Schwimmzeit zusätzlich auf > 0
+            if (!empty($schwimmzeit)) {
+                $err = $this->model->validateTimeInput($schwimmzeit, true);
+                if ($err !== null) {
+                    debug_log("Fehler: Ungültige Schwimmzeit", ['teamID' => $teamID, 'value' => $schwimmzeit, 'error' => $err]);
+                    header("Location: ../controller/StaffelSubmissionController.php?action=input&staffel=" . $staffelID . "&status=failure&message=" . urlencode("Team $teamID: " . $err));
+                    exit;
+                }
+            }
+            if (!empty($strafzeit)) {
+                $err = $this->model->validateTimeInput($strafzeit, false);
+                if ($err !== null) {
+                    debug_log("Fehler: Ungültige Strafzeit", ['teamID' => $teamID, 'value' => $strafzeit, 'error' => $err]);
+                    header("Location: ../controller/StaffelSubmissionController.php?action=input&staffel=" . $staffelID . "&status=failure&message=" . urlencode("Team $teamID (Strafzeit): " . $err));
+                    exit;
+                }
             }
         }
 

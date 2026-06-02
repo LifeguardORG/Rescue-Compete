@@ -69,6 +69,12 @@ class SwimmingCalculator
                         $swimSeconds = self::timeStringToSeconds($data[0]);
                         $swimMs = (int) floor($swimSeconds * 1000);
 
+                        // Schutz vor 0-Zeiten (fehlerhaft eingetragene "00:00:00.0000"),
+                        // die sonst zur "schnellsten Zeit" werden und die Wertung sabotieren.
+                        if ($swimMs <= 0) {
+                            continue;
+                        }
+
                         if (!isset($minTimes[$wertung][$staffelName]) || $swimMs < $minTimes[$wertung][$staffelName]) {
                             $minTimes[$wertung][$staffelName] = $swimMs;
                         }
@@ -91,7 +97,15 @@ class SwimmingCalculator
                     }
 
                     $overallMs = (int)($data[4] ?? 0);
-                    $minMs = $minTimes[$wertung][$staffelName] ?? 0;
+
+                    // Konsistent mit Min-Zeit-Loop: 0-Einträge nicht werten,
+                    // sonst lieferte das Team Punkte oberhalb des Maximums.
+                    if ($overallMs <= 0 || !isset($minTimes[$wertung][$staffelName])) {
+                        $data[3] = null;
+                        continue;
+                    }
+
+                    $minMs = $minTimes[$wertung][$staffelName];
                     $difference = $overallMs - $minMs;
                     $intervals = floor($difference / $deductionIntervalMs);
                     $staffelPoints = max($staffelMaximalPoints - ($intervals * $pointsDeduction), 0);

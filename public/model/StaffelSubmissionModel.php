@@ -218,6 +218,47 @@ class StaffelSubmissionModel {
     }
 
     /**
+     * Prüft, ob ein Zeit-Eingabewert wohlgeformt ist und (bei Schwimmzeiten) > 0 ergibt.
+     *
+     * @param string $timeInput Roh-Input (vom POST)
+     * @param bool $requirePositive true für Schwimmzeit (muss > 0 sein), false für Strafzeit
+     * @return string|null null bei OK, sonst die Fehlermeldung
+     */
+    public function validateTimeInput(string $timeInput, bool $requirePositive): ?string {
+        $timeInput = trim($timeInput);
+        if ($timeInput === '') {
+            return $requirePositive ? null : null; // leer wird vom Aufrufer separat gehandhabt
+        }
+
+        $normalized = str_replace(',', '.', $timeInput);
+
+        // Akzeptierte Formate: SS[.NNNN] | MM:SS[.NNNN] | HH:MM:SS[.NNNN]
+        // Sekunden und Minuten dürfen 0-59 sein, Stunden 0-99.
+        $pattern = '/^(?:\d{1,2}|\d{1,2}:[0-5]?\d|\d{1,2}:[0-5]?\d:[0-5]?\d)(\.\d{1,4})?$/';
+        if (!preg_match($pattern, $normalized)) {
+            return "Ungültiges Zeitformat: '$timeInput'. Erlaubt: SS.NNN, MM:SS.NNN oder HH:MM:SS.NNN (Minuten/Sekunden max. 59).";
+        }
+
+        if ($requirePositive) {
+            // In Sekunden umrechnen, um 0-Werte zu erkennen
+            $parts = explode(':', $normalized);
+            $totalSeconds = 0.0;
+            if (count($parts) === 1) {
+                $totalSeconds = (float)$parts[0];
+            } elseif (count($parts) === 2) {
+                $totalSeconds = ((int)$parts[0]) * 60 + (float)$parts[1];
+            } elseif (count($parts) === 3) {
+                $totalSeconds = ((int)$parts[0]) * 3600 + ((int)$parts[1]) * 60 + (float)$parts[2];
+            }
+            if ($totalSeconds <= 0.0) {
+                return "Schwimmzeit muss größer als 0 sein. Lass das Feld leer, wenn das Team nicht angetreten ist.";
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Konvertiert eine Zeiteingabe in das Datenbankformat TIME(4)
      */
     private function convertTimeToDatabase(string $timeInput): string {

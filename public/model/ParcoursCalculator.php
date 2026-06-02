@@ -25,12 +25,13 @@ class ParcoursCalculator
         $totalParcoursPoints = $totalPoints * $shareParcours;
         $weights = $config['WEIGHTS'] ?? [];
 
-        // DEBUG: Konfigurationswerte ausgeben
-        error_log("DEBUG ParcoursCalculator - Config:");
-        error_log("  SHARE_PARCOURS from config: " . ($config['SHARE_PARCOURS'] ?? 'not set'));
-        error_log("  shareParcours calculated: $shareParcours");
-        error_log("  totalPoints: $totalPoints");
-        error_log("  totalParcoursPoints: $totalParcoursPoints");
+        if (getenv('APP_DEBUG')) {
+            error_log("DEBUG ParcoursCalculator - Config:");
+            error_log("  SHARE_PARCOURS from config: " . ($config['SHARE_PARCOURS'] ?? 'not set'));
+            error_log("  shareParcours calculated: $shareParcours");
+            error_log("  totalPoints: $totalPoints");
+            error_log("  totalParcoursPoints: $totalParcoursPoints");
+        }
 
         // Summe aller Gewichte berechnen
         $sumWeights = 0;
@@ -39,7 +40,9 @@ class ParcoursCalculator
             $sumWeights += $weight;
         }
 
-        error_log("  sumWeights: $sumWeights");
+        if (getenv('APP_DEBUG')) {
+            error_log("  sumWeights: $sumWeights");
+        }
 
         // Für jede Wertung und jedes Team: adjustierte Punkte berechnen
         foreach ($parcoursData as $wertung => &$wertungData) {
