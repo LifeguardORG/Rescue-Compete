@@ -155,6 +155,11 @@ CREATE TABLE IF NOT EXISTS `Wertungsklasse` (
     `name` varchar(100) NOT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE IF NOT EXISTS `WertungStaffel` (
+                                                `wertung_ID` int(11) NOT NULL,
+    `staffel_ID` int(11) NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- -----------------------
 -- Indizes
 -- -----------------------
@@ -242,6 +247,10 @@ ALTER TABLE `User`
 
 ALTER TABLE `Wertungsklasse`
     ADD PRIMARY KEY (`ID`);
+
+ALTER TABLE `WertungStaffel`
+    ADD PRIMARY KEY (`wertung_ID`,`staffel_ID`),
+  ADD KEY `staffel_ID` (`staffel_ID`);
 
 -- -----------------------
 -- AUTO_INCREMENT

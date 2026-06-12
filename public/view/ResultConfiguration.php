@@ -148,7 +148,7 @@ $parcoursPoints = ($totalPoints * $parcoursShare) / 100;
                     <div class="info-box">
                         <h4>Berechnung der Schwimmpunkte:</h4>
                         <ul>
-                            <li>Maximalpunkte pro Staffel: Innerhalb einer Wertung wird für jede Staffel die schnellste Schwimmzeit (ohne Strafsekunden) ermittelt. Diese Mannschaft erhält die Maximalpunkte (Schwimm Anteil ÷ Staffelanzahl)</li>
+                            <li>Maximalpunkte pro Staffel: Innerhalb einer Wertung wird für jede Staffel die schnellste Gesamtzeit ermittelt. Diese Mannschaft erhält die Maximalpunkte (Schwimm Anteil ÷ Anzahl der dieser Wertung zugeordneten Staffeln)</li>
                             <li>Alle anderen Mannschaften in der Staffel werden an dieser Bestzeit gemessen</li>
                             <li>Für jedes Abzugsintervall (in Millisekunden) über der Bestzeit werden Punkte abgezogen</li>
                             <li>Bei 100ms Intervall und 1 Punkt Abzug verliert eine Mannschaft mit 2,5 Sekunden Rückstand 25 Punkte (2500ms ÷ 100ms = 25 Intervalle)</li>

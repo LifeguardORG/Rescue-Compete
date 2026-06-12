@@ -31,22 +31,51 @@ class ResultModel
             // 1. Konfigurationswerte laden (inklusive WEIGHTS aus StationWeight-Tabelle)
             $configData = $this->loadCompleteConfiguration();
 
-            // 2. Erwartete Staffeln ermitteln
-            $expectedStaffeln = $this->db->query("SELECT name FROM Staffel ORDER BY name")
-                ->fetchAll(PDO::FETCH_COLUMN);
+            // 2. Pro Wertung die zugeordneten Staffeln ermitteln (Map wertungName => [staffelNamen])
+            $staffelMap = $this->getStaffelnByWertungMap();
 
-            // 3. Schwimm-Rohdaten abrufen
+            // 3. Schwimm-Rohdaten abrufen (bereits pro Wertung auf deren Staffeln gefiltert)
             $results = $this->loadSwimmingRawData();
 
-            // 4. Fehlende Staffeln als Platzhalter ergänzen
-            $results = $this->addMissingStaffeln($results, $expectedStaffeln);
+            // 4. Fehlende Staffeln der jeweiligen Wertung als Platzhalter ergänzen
+            $results = $this->addMissingStaffeln($results, $staffelMap);
 
-            // 5. Punkte berechnen mit SwimmingCalculator
-            $results = SwimmingCalculator::calculateSwimmingPoints($results, $configData, $expectedStaffeln);
+            // 5. Punkte berechnen mit SwimmingCalculator (Divisor pro Wertung)
+            $results = SwimmingCalculator::calculateSwimmingPoints($results, $configData, $staffelMap);
 
             return $results;
         } catch (PDOException $e) {
             error_log("Error in ResultModel::getSwimmingWertungenWithDetails: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Liefert je Wertung die Liste ihrer zugeordneten Staffelnamen.
+     * Wertungen ohne Zuordnung tauchen NICHT auf (bewusst: keine Schwimmpunkte,
+     * keine Staffelspalten). Dient als gemeinsame Quelle für Berechnung und
+     * Spaltenköpfe der Ergebnis-Ansichten.
+     *
+     * @return array Map: wertungName (string) => string[] (Staffelnamen, sortiert).
+     */
+    public function getStaffelnByWertungMap(): array
+    {
+        try {
+            $stmt = $this->db->query(
+                "SELECT wk.name AS wertung_name, s.name AS staffel_name
+                 FROM Wertungsklasse wk
+                 JOIN WertungStaffel ws ON ws.wertung_ID = wk.ID
+                 JOIN Staffel s ON s.ID = ws.staffel_ID
+                 ORDER BY wk.name, s.name"
+            );
+
+            $map = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $map[$row['wertung_name']][] = $row['staffel_name'];
+            }
+            return $map;
+        } catch (PDOException $e) {
+            error_log("Error in ResultModel::getStaffelnByWertungMap: " . $e->getMessage());
             return [];
         }
     }
@@ -104,8 +133,12 @@ class ResultModel
      */
     private function loadSwimmingRawData(): array
     {
+        // Der Staffelsatz wird aus WertungStaffel der jeweiligen Wertung getrieben:
+        // Pro (Team, Wertung) erscheinen nur die DIESER Wertung zugeordneten Staffeln.
+        // So „leckt" keine Zeit aus einer anderen Wertung des Teams herüber, und der
+        // Divisor (Anzahl zugeordneter Staffeln) bleibt konsistent.
         $query = "
-            SELECT 
+            SELECT
                 m.Teamname,
                 s.name AS staffelName,
                 ms.schwimmzeit,
@@ -113,10 +146,11 @@ class ResultModel
                 (TIME_TO_SEC(ms.schwimmzeit) + TIME_TO_SEC(IFNULL(ms.strafzeit, '00:00:00'))) * 1000 AS total_ms,
                 wk.name AS Wertungsklasse
             FROM Mannschaft m
-            LEFT JOIN MannschaftStaffel ms ON m.ID = ms.mannschaft_ID
-            LEFT JOIN Staffel s ON ms.staffel_ID = s.ID
             JOIN MannschaftWertung mw ON m.ID = mw.mannschaft_ID
             JOIN Wertungsklasse wk ON mw.wertung_ID = wk.ID
+            JOIN WertungStaffel ws ON ws.wertung_ID = wk.ID
+            JOIN Staffel s ON s.ID = ws.staffel_ID
+            LEFT JOIN MannschaftStaffel ms ON ms.mannschaft_ID = m.ID AND ms.staffel_ID = s.ID
             ORDER BY wk.name, m.Teamname, s.name
         ";
         $stmt = $this->db->prepare($query);
@@ -135,7 +169,9 @@ class ResultModel
                 $results[$wertung]['Teams'][$team] = [];
             }
 
-            if (!is_null($staffelName)) {
+            // Staffel-Daten nur bei tatsächlich eingetragener Schwimmzeit übernehmen;
+            // nicht eingetragene Staffeln werden später als Platzhalter ergänzt.
+            if (!is_null($row['schwimmzeit'])) {
                 $swimTime = $row['schwimmzeit'];
                 $penaltyTime = $row['strafzeit'] ?? '00:00:00.0000';
                 $totalSeconds = SwimmingCalculator::timeStringToSeconds($swimTime) +
@@ -157,11 +193,15 @@ class ResultModel
     }
 
     /**
-     * Ergänzt fehlende Staffeln als Platzhalter.
+     * Ergänzt je Wertung deren fehlende Staffeln als Platzhalter.
+     *
+     * @param array $results    Schwimm-Ergebnisse, gruppiert nach Wertung.
+     * @param array $staffelMap Map: wertungName => string[] (zugeordnete Staffelnamen).
      */
-    private function addMissingStaffeln(array $results, array $expectedStaffeln): array
+    private function addMissingStaffeln(array $results, array $staffelMap): array
     {
         foreach ($results as $wertung => &$wertungData) {
+            $expectedStaffeln = $staffelMap[$wertung] ?? [];
             foreach ($wertungData['Teams'] as &$teamData) {
                 foreach ($expectedStaffeln as $staffel) {
                     if (!isset($teamData[$staffel])) {

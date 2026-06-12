@@ -126,7 +126,7 @@ class CompetitionResetController
     {
         $result = $this->model->resetFormulare();
         if ($result['success']) {
-            $this->setMessage("Alle Formulare, Fragen, Antworten und ihre Verbindungen wurden erfolgreich gelöscht.", "success");
+            $this->setMessage("Alle Formulare und ihre Verbindungen wurden erfolgreich gelöscht. Die Fragenpools bleiben erhalten.", "success");
         } else {
             $this->setMessage("Fehler beim Löschen der Formulare: " . $result['error'], "error");
         }

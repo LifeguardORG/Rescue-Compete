@@ -35,6 +35,17 @@ $modalData = $controller->modalData;
 $message = $controller->message;
 $staffeln = $model->read();
 
+// Daten für die Zuordnungs-Tabs
+$wertungen = $model->getAllWertungen();
+$assignmentOverview = $model->getAssignmentOverview();
+
+// Erfolgsmeldung aus der Session holen (z. B. nach erfolgreicher Zuordnung)
+$successMessage = "";
+if (isset($_SESSION['success_message'])) {
+    $successMessage = $_SESSION['success_message'];
+    unset($_SESSION['success_message']);
+}
+
 // Werte aus dem POST-Request (falls vorhanden)
 $name = isset($_POST['name']) ? trim($_POST['name']) : "";
 
@@ -61,6 +72,8 @@ $pageTitle = "Verwaltung der Staffeln";
     <link rel="stylesheet" href="../css/Footer.css">
     <link rel="stylesheet" href="../css/Components.css">
     <link rel="stylesheet" href="../css/StaffelInputStyling.css">
+    <!-- Checkbox-/Zuweisungs-Styles werden aus der Wertungs-Ansicht wiederverwendet -->
+    <link rel="stylesheet" href="../css/ScoringInputViewStyling.css">
 </head>
 <body class="has-navbar">
 
@@ -82,9 +95,20 @@ $pageTitle = "Verwaltung der Staffeln";
             <button class="tab-button <?php echo $currentView === 'create' ? 'active' : ''; ?>"
                     data-tab="create"
                     onclick="showTab('create')">Neue Staffel</button>
+            <button class="tab-button <?php echo $currentView === 'assign' ? 'active' : ''; ?>"
+                    data-tab="assign"
+                    onclick="showTab('assign')">Wertung zuordnen</button>
+            <button class="tab-button <?php echo $currentView === 'assignment-overview' ? 'active' : ''; ?>"
+                    data-tab="assignment-overview"
+                    onclick="showTab('assignment-overview')">Zuordnungs-Übersicht</button>
         </div>
 
         <!-- Statusmeldungen -->
+        <?php if (!empty($successMessage)): ?>
+            <div class="message-box success">
+                <?php echo htmlspecialchars($successMessage); ?>
+            </div>
+        <?php endif; ?>
         <?php if (!empty($message)): ?>
             <div class="message-box error">
                 <?php echo htmlspecialchars($message); ?>
@@ -156,6 +180,102 @@ $pageTitle = "Verwaltung der Staffeln";
                         <button type="button" class="btn" onclick="showTab('overview')">Abbrechen</button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- Tab: Wertung zuordnen -->
+        <div id="assign" class="tab-content <?php echo $currentView === 'assign' ? 'active' : ''; ?>">
+            <div class="data-container">
+                <h3>Staffeln einer Wertung zuordnen</h3>
+                <p class="tab-description">Wählen Sie eine Wertung und haken Sie die Staffeln an, die in dieser Wertung gewertet werden. Nur die angehakten Staffeln zählen in die Schwimmpunkte dieser Wertung.</p>
+
+                <form id="assignStaffelnForm" method="POST">
+                    <div class="form-group">
+                        <label for="assignWertung">Wertung *</label>
+                        <select id="assignWertung" name="wertung" required onchange="loadStaffelCheckboxes()">
+                            <option value="" disabled selected hidden>Bitte auswählen</option>
+                            <?php foreach ($wertungen as $wertung): ?>
+                                <option value="<?php echo htmlspecialchars($wertung['ID']); ?>">
+                                    <?php echo htmlspecialchars($wertung['name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <small>Wählen Sie die Wertung aus, der Sie Staffeln zuordnen möchten</small>
+                    </div>
+
+                    <?php if (empty($wertungen)): ?>
+                        <div class="no-data">
+                            <p>Keine Wertungen vorhanden. Bitte legen Sie zuerst eine Wertung an.</p>
+                        </div>
+                    <?php elseif (empty($staffeln)): ?>
+                        <div class="no-data">
+                            <p>Keine Staffeln vorhanden.</p>
+                            <p><a href="#" onclick="showTab('create')">Erstellen Sie Ihre erste Staffel</a></p>
+                        </div>
+                    <?php endif; ?>
+
+                    <!-- Container für Staffel-Checkboxen -->
+                    <div id="staffelCheckboxContainer" style="display: none;">
+                        <div class="form-group">
+                            <label>Staffeln auswählen</label>
+                            <div class="team-selection-actions">
+                                <button type="button" class="btn secondary-btn small" onclick="selectAllStaffeln()">Alle auswählen</button>
+                                <button type="button" class="btn secondary-btn small" onclick="deselectAllStaffeln()">Alle abwählen</button>
+                            </div>
+                            <div id="staffelCheckboxList" class="assigned-teams-list">
+                                <!-- Dynamisch geladen -->
+                            </div>
+                            <small>Ohne angehakte Staffel erhält die Wertung keine Schwimmpunkte.</small>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" name="assign_staffeln" value="1" class="btn primary-btn">Zuordnung speichern</button>
+                            <button type="button" class="btn" onclick="showTab('assignment-overview')">Abbrechen</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tab: Zuordnungs-Übersicht -->
+        <div id="assignment-overview" class="tab-content <?php echo $currentView === 'assignment-overview' ? 'active' : ''; ?>">
+            <div class="data-container">
+                <div class="actions-bar">
+                    <button class="btn primary-btn" onclick="showTab('assign')">
+                        Staffeln zuordnen
+                    </button>
+                </div>
+
+                <?php if (empty($assignmentOverview)): ?>
+                    <div class="no-data">
+                        <p>Keine Wertungen vorhanden.</p>
+                    </div>
+                <?php else: ?>
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th data-sort-key="name" width="30%">Wertung</th>
+                            <th width="55%">Zugeordnete Staffeln</th>
+                            <th data-sort-key="count" data-sort-type="number" width="15%">Anzahl</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($assignmentOverview as $row): ?>
+                            <tr>
+                                <td><strong><?php echo htmlspecialchars($row['wertung_name']); ?></strong></td>
+                                <td>
+                                    <?php
+                                    echo empty($row['staffeln'])
+                                        ? '<em>keine Staffeln – keine Schwimmpunkte</em>'
+                                        : htmlspecialchars(implode(', ', $row['staffeln']));
+                                    ?>
+                                </td>
+                                <td class="numeric-cell"><?php echo count($row['staffeln']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
             </div>
         </div>
     </div>

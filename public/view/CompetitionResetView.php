@@ -145,7 +145,7 @@ $pageTitle = "Wettkampf zurücksetzen";
             <!-- Formulare Reset -->
             <div class="reset-card">
                 <h3>Formulare zurücksetzen</h3>
-                <p>Löscht alle Formulare, Fragen, Antworten und deren Verbindungen.</p>
+                <p>Löscht alle Formulare und deren Verbindungen. Die Fragenpools bleiben erhalten.</p>
                 <form method="POST" action="" class="reset-form" id="form-formulare">
                     <input type="hidden" name="reset_formulare" value="1">
                     <div class="form-actions standard-card">
@@ -216,7 +216,7 @@ $resetTypes = [
     'stationen' => ['title' => 'Stationen löschen', 'message' => 'Möchten Sie wirklich alle Stationen, Protokolle und ihre Verbindungen löschen? Diese Aktion kann nicht rückgängig gemacht werden.'],
     'protokolle' => ['title' => 'Protokolle löschen', 'message' => 'Möchten Sie wirklich alle Protokolle und ihre Verbindungen löschen? Diese Aktion kann nicht rückgängig gemacht werden.'],
     'mannschaften' => ['title' => 'Mannschaften löschen', 'message' => 'Möchten Sie wirklich alle Mannschaften und ihre Verbindungen löschen? Diese Aktion kann nicht rückgängig gemacht werden.'],
-    'formulare' => ['title' => 'Formulare löschen', 'message' => 'Möchten Sie wirklich alle Formulare, Fragen, Antworten und ihre Verbindungen löschen? Diese Aktion kann nicht rückgängig gemacht werden.'],
+    'formulare' => ['title' => 'Formulare löschen', 'message' => 'Möchten Sie wirklich alle Formulare und ihre Verbindungen löschen? Die Fragenpools bleiben erhalten. Diese Aktion kann nicht rückgängig gemacht werden.'],
     'wertungen' => ['title' => 'Wertungen löschen', 'message' => 'Möchten Sie wirklich alle Wertungsklassen und ihre Verbindungen löschen? Diese Aktion kann nicht rückgängig gemacht werden.'],
     'users' => ['title' => 'Benutzer löschen', 'message' => 'Möchten Sie wirklich alle Benutzer (außer dem aktuell angemeldeten) löschen? Diese Aktion kann nicht rückgängig gemacht werden.'],
     'all' => ['title' => 'ALLE DATEN LÖSCHEN', 'message' => 'WARNUNG: Sie sind dabei, ALLE WETTKAMPFDATEN unwiderruflich zu löschen! Dies umfasst alle Mannschaften, Stationen, Protokolle, Staffeln, Formulare, Wertungen und Benutzer (außer Ihrem eigenen). Diese Aktion kann NICHT rückgängig gemacht werden!']

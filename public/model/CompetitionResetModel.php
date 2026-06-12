@@ -36,6 +36,10 @@ class CompetitionResetModel
             $stmt = $this->db->prepare("DELETE FROM MannschaftStaffel");
             $stmt->execute();
 
+            // Lösche alle Wertung-Staffel-Zuordnungen
+            $stmt = $this->db->prepare("DELETE FROM WertungStaffel");
+            $stmt->execute();
+
             // Lösche alle Staffeln
             $stmt = $this->db->prepare("DELETE FROM Staffel");
             $stmt->execute();
@@ -192,17 +196,7 @@ class CompetitionResetModel
             $stmt = $this->db->prepare("DELETE FROM FormCollection");
             $stmt->execute();
 
-            // Lösche Antworten
-            $stmt = $this->db->prepare("DELETE FROM Answer");
-            $stmt->execute();
-
-            // Lösche Fragen
-            $stmt = $this->db->prepare("DELETE FROM Question");
-            $stmt->execute();
-
-            // Lösche Fragenpools
-            $stmt = $this->db->prepare("DELETE FROM QuestionPool");
-            $stmt->execute();
+            // Fragenpools, Fragen und Antworten bleiben erhalten (wiederverwendbar)
 
             $this->db->commit();
             return ['success' => true];
@@ -224,6 +218,10 @@ class CompetitionResetModel
 
             // Lösche alle Mannschaft-Wertung-Zuordnungen
             $stmt = $this->db->prepare("DELETE FROM MannschaftWertung");
+            $stmt->execute();
+
+            // Lösche alle Wertung-Staffel-Zuordnungen
+            $stmt = $this->db->prepare("DELETE FROM WertungStaffel");
             $stmt->execute();
 
             // Lösche alle Wertungsklassen
@@ -296,6 +294,10 @@ class CompetitionResetModel
             $stmt->execute();
 
             $stmt = $this->db->prepare("DELETE FROM MannschaftWertung");
+            $stmt->execute();
+
+            // Wertung-Staffel-Zuordnungen löschen
+            $stmt = $this->db->prepare("DELETE FROM WertungStaffel");
             $stmt->execute();
 
             // 3. Collection-Daten löschen

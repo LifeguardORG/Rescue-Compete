@@ -67,7 +67,8 @@ class StaffelSubmissionController {
         }
 
         $staffelName = $staffel['name'];
-        $teams = $this->model->getTeams();
+        // Nur Teams anzeigen, deren Wertung diese Staffel zugeordnet ist.
+        $teams = $this->model->getTeamsForStaffel($staffelID);
         $submittedTeams = $this->model->getSubmittedTeams($staffelID);
 
         // Lade bereits vorhandene Ergebnisse

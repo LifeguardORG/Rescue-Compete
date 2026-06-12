@@ -54,6 +54,33 @@ class StaffelSubmissionModel {
     }
 
     /**
+     * Liefert nur die Mannschaften, die für eine bestimmte Staffel relevant sind:
+     * also Teams, deren Wertung diese Staffel zugeordnet ist. So erscheinen bei der
+     * Zeiteingabe nur die tatsächlich teilnehmenden Teams (auch nachträglich
+     * hinzugefügte, sobald sie einer passenden Wertung zugeordnet wurden).
+     *
+     * @param int $staffelId Die ID der Staffel.
+     * @return array Liste der relevanten Mannschaften, sortiert nach Teamname.
+     */
+    public function getTeamsForStaffel(int $staffelId): array {
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT DISTINCT m.*
+                 FROM Mannschaft m
+                 JOIN MannschaftWertung mw ON m.ID = mw.mannschaft_ID
+                 JOIN WertungStaffel ws ON mw.wertung_ID = ws.wertung_ID
+                 WHERE ws.staffel_ID = :staffelId
+                 ORDER BY m.Teamname"
+            );
+            $stmt->execute([':staffelId' => $staffelId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error in StaffelSubmissionModel::getTeamsForStaffel: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Ermittelt, welche Mannschaften bereits Ergebnisse für eine bestimmte Staffel haben
      */
     public function getSubmittedTeams(int $staffelId): array {

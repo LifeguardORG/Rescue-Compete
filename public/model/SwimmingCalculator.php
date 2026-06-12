@@ -41,8 +41,14 @@ class SwimmingCalculator
 
     /**
      * Berechnet die Schwimm-Punkte basierend auf Zeiten und Konfiguration.
+     *
+     * @param array $results    Schwimm-Ergebnisse, gruppiert nach Wertung.
+     * @param array $config     Berechnungs-Konfiguration.
+     * @param array $staffelMap Map: wertungName => string[] (zugeordnete Staffelnamen).
+     *                          Der Schwimm-Punktetopf wird PRO WERTUNG durch die Anzahl
+     *                          DEREN zugeordneter Staffeln geteilt.
      */
-    public static function calculateSwimmingPoints(array $results, array $config, array $expectedStaffeln): array
+    public static function calculateSwimmingPoints(array $results, array $config, array $staffelMap): array
     {
         $shareSwimming = isset($config["SHARE_SWIMMING"]) ? (float)$config["SHARE_SWIMMING"] : 50.0;
         $totalPoints = isset($config["TOTAL_POINTS"]) ? (float)$config["TOTAL_POINTS"] : 12000.0;
@@ -50,13 +56,16 @@ class SwimmingCalculator
         $pointsDeduction = isset($config["POINTS_DEDUCTION"]) ? (float)$config["POINTS_DEDUCTION"] : 1.0;
 
         $totalSwimmingPoints = $totalPoints * ($shareSwimming / 100);
-        $numStaffeln = count($expectedStaffeln);
 
-        if ($numStaffeln <= 0) {
-            return $results;
+        // Maximalpunkte pro Staffel je Wertung = Schwimm-Topf / Anzahl der dieser
+        // Wertung zugeordneten Staffeln. Wertungen ohne Zuordnung bleiben unberücksichtigt.
+        $staffelMaximalPointsByWertung = [];
+        foreach ($staffelMap as $wertung => $staffeln) {
+            $numStaffeln = count($staffeln);
+            if ($numStaffeln > 0) {
+                $staffelMaximalPointsByWertung[$wertung] = $totalSwimmingPoints / $numStaffeln;
+            }
         }
-
-        $staffelMaximalPoints = $totalSwimmingPoints / $numStaffeln;
 
         // Minimale Zeiten pro Staffel und Wertung ermitteln.
         // WICHTIG: Als Wertungsmaßstab die GESAMTZEIT (Schwimmzeit + Strafzeit, data[4])
@@ -89,6 +98,9 @@ class SwimmingCalculator
 
         // Punkteberechnung
         foreach ($results as $wertung => &$wertungData) {
+            // Wertung ohne zugeordnete Staffeln: keine Schwimmpunkte.
+            $staffelMaximalPoints = $staffelMaximalPointsByWertung[$wertung] ?? 0;
+
             foreach ($wertungData["Teams"] as $team => &$teamData) {
                 $totalStaffelScore = 0;
 

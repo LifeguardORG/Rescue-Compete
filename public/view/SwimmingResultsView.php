@@ -21,7 +21,7 @@ $controller = new SwimmingResultsController($model);
 
 // Verarbeite den Request und rufe die Ergebnisse ab
 $data = $controller->processRequest();
-extract($data); // Nun stehen $wertungDetails und $staffelIDs zur Verfügung
+extract($data); // Nun stehen $wertungDetails und $staffelIDsByWertung zur Verfügung
 
 $pageTitle = "Schwimm Ergebnisse";
 ?>
@@ -67,6 +67,7 @@ $pageTitle = "Schwimm Ergebnisse";
                 <p>Keine Daten verfügbar.</p>
             <?php else: ?>
                 <?php foreach ($wertungDetails as $wertungsklasse => $details): ?>
+                    <?php $staffelIDs = $staffelIDsByWertung[$wertungsklasse] ?? []; ?>
                     <div class="results-section">
                         <h2>Wertung: <?php echo htmlspecialchars($wertungsklasse); ?></h2>
                         <table class="results-table">

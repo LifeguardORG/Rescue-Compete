@@ -135,6 +135,11 @@ class StaffelModel
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
 
+            // Außerdem: Lösche alle Wertung-Zuordnungen dieser Staffel
+            $stmt = $this->db->prepare("DELETE FROM WertungStaffel WHERE staffel_ID = :id");
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+
             // Dann: Lösche den Eintrag in der Tabelle Staffel
             $stmt = $this->db->prepare("DELETE FROM Staffel WHERE ID = :id");
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
@@ -162,6 +167,118 @@ class StaffelModel
         $stmt->execute([':name' => trim($name)]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result !== false;
+    }
+
+    /**
+     * Liefert alle Wertungsklassen (ID + Name) für die Zuordnungs-Dropdowns.
+     *
+     * @return array Liste mit ['ID' => int, 'name' => string].
+     */
+    public function getAllWertungen(): array
+    {
+        try {
+            $stmt = $this->db->query("SELECT ID, name FROM Wertungsklasse ORDER BY name");
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error in Staffel::getAllWertungen: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Liefert die IDs der einer Wertung zugeordneten Staffeln.
+     *
+     * @param int $wertungId ID der Wertungsklasse.
+     * @return int[] Liste der zugeordneten Staffel-IDs.
+     */
+    public function getStaffelnByWertung(int $wertungId): array
+    {
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT staffel_ID FROM WertungStaffel WHERE wertung_ID = :id"
+            );
+            $stmt->bindParam(':id', $wertungId, PDO::PARAM_INT);
+            $stmt->execute();
+            return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+        } catch (PDOException $e) {
+            error_log("Error in Staffel::getStaffelnByWertung: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Synchronisiert die Staffel-Zuordnungen einer Wertung auf genau die
+     * übergebene ID-Liste (alte Zuordnungen werden ersetzt). Transaktional.
+     *
+     * @param int   $wertungId  ID der Wertungsklasse.
+     * @param int[] $staffelIds Gewünschte Staffel-IDs.
+     * @return bool True bei Erfolg, false bei Fehler.
+     */
+    public function setStaffelnForWertung(int $wertungId, array $staffelIds): bool
+    {
+        try {
+            $this->db->beginTransaction();
+
+            $stmt = $this->db->prepare("DELETE FROM WertungStaffel WHERE wertung_ID = :id");
+            $stmt->bindParam(':id', $wertungId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $insert = $this->db->prepare(
+                "INSERT INTO WertungStaffel (wertung_ID, staffel_ID) VALUES (:wertung_ID, :staffel_ID)"
+            );
+            foreach (array_unique(array_map('intval', $staffelIds)) as $staffelId) {
+                $insert->execute([
+                    ':wertung_ID' => $wertungId,
+                    ':staffel_ID' => $staffelId,
+                ]);
+            }
+
+            $this->db->commit();
+            return true;
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            error_log("Error in Staffel::setStaffelnForWertung: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Liefert je Wertung die Liste ihrer zugeordneten Staffelnamen
+     * (für den Übersichts-Tab). Wertungen ohne Zuordnung erscheinen mit
+     * leerer Staffelliste.
+     *
+     * @return array Liste mit ['wertung_id' => int, 'wertung_name' => string, 'staffeln' => string[]].
+     */
+    public function getAssignmentOverview(): array
+    {
+        try {
+            $stmt = $this->db->query(
+                "SELECT wk.ID AS wertung_id, wk.name AS wertung_name, s.name AS staffel_name
+                 FROM Wertungsklasse wk
+                 LEFT JOIN WertungStaffel ws ON ws.wertung_ID = wk.ID
+                 LEFT JOIN Staffel s ON s.ID = ws.staffel_ID
+                 ORDER BY wk.name, s.name"
+            );
+
+            $overview = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $id = (int)$row['wertung_id'];
+                if (!isset($overview[$id])) {
+                    $overview[$id] = [
+                        'wertung_id'   => $id,
+                        'wertung_name' => $row['wertung_name'],
+                        'staffeln'     => [],
+                    ];
+                }
+                if (!is_null($row['staffel_name'])) {
+                    $overview[$id]['staffeln'][] = $row['staffel_name'];
+                }
+            }
+            return array_values($overview);
+        } catch (PDOException $e) {
+            error_log("Error in Staffel::getAssignmentOverview: " . $e->getMessage());
+            return [];
+        }
     }
 
 }

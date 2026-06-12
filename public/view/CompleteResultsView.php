@@ -29,7 +29,7 @@ $controller = new CompleteResultsController($model, $configModel);
 
 // Ergebnisse verarbeiten und in Variablen extrahieren
 $data = $controller->processRequest();
-extract($data); // Es stehen nun $combinedResults, $staffelNames, $stationNames und $config zur Verfügung
+extract($data); // Es stehen nun $combinedResults, $staffelNamesByWertung, $stationNames und $config zur Verfügung
 
 // Fallback für die Konfiguration: Falls Schlüssel fehlen, werden Standardwerte gesetzt
 $config['SHARE_SWIMMING'] = $config['SHARE_SWIMMING'] ?? 50;
@@ -89,13 +89,14 @@ $config['TOTAL_POINTS']   = $config['TOTAL_POINTS'] ?? 12000;
                 <p>Keine Daten verfügbar.</p>
             <?php else: ?>
                 <?php foreach ($combinedResults as $wertung => $data): ?>
+                    <?php $staffelNames = $staffelNamesByWertung[$wertung] ?? []; ?>
                     <div class="results-section">
                         <h2>Wertung: <?php echo htmlspecialchars($wertung); ?></h2>
                         <table class="results-table">
                             <thead>
                             <tr>
                                 <th>Mannschaft</th>
-                                <!-- Spaltenüberschriften für alle Staffeln (aus Staffelnamen) -->
+                                <!-- Spaltenüberschriften für die dieser Wertung zugeordneten Staffeln -->
                                 <?php foreach ($staffelNames as $staffelName): ?>
                                     <th>Staffel <?php echo htmlspecialchars($staffelName); ?></th>
                                 <?php endforeach; ?>

@@ -93,6 +93,88 @@ function handleTabSpecificActions(tabName) {
 }
 
 /**
+ * Lädt für die im Dropdown gewählte Wertung alle Staffeln als Checkboxen
+ * und hakt die bereits zugeordneten vor.
+ */
+function loadStaffelCheckboxes() {
+    const select = document.getElementById('assignWertung');
+    const container = document.getElementById('staffelCheckboxContainer');
+    const list = document.getElementById('staffelCheckboxList');
+    if (!select || !container || !list) {
+        return;
+    }
+
+    const wertungId = select.value;
+    if (!wertungId) {
+        container.style.display = 'none';
+        return;
+    }
+
+    list.innerHTML = '<p>Lade Staffeln…</p>';
+    container.style.display = 'block';
+
+    const url = `StaffelInputView.php?action=getStaffelnForWertung&wertung=${encodeURIComponent(wertungId)}`;
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                list.innerHTML = `<p class="warning">${data.error || 'Fehler beim Laden der Staffeln.'}</p>`;
+                return;
+            }
+
+            const assigned = (data.zugeordneteIds || []).map(Number);
+            const staffeln = data.alleStaffeln || [];
+
+            if (staffeln.length === 0) {
+                list.innerHTML = '<p>Keine Staffeln vorhanden.</p>';
+                return;
+            }
+
+            list.innerHTML = '';
+            staffeln.forEach(staffel => {
+                const id = Number(staffel.ID);
+                const isChecked = assigned.includes(id) ? 'checked' : '';
+                const item = document.createElement('div');
+                item.className = 'team-checkbox-item';
+                item.innerHTML = `
+                    <input type="checkbox" id="assign_staffel_${id}" name="staffeln[]" value="${id}" ${isChecked}>
+                    <label for="assign_staffel_${id}"><strong>${escapeHtml(staffel.name)}</strong></label>
+                `;
+                list.appendChild(item);
+            });
+        })
+        .catch(error => {
+            list.innerHTML = '<p class="warning">Fehler beim Laden der Staffeln.</p>';
+            console.error('loadStaffelCheckboxes:', error);
+        });
+}
+
+/**
+ * Hakt alle Staffel-Checkboxen an.
+ */
+function selectAllStaffeln() {
+    document.querySelectorAll('#staffelCheckboxList input[type="checkbox"]').forEach(cb => cb.checked = true);
+}
+
+/**
+ * Entfernt alle Häkchen der Staffel-Checkboxen.
+ */
+function deselectAllStaffeln() {
+    document.querySelectorAll('#staffelCheckboxList input[type="checkbox"]').forEach(cb => cb.checked = false);
+}
+
+/**
+ * Einfaches HTML-Escaping für dynamisch eingefügte Texte.
+ * @param {string} value
+ * @returns {string}
+ */
+function escapeHtml(value) {
+    const div = document.createElement('div');
+    div.textContent = value ?? '';
+    return div.innerHTML;
+}
+
+/**
  * Initialisiert Event-Listener
  */
 function initializeEventListeners() {
@@ -297,9 +379,9 @@ function handleKeyboardNavigation(event) {
     }
 
     // Tab-Navigation zwischen Tabs
-    if (event.key >= '1' && event.key <= '2' && event.ctrlKey) {
+    if (event.key >= '1' && event.key <= '4' && event.ctrlKey) {
         event.preventDefault();
-        const tabs = ['overview', 'create'];
+        const tabs = ['overview', 'create', 'assign', 'assignment-overview'];
         const tabIndex = parseInt(event.key) - 1;
         if (tabs[tabIndex]) {
             showTab(tabs[tabIndex]);
