@@ -34,7 +34,7 @@ class SwimmingCalculator
         $minutes = floor(fmod($seconds, 3600) / 60);
         $secs = floor(fmod($seconds, 60));
         $fraction = $seconds - floor($seconds);
-        $fractionStr = number_format($fraction, 4, '.', '');
+        $fractionStr = number_format($fraction, 4, ".", "");
         $fractionDigits = substr($fractionStr, 2);
         return sprintf("%02d:%02d:%02d.%s", $hours, $minutes, $secs, $fractionDigits);
     }
@@ -44,10 +44,10 @@ class SwimmingCalculator
      */
     public static function calculateSwimmingPoints(array $results, array $config, array $expectedStaffeln): array
     {
-        $shareSwimming = isset($config['SHARE_SWIMMING']) ? (float)$config['SHARE_SWIMMING'] : 50.0;
-        $totalPoints = isset($config['TOTAL_POINTS']) ? (float)$config['TOTAL_POINTS'] : 12000.0;
-        $deductionIntervalMs = isset($config['DEDUCTION_INTERVAL_MS']) ? (float)$config['DEDUCTION_INTERVAL_MS'] : 100.0;
-        $pointsDeduction = isset($config['POINTS_DEDUCTION']) ? (float)$config['POINTS_DEDUCTION'] : 1.0;
+        $shareSwimming = isset($config["SHARE_SWIMMING"]) ? (float)$config["SHARE_SWIMMING"] : 50.0;
+        $totalPoints = isset($config["TOTAL_POINTS"]) ? (float)$config["TOTAL_POINTS"] : 12000.0;
+        $deductionIntervalMs = isset($config["DEDUCTION_INTERVAL_MS"]) ? (float)$config["DEDUCTION_INTERVAL_MS"] : 100.0;
+        $pointsDeduction = isset($config["POINTS_DEDUCTION"]) ? (float)$config["POINTS_DEDUCTION"] : 1.0;
 
         $totalSwimmingPoints = $totalPoints * ($shareSwimming / 100);
         $numStaffeln = count($expectedStaffeln);
@@ -58,25 +58,29 @@ class SwimmingCalculator
 
         $staffelMaximalPoints = $totalSwimmingPoints / $numStaffeln;
 
-        // Minimale Zeiten pro Staffel und Wertung ermitteln
+        // Minimale Zeiten pro Staffel und Wertung ermitteln.
+        // WICHTIG: Als Wertungsmaßstab die GESAMTZEIT (Schwimmzeit + Strafzeit, data[4])
+        // verwenden – konsistent mit der Punkteberechnung weiter unten. Würde hier die
+        // reine Schwimmzeit (data[0]) benutzt, bekäme selbst das schnellste Team keine
+        // vollen Punkte, sobald es eine Strafzeit hat (Maßstab-Inkonsistenz).
         $minTimes = [];
         foreach ($results as $wertung => $wertungData) {
             $minTimes[$wertung] = [];
 
-            foreach ($wertungData['Teams'] as $teamData) {
+            foreach ($wertungData["Teams"] as $teamData) {
                 foreach ($teamData as $staffelName => $data) {
+                    // data[0] (Schwimmzeit) dient nur als "Team ist angetreten"-Indikator.
                     if (is_array($data) && !empty($data[0])) {
-                        $swimSeconds = self::timeStringToSeconds($data[0]);
-                        $swimMs = (int) floor($swimSeconds * 1000);
+                        $overallMs = (int)($data[4] ?? 0);
 
                         // Schutz vor 0-Zeiten (fehlerhaft eingetragene "00:00:00.0000"),
                         // die sonst zur "schnellsten Zeit" werden und die Wertung sabotieren.
-                        if ($swimMs <= 0) {
+                        if ($overallMs <= 0) {
                             continue;
                         }
 
-                        if (!isset($minTimes[$wertung][$staffelName]) || $swimMs < $minTimes[$wertung][$staffelName]) {
-                            $minTimes[$wertung][$staffelName] = $swimMs;
+                        if (!isset($minTimes[$wertung][$staffelName]) || $overallMs < $minTimes[$wertung][$staffelName]) {
+                            $minTimes[$wertung][$staffelName] = $overallMs;
                         }
                     }
                 }
@@ -85,7 +89,7 @@ class SwimmingCalculator
 
         // Punkteberechnung
         foreach ($results as $wertung => &$wertungData) {
-            foreach ($wertungData['Teams'] as $team => &$teamData) {
+            foreach ($wertungData["Teams"] as $team => &$teamData) {
                 $totalStaffelScore = 0;
 
                 foreach ($teamData as $staffelName => &$data) {
@@ -113,15 +117,15 @@ class SwimmingCalculator
                     $data[3] = (int)$staffelPoints;
                     $totalStaffelScore += $data[3];
                 }
-                $teamData['TotalStaffelScore'] = $totalStaffelScore;
+                $teamData["TotalStaffelScore"] = $totalStaffelScore;
             }
         }
 
         // Teams nach Gesamtpunkten sortieren
         foreach ($results as $wertung => &$wertungData) {
-            uasort($wertungData['Teams'], function($a, $b) {
-                $scoreA = $a['TotalStaffelScore'] ?? 0;
-                $scoreB = $b['TotalStaffelScore'] ?? 0;
+            uasort($wertungData["Teams"], function($a, $b) {
+                $scoreA = $a["TotalStaffelScore"] ?? 0;
+                $scoreB = $b["TotalStaffelScore"] ?? 0;
                 return $scoreB <=> $scoreA;
             });
         }
