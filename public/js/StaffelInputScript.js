@@ -432,3 +432,6 @@ window.showTab = showTab;
 window.confirmDeleteStaffel = confirmDeleteStaffel;
 window.deleteStaffel = deleteStaffel;
 window.closeModal = closeModal;
+window.loadStaffelCheckboxes = loadStaffelCheckboxes;
+window.selectAllStaffeln = selectAllStaffeln;
+window.deselectAllStaffeln = deselectAllStaffeln;
