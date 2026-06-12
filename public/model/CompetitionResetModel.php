@@ -321,15 +321,7 @@ class CompetitionResetModel
             $stmt->bindParam(':currentUserId', $currentUserId, PDO::PARAM_INT);
             $stmt->execute();
 
-            // 7. Question-Daten löschen
-            $stmt = $this->db->prepare("DELETE FROM Answer");
-            $stmt->execute();
-
-            $stmt = $this->db->prepare("DELETE FROM Question");
-            $stmt->execute();
-
-            $stmt = $this->db->prepare("DELETE FROM QuestionPool");
-            $stmt->execute();
+            // 7. Question-Daten: Fragenpools, Fragen und Antworten bleiben erhalten (wiederverwendbar)
 
             // 8. Protokolle löschen
             $stmt = $this->db->prepare("DELETE FROM Protokoll");
