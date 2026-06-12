@@ -72,6 +72,7 @@ require_once '../php_assets/CustomAlertBox.php';
                 <li>Fehlende Stunden oder Minuten werden automatisch ergänzt</li>
                 <li>Sie können die Felder auch leer lassen, wenn ein Team nicht teilgenommen hat</li>
                 <li>Bereits gespeicherte Zeiten werden automatisch angezeigt</li>
+                <li>Es werden nur Mannschaften angezeigt, deren Wertung dieser Staffel zugeordnet ist</li>
             </ul>
         </div>
 
@@ -82,7 +83,10 @@ require_once '../php_assets/CustomAlertBox.php';
                     <input type="hidden" name="staffelID" value="<?php echo htmlspecialchars($staffelID); ?>">
 
                     <?php if (empty($teams)): ?>
-                        <p class="warning">Für diese Staffel sind keine Mannschaften hinterlegt. Bitte kontaktieren Sie den Administrator.</p>
+                        <p class="warning">
+                            Für diese Staffel können noch keine Ergebnisse eingegeben werden, da keine passenden Mannschaften vorhanden sind.<br>
+                            Die Staffel muss zuerst einer Wertung zugeordnet werden (unter „Staffeln → Wertung zuordnen"). Erst dann erscheinen hier die Mannschaften der zugeordneten Wertungen.
+                        </p>
                     <?php else: ?>
                         <!-- Kopfzeile mit Beschriftungen -->
                         <div class="team-row header-row">
