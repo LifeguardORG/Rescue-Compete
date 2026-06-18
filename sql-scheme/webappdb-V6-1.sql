@@ -162,7 +162,8 @@ CREATE TABLE IF NOT EXISTS `WertungStaffel` (
 
 CREATE TABLE IF NOT EXISTS `WertungStation` (
                                                 `wertung_ID` int(11) NOT NULL,
-    `station_ID` int(11) NOT NULL
+    `station_ID` int(11) NOT NULL,
+    `weight` int(11) NOT NULL DEFAULT 0
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------

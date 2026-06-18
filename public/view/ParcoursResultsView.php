@@ -63,22 +63,13 @@ extract($data); // Jetzt stehen $wertungDetails, $stationIDs und $weights zur Ve
                     <li>2. Wert: normierte Punkte</li>
                 </ul>
             </div>
-            <!-- Berechnungsinformationen für jede Station -->
+            <!-- Berechnungsinformationen -->
             <div class="legend">
                 <h3>Berechnungen</h3>
-                <table>
-                    <?php foreach ($stationIDs as $stationName):
-                        // Gewichtung der Station ermitteln, Standard: 100%
-                        $stationWeight = isset($weights[$stationName]) ? (int)$weights[$stationName] : 100;
-                        ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($stationName); ?>:</td>
-                            <td><?php echo htmlspecialchars($stationWeight); ?>%</td>
-                        </tr>
-                    <?php endforeach; ?>
-                </table>
-                <div style="margin-top: 8px;">
-                    Die Maximal-Summe aller Stationen zusammen ist immer gleich.
+                <div>
+                    Die Stationsgewichte sind <strong>pro Wertung</strong> und stehen
+                    in Klammern im jeweiligen Spaltenkopf. Pro Wertung ergeben die
+                    Stationen zusammen 100 % des Parcours-Anteils.
                 </div>
             </div>
 
@@ -91,7 +82,10 @@ extract($data); // Jetzt stehen $wertungDetails, $stationIDs und $weights zur Ve
                 <p>Keine Daten verfügbar.</p>
             <?php else: ?>
                 <?php foreach ($wertungDetails as $wertungsklasse => $details): ?>
-                    <?php $wertungStationIDs = $stationNamesByWertung[$wertungsklasse] ?? []; ?>
+                    <?php
+                    $wertungStationIDs = $stationNamesByWertung[$wertungsklasse] ?? [];
+                    $wertungWeights = $weightsByWertung[$wertungsklasse] ?? [];
+                    ?>
                     <div class="results-section">
                         <h2>Wertung: <?php echo htmlspecialchars($wertungsklasse); ?></h2>
                         <table class="results-table">
@@ -99,7 +93,10 @@ extract($data); // Jetzt stehen $wertungDetails, $stationIDs und $weights zur Ve
                             <tr>
                                 <th class="team-header">Mannschaft</th>
                                 <?php foreach ($wertungStationIDs as $stationName): ?>
-                                    <th class="station-header"><?php echo htmlspecialchars($stationName); ?></th>
+                                    <?php $w = isset($wertungWeights[$stationName]) ? (int)$wertungWeights[$stationName] : null; ?>
+                                    <th class="station-header">
+                                        <?php echo htmlspecialchars($stationName); ?><?php echo $w !== null ? ' (' . $w . '%)' : ''; ?>
+                                    </th>
                                 <?php endforeach; ?>
                                 <th class="points-header">Gesamtpunkte</th>
                             </tr>

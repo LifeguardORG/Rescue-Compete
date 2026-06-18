@@ -25,27 +25,28 @@ class ParcoursResultsController {
      * Verarbeitet den Request und liefert die Parcours-Ergebnisse.
      */
     public function processRequest(): array {
-        // 1. Station-Gewichte aktualisieren
-        $this->updateWeightsIfNeeded();
-
-        // 2. Konfiguration laden
+        // 1. Konfiguration laden (Shares/Gesamtpunkte). Die Gewichte sind jetzt
+        //    Wertungs-abhängig und werden direkt im Model ermittelt.
         $config = $this->loadConfig();
 
-        // 3. Adjustierte Parcours-Ergebnisse berechnen
+        // 2. Adjustierte Parcours-Ergebnisse berechnen
         $wertungDetails = $this->model->getAdjustedParcoursResults($config);
 
-        // 4. Station-Namen sammeln (globale Union – für die "Berechnungen"-Legende)
+        // 3. Station-Namen sammeln (globale Union – Fallback/Allgemein)
         $stationNames = $this->collectStationNames($wertungDetails);
 
-        // 5. Je Wertung deren zugeordnete Stationen (für die Spaltenköpfe pro Wertung) –
+        // 4. Je Wertung deren zugeordnete Stationen (für die Spaltenköpfe pro Wertung) –
         //    gleiche Quelle wie die Punkteberechnung, damit Spalten und Topf konsistent sind.
         $stationNamesByWertung = $this->model->getStationsByWertungMap();
+
+        // 5. Wertungs-abhängige Stationsgewichte (Prozent, Summe 100) für die Anzeige.
+        $weightsByWertung = $this->model->getWeightsByWertungMap();
 
         return [
             'wertungDetails'        => $wertungDetails,
             'stationIDs'            => $stationNames,
             'stationNamesByWertung' => $stationNamesByWertung,
-            'weights'               => $config['WEIGHTS'] ?? [],
+            'weightsByWertung'      => $weightsByWertung,
         ];
     }
 
@@ -71,36 +72,6 @@ class ParcoursResultsController {
         }
 
         return $config;
-    }
-
-    /**
-     * Aktualisiert Station-Gewichte falls nötig.
-     */
-    private function updateWeightsIfNeeded(): void
-    {
-        $stationNames = $this->configModel->getDbStationNames();
-        $config = $this->configModel->getConfig();
-
-        if (empty($config)) {
-            $config = [
-                'SHARE_PARCOURS' => 50,
-                'TOTAL_POINTS'   => 12000,
-                'WEIGHTS'        => array_fill_keys($stationNames, 100)
-            ];
-        } else {
-            if (!isset($config['WEIGHTS']) || !is_array($config['WEIGHTS'])) {
-                $config['WEIGHTS'] = array_fill_keys($stationNames, 100);
-            }
-        }
-
-        $configStationNames = array_keys($config['WEIGHTS']);
-        sort($configStationNames);
-        sort($stationNames);
-
-        if ($configStationNames !== $stationNames) {
-            $config['WEIGHTS'] = array_fill_keys($stationNames, 100);
-            $this->configModel->updateConfig($config);
-        }
     }
 
     /**

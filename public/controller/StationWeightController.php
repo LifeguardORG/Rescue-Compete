@@ -3,110 +3,129 @@
 namespace Station\Controller;
 
 use Station\StationModel;
-use Station\StationWeightModel;
+use Model\WeightDistribution;
+
+require_once __DIR__ . '/../model/WeightDistribution.php';
 
 /**
- * Controller für die Verwaltung der Stationsgewichtungen.
+ * Controller für die Wertungs-abhängige Stationsgewichtung.
+ *
+ * Pro Wertung ergeben die zugeordneten Stationen zusammen exakt 100 % des
+ * Parcours-Anteils. Die Gewichte werden in WertungStation.weight gespeichert.
  */
 class StationWeightController {
     private StationModel $stationModel;
-    private StationWeightModel $weightModel;
     public string $message = "";
-    public array $modalData = [];
-    public string $redirectUrl = "StationWeightView.php";
+    public string $redirectUrl = "StationWeightInputView.php";
 
-    /**
-     * Konstruktor: Initialisiert die benötigten Modelle.
-     *
-     * @param StationModel $stationModel Das Stationsmodell
-     * @param StationWeightModel $weightModel Das Gewichtungsmodell
-     */
-    public function __construct(StationModel $stationModel, StationWeightModel $weightModel) {
+    public function __construct(StationModel $stationModel) {
         $this->stationModel = $stationModel;
-        $this->weightModel = $weightModel;
     }
 
     /**
-     * Verarbeitet Anfragen zum Aktualisieren von Stationsgewichtungen.
+     * Verarbeitet AJAX-Vorbelegung und das Speichern. Liefert die Daten für die View.
      *
-     * @return array Daten für die View
+     * @return array ['wertungen' => array, 'message' => string]
      */
     public function processRequest(): array {
-        // Initialisiere die Gewichtungen, falls noch keine existieren
-        $this->weightModel->initializeWeights();
-
-        // Verarbeite das Update-Formular
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_weights'])) {
-            $this->handleUpdateWeights();
+        // AJAX: Stationen + wirksame Startgewichte einer Wertung (für die UI-Vorbelegung)
+        if (isset($_GET['action']) && $_GET['action'] === 'getWeightsForWertung') {
+            $this->handleAjaxGetWeightsForWertung();
+            // exit erfolgt in der Methode
         }
 
-        // Hole alle Stationen mit ihren Gewichtungen
-        $stations = $this->getStationsWithWeights();
+        // Speichern der Gewichte einer Wertung
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_weights'])) {
+            $this->handleSaveWeights();
+        }
 
         return [
-            'stations' => $stations,
-            'message' => $this->message
+            'wertungen' => $this->stationModel->getAllWertungen(),
+            'message'   => $this->message,
         ];
     }
 
     /**
-     * Verarbeitet die Aktualisierung der Stationsgewichtungen.
+     * AJAX: Liefert die einer Wertung zugeordneten Stationen samt wirksamem
+     * Startgewicht (gespeicherte Werte falls Summe 100, sonst Gleichverteilung).
      */
-    private function handleUpdateWeights() {
-        if (!isset($_POST['weights']) || !is_array($_POST['weights'])) {
-            $this->message = "Fehlerhafte Anfrage: Keine Gewichtungen übermittelt.";
-            return;
+    private function handleAjaxGetWeightsForWertung(): void {
+        header('Content-Type: application/json');
+
+        $wertungId = intval($_GET['wertung'] ?? 0);
+        if ($wertungId <= 0) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Keine Wertung angegeben']);
+            exit;
         }
 
-        $weights = $_POST['weights'];
-        $stationIds = array_keys($weights);
-        $success = true;
+        $stationen = $this->stationModel->getWeightedStationsByWertung($wertungId);
+        $effective = WeightDistribution::effective(array_column($stationen, 'weight'));
 
-        // Validiere die Gewichtungen
-        foreach ($weights as $id => $weight) {
-            if (!is_numeric($weight) || $weight < 0) {
-                $this->message = "Ungültige Gewichtung für Station ID $id. Gewichtungen müssen positive Zahlen sein.";
-                return;
-            }
+        $result = [];
+        foreach ($stationen as $i => $station) {
+            $result[] = [
+                'ID'     => (int)$station['ID'],
+                'name'   => $station['name'],
+                'Nr'     => (int)$station['Nr'],
+                'weight' => (int)($effective[$i] ?? 0),
+            ];
         }
 
-        // Aktualisiere die Gewichtungen in der Datenbank
-        foreach ($weights as $id => $weight) {
-            $result = $this->weightModel->setWeight((int)$id, (int)$weight);
-            if (!$result) {
-                $success = false;
-            }
-        }
-
-        $this->message = $success
-            ? "Stationsgewichtungen erfolgreich aktualisiert."
-            : "Fehler beim Aktualisieren der Gewichtungen.";
+        echo json_encode(['success' => true, 'stationen' => $result]);
+        exit;
     }
 
     /**
-     * Holt alle Stationen mit ihren aktuellen Gewichtungen.
-     *
-     * @return array Liste der Stationen mit Gewichtungen
+     * Validiert und speichert die Gewichte einer Wertung. Erlaubt nur ganzzahlige
+     * Werte 0–100, die zusammen exakt 100 ergeben, und nur für genau die der Wertung
+     * zugeordneten Stationen.
      */
-    private function getStationsWithWeights(): array {
-        $stations = $this->stationModel->read();
-        $weights = $this->weightModel->read();
+    private function handleSaveWeights(): void {
+        $wertungId = intval($_POST['wertung'] ?? 0);
+        $weightsInput = (isset($_POST['weights']) && is_array($_POST['weights'])) ? $_POST['weights'] : [];
 
-        // Erstelle ein Lookup-Array für die Gewichtungen
-        $weightLookup = [];
-        if ($weights) {
-            foreach ($weights as $weight) {
-                $weightLookup[$weight['station_ID']] = $weight['weight'];
-            }
+        if ($wertungId <= 0) {
+            $this->message = "Bitte wählen Sie eine Wertung aus.";
+            return;
         }
 
-        // Füge die Gewichtungen zu den Stationsdaten hinzu
-        if ($stations) {
-            foreach ($stations as &$station) {
-                $station['weight'] = $weightLookup[$station['ID']] ?? 100; // Standardgewichtung 100
-            }
+        // Erlaubte Stationen dieser Wertung
+        $assignedIds = $this->stationModel->getStationsByWertung($wertungId);
+        if (empty($assignedIds)) {
+            $this->message = "Dieser Wertung sind keine Stationen zugeordnet.";
+            return;
         }
 
-        return $stations ?: [];
+        // Nur Gewichte zugeordneter Stationen übernehmen; jede zugeordnete Station muss vorkommen.
+        $idToWeight = [];
+        foreach ($assignedIds as $stationId) {
+            if (!isset($weightsInput[$stationId]) || !is_numeric($weightsInput[$stationId])) {
+                $this->message = "Unvollständige oder ungültige Gewichtungen.";
+                return;
+            }
+            $w = (int)$weightsInput[$stationId];
+            if ($w < 0 || $w > 100) {
+                $this->message = "Gewichtungen müssen zwischen 0 und 100 liegen.";
+                return;
+            }
+            $idToWeight[$stationId] = $w;
+        }
+
+        if (array_sum($idToWeight) !== 100) {
+            $this->message = "Die Gewichtungen müssen zusammen exakt 100 % ergeben.";
+            return;
+        }
+
+        if ($this->stationModel->setStationWeightsForWertung($wertungId, $idToWeight)) {
+            if (session_status() == PHP_SESSION_NONE) {
+                session_start();
+            }
+            $_SESSION['success_message'] = "Gewichtungen erfolgreich gespeichert.";
+            header("Location: " . $this->redirectUrl . "?wertung=" . $wertungId);
+            exit;
+        }
+
+        $this->message = "Fehler beim Speichern der Gewichtungen.";
     }
 }

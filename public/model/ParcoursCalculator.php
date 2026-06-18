@@ -11,17 +11,19 @@ class ParcoursCalculator
     /**
      * Berechnet adjustierte Parcours-Punkte basierend auf Gewichtung und Konfiguration.
      *
-     * @param array $parcoursData Raw parcours data
-     * @param array $config Configuration array with WEIGHTS, SHARE_PARCOURS, TOTAL_POINTS
+     * @param array $parcoursData     Raw parcours data
+     * @param array $config           Configuration array with SHARE_PARCOURS, TOTAL_POINTS
+     * @param array $weightsByWertung Map: wertungName => (stationName => prozent). Die
+     *                                Stationsgewichte sind Wertungs-abhängig und ergeben
+     *                                pro Wertung 100 (Fallback Gleichverteilung im Model).
      * @return array Adjusted parcours data with calculated points
      */
-    public static function calculateAdjustedPoints(array $parcoursData, array $config): array
+    public static function calculateAdjustedPoints(array $parcoursData, array $config, array $weightsByWertung = []): array
     {
         // Konfigurationswerte aus der Datenbank verwenden
         $shareParcours = isset($config['SHARE_PARCOURS']) ? (float)$config['SHARE_PARCOURS'] / 100 : 0.5;
         $totalPoints = isset($config['TOTAL_POINTS']) ? (float)$config['TOTAL_POINTS'] : 12000.0;
         $totalParcoursPoints = $totalPoints * $shareParcours;
-        $weights = $config['WEIGHTS'] ?? [];
 
         if (getenv('APP_DEBUG')) {
             error_log("DEBUG ParcoursCalculator - Config:");
@@ -32,13 +34,16 @@ class ParcoursCalculator
         }
 
         // Der Parcours-Topf wird PRO WERTUNG nur auf deren zugeordnete Stationen
-        // verteilt. Da die Daten bereits pro Wertung auf die zugeordneten Stationen
-        // gefiltert sind, ergibt sich die Stationsmenge je Wertung aus deren
-        // Stations-Keys. Wertung ohne Stationen → sumWeights = 0 → keine Punkte.
+        // verteilt. Die Gewichte je Station kommen Wertungs-abhängig aus
+        // $weightsByWertung; sumWeights ist deren Summe (= 100 bei gültiger Aufteilung).
         foreach ($parcoursData as $wertung => &$wertungData) {
             if (!isset($wertungData['Teams'])) {
                 continue;
             }
+
+            // Wertungs-abhängige Stationsgewichte. Fallback 100 pro vorhandener Station,
+            // falls (unerwartet) keine Map übergeben wurde.
+            $weights = $weightsByWertung[$wertung] ?? [];
 
             // Stationsmenge dieser Wertung (Union der Stations-Keys ihrer Teams).
             $wertungStationNames = self::collectWertungStationNames($wertungData['Teams']);

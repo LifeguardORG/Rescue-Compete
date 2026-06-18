@@ -270,6 +270,73 @@ class StationModel
     }
 
     /**
+     * Liefert die einer Wertung zugeordneten Stationen inkl. gespeichertem Gewicht,
+     * sortiert nach Nr, name (einheitliche Reihenfolge für die Gleichverteilung).
+     *
+     * @param int $wertungId ID der Wertungsklasse.
+     * @return array Liste mit ['ID' => int, 'name' => string, 'Nr' => int, 'weight' => int].
+     */
+    public function getWeightedStationsByWertung(int $wertungId): array
+    {
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT s.ID, s.name, s.Nr, ws.weight
+                 FROM WertungStation ws
+                 JOIN Station s ON s.ID = ws.station_ID
+                 WHERE ws.wertung_ID = :id
+                 ORDER BY s.Nr, s.name"
+            );
+            $stmt->bindParam(':id', $wertungId, PDO::PARAM_INT);
+            $stmt->execute();
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($rows as &$row) {
+                $row['ID']     = (int)$row['ID'];
+                $row['Nr']     = (int)$row['Nr'];
+                $row['weight'] = (int)$row['weight'];
+            }
+            return $rows;
+        } catch (PDOException $e) {
+            error_log("Error in Station::getWeightedStationsByWertung: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Speichert die Stationsgewichte einer Wertung. Aktualisiert nur Stationen,
+     * die der Wertung bereits zugeordnet sind (WHERE auf wertung_ID + station_ID),
+     * sodass keine fremden Zuordnungen entstehen. Transaktional.
+     *
+     * @param int   $wertungId   ID der Wertungsklasse.
+     * @param array $idToWeight  Map station_ID => weight (Prozent, ganzzahlig).
+     * @return bool True bei Erfolg, false bei Fehler.
+     */
+    public function setStationWeightsForWertung(int $wertungId, array $idToWeight): bool
+    {
+        try {
+            $this->db->beginTransaction();
+
+            $update = $this->db->prepare(
+                "UPDATE WertungStation SET weight = :weight
+                 WHERE wertung_ID = :wertung_ID AND station_ID = :station_ID"
+            );
+            foreach ($idToWeight as $stationId => $weight) {
+                $update->execute([
+                    ':weight'     => (int)$weight,
+                    ':wertung_ID' => $wertungId,
+                    ':station_ID' => (int)$stationId,
+                ]);
+            }
+
+            $this->db->commit();
+            return true;
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            error_log("Error in Station::setStationWeightsForWertung: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Synchronisiert die Stations-Zuordnungen einer Wertung auf genau die
      * übergebene ID-Liste (alte Zuordnungen werden ersetzt). Transaktional.
      *
@@ -282,17 +349,30 @@ class StationModel
         try {
             $this->db->beginTransaction();
 
+            // Bestehende Gewichte merken, um sie für erhaltene Stationen zu bewahren.
+            // Neue Stationen starten mit 0 (= unbestimmt → Gleichverteilung beim Laden).
+            $existing = $this->db->prepare(
+                "SELECT station_ID, weight FROM WertungStation WHERE wertung_ID = :id"
+            );
+            $existing->bindParam(':id', $wertungId, PDO::PARAM_INT);
+            $existing->execute();
+            $existingWeights = [];
+            foreach ($existing->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $existingWeights[(int)$row['station_ID']] = (int)$row['weight'];
+            }
+
             $stmt = $this->db->prepare("DELETE FROM WertungStation WHERE wertung_ID = :id");
             $stmt->bindParam(':id', $wertungId, PDO::PARAM_INT);
             $stmt->execute();
 
             $insert = $this->db->prepare(
-                "INSERT INTO WertungStation (wertung_ID, station_ID) VALUES (:wertung_ID, :station_ID)"
+                "INSERT INTO WertungStation (wertung_ID, station_ID, weight) VALUES (:wertung_ID, :station_ID, :weight)"
             );
             foreach (array_unique(array_map('intval', $stationIds)) as $stationId) {
                 $insert->execute([
                     ':wertung_ID' => $wertungId,
                     ':station_ID' => $stationId,
+                    ':weight'     => $existingWeights[$stationId] ?? 0,
                 ]);
             }
 

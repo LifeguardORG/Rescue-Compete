@@ -8,6 +8,7 @@ use PDOException;
 // Neue Calculator-Klassen einbinden
 require_once __DIR__ . '/SwimmingCalculator.php';
 require_once __DIR__ . '/ParcoursCalculator.php';
+require_once __DIR__ . '/WeightDistribution.php';
 
 /**
  * Model für Ergebnisdaten.
@@ -106,6 +107,48 @@ class ResultModel
             return $map;
         } catch (PDOException $e) {
             error_log("Error in ResultModel::getStationsByWertungMap: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Liefert je Wertung die wirksamen Stationsgewichte (Prozent, Summe 100).
+     *
+     * Quelle ist WertungStation.weight; ist für eine Wertung noch nichts
+     * Gültiges gespeichert (Summe != 100), wird über WeightDistribution::effective
+     * auf eine Gleichverteilung zurückgefallen. Reihenfolge Nr, name – konsistent
+     * mit der Gewichtungs-UI, damit der „+1"-Rest an derselben Stelle landet.
+     *
+     * @return array Map: wertungName (string) => (stationName => prozent:int).
+     */
+    public function getWeightsByWertungMap(): array
+    {
+        try {
+            $stmt = $this->db->query(
+                "SELECT wk.name AS wertung_name, s.name AS station_name, ws.weight AS weight
+                 FROM Wertungsklasse wk
+                 JOIN WertungStation ws ON ws.wertung_ID = wk.ID
+                 JOIN Station s ON s.ID = ws.station_ID
+                 ORDER BY wk.name, s.Nr, s.name"
+            );
+
+            // Pro Wertung Stationsnamen + gespeicherte Gewichte in fester Reihenfolge sammeln.
+            $names = [];
+            $stored = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $w = $row['wertung_name'];
+                $names[$w][]  = $row['station_name'];
+                $stored[$w][] = (int)$row['weight'];
+            }
+
+            $map = [];
+            foreach ($names as $wertung => $stationNames) {
+                $effective = WeightDistribution::effective($stored[$wertung]);
+                $map[$wertung] = array_combine($stationNames, $effective);
+            }
+            return $map;
+        } catch (PDOException $e) {
+            error_log("Error in ResultModel::getWeightsByWertungMap: " . $e->getMessage());
             return [];
         }
     }
@@ -476,11 +519,15 @@ class ResultModel
      */
     public function getAdjustedParcoursResults(): array
     {
-        // Komplette Konfiguration laden (inklusive aktueller WEIGHTS)
+        // Konfiguration laden (Shares/Gesamtpunkte). Die globalen WEIGHTS werden vom
+        // Parcours nicht mehr genutzt – die Gewichte kommen jetzt pro Wertung.
         $config = $this->loadCompleteConfiguration();
 
+        // Wertungs-abhängige Stationsgewichte (Prozent, Summe 100; Fallback Gleichverteilung).
+        $weightsByWertung = $this->getWeightsByWertungMap();
+
         $parcoursData = $this->getParcoursWertungenWithDetails();
-        $adjustedData = ParcoursCalculator::calculateAdjustedPoints($parcoursData, $config);
+        $adjustedData = ParcoursCalculator::calculateAdjustedPoints($parcoursData, $config, $weightsByWertung);
 
         return $adjustedData;
     }
