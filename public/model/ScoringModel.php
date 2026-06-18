@@ -190,6 +190,11 @@ class ScoringModel
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
 
+            // Außerdem alle Stations-Zuordnungen dieser Wertung löschen
+            $stmt = $this->db->prepare("DELETE FROM WertungStation WHERE wertung_ID = :id");
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+
             // Anschließend die eigentliche Wertungsklasse löschen
             $stmt = $this->db->prepare("DELETE FROM Wertungsklasse WHERE ID = :id");
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);

@@ -139,6 +139,11 @@ class StationModel
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
 
+            // 6b. Lösche alle Wertung-Zuordnungen dieser Station
+            $stmt = $this->db->prepare("DELETE FROM WertungStation WHERE station_ID = :id");
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+
             // 7. Lösche die Station selbst
             $stmt = $this->db->prepare("DELETE FROM Station WHERE ID = :id");
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
@@ -224,6 +229,118 @@ class StationModel
         } catch (PDOException $e) {
             error_log("Fehler in Station::getQuestionFormCount: " . $e->getMessage());
             return 0;
+        }
+    }
+
+    /**
+     * Liefert alle Wertungsklassen (ID + Name) für die Zuordnungs-Dropdowns.
+     *
+     * @return array Liste mit ['ID' => int, 'name' => string].
+     */
+    public function getAllWertungen(): array
+    {
+        try {
+            $stmt = $this->db->query("SELECT ID, name FROM Wertungsklasse ORDER BY name");
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error in Station::getAllWertungen: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Liefert die IDs der einer Wertung zugeordneten Stationen.
+     *
+     * @param int $wertungId ID der Wertungsklasse.
+     * @return int[] Liste der zugeordneten Station-IDs.
+     */
+    public function getStationsByWertung(int $wertungId): array
+    {
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT station_ID FROM WertungStation WHERE wertung_ID = :id"
+            );
+            $stmt->bindParam(':id', $wertungId, PDO::PARAM_INT);
+            $stmt->execute();
+            return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+        } catch (PDOException $e) {
+            error_log("Error in Station::getStationsByWertung: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Synchronisiert die Stations-Zuordnungen einer Wertung auf genau die
+     * übergebene ID-Liste (alte Zuordnungen werden ersetzt). Transaktional.
+     *
+     * @param int   $wertungId  ID der Wertungsklasse.
+     * @param int[] $stationIds Gewünschte Station-IDs.
+     * @return bool True bei Erfolg, false bei Fehler.
+     */
+    public function setStationsForWertung(int $wertungId, array $stationIds): bool
+    {
+        try {
+            $this->db->beginTransaction();
+
+            $stmt = $this->db->prepare("DELETE FROM WertungStation WHERE wertung_ID = :id");
+            $stmt->bindParam(':id', $wertungId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $insert = $this->db->prepare(
+                "INSERT INTO WertungStation (wertung_ID, station_ID) VALUES (:wertung_ID, :station_ID)"
+            );
+            foreach (array_unique(array_map('intval', $stationIds)) as $stationId) {
+                $insert->execute([
+                    ':wertung_ID' => $wertungId,
+                    ':station_ID' => $stationId,
+                ]);
+            }
+
+            $this->db->commit();
+            return true;
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            error_log("Error in Station::setStationsForWertung: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Liefert je Wertung die Liste ihrer zugeordneten Stationsnamen
+     * (für den Übersichts-Tab). Wertungen ohne Zuordnung erscheinen mit
+     * leerer Stationsliste.
+     *
+     * @return array Liste mit ['wertung_id' => int, 'wertung_name' => string, 'stationen' => string[]].
+     */
+    public function getAssignmentOverview(): array
+    {
+        try {
+            $stmt = $this->db->query(
+                "SELECT wk.ID AS wertung_id, wk.name AS wertung_name, s.name AS station_name
+                 FROM Wertungsklasse wk
+                 LEFT JOIN WertungStation ws ON ws.wertung_ID = wk.ID
+                 LEFT JOIN Station s ON s.ID = ws.station_ID
+                 ORDER BY wk.name, s.name"
+            );
+
+            $overview = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $id = (int)$row['wertung_id'];
+                if (!isset($overview[$id])) {
+                    $overview[$id] = [
+                        'wertung_id'   => $id,
+                        'wertung_name' => $row['wertung_name'],
+                        'stationen'    => [],
+                    ];
+                }
+                if (!is_null($row['station_name'])) {
+                    $overview[$id]['stationen'][] = $row['station_name'];
+                }
+            }
+            return array_values($overview);
+        } catch (PDOException $e) {
+            error_log("Error in Station::getAssignmentOverview: " . $e->getMessage());
+            return [];
         }
     }
 }

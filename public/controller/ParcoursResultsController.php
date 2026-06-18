@@ -34,13 +34,18 @@ class ParcoursResultsController {
         // 3. Adjustierte Parcours-Ergebnisse berechnen
         $wertungDetails = $this->model->getAdjustedParcoursResults($config);
 
-        // 4. Station-Namen sammeln
+        // 4. Station-Namen sammeln (globale Union – für die "Berechnungen"-Legende)
         $stationNames = $this->collectStationNames($wertungDetails);
 
+        // 5. Je Wertung deren zugeordnete Stationen (für die Spaltenköpfe pro Wertung) –
+        //    gleiche Quelle wie die Punkteberechnung, damit Spalten und Topf konsistent sind.
+        $stationNamesByWertung = $this->model->getStationsByWertungMap();
+
         return [
-            'wertungDetails' => $wertungDetails,
-            'stationIDs'     => $stationNames,
-            'weights'        => $config['WEIGHTS'] ?? [],
+            'wertungDetails'        => $wertungDetails,
+            'stationIDs'            => $stationNames,
+            'stationNamesByWertung' => $stationNamesByWertung,
+            'weights'               => $config['WEIGHTS'] ?? [],
         ];
     }
 

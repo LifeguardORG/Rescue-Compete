@@ -82,6 +82,10 @@ class CompetitionResetModel
             $stmt = $this->db->prepare("UPDATE User SET station_ID = NULL WHERE station_ID IS NOT NULL AND acc_typ != 'Admin'");
             $stmt->execute();
 
+            // Lösche alle Wertung-Station-Zuordnungen
+            $stmt = $this->db->prepare("DELETE FROM WertungStation");
+            $stmt->execute();
+
             // Lösche alle Stationen
             $stmt = $this->db->prepare("DELETE FROM Station");
             $stmt->execute();
@@ -224,6 +228,10 @@ class CompetitionResetModel
             $stmt = $this->db->prepare("DELETE FROM WertungStaffel");
             $stmt->execute();
 
+            // Lösche alle Wertung-Station-Zuordnungen
+            $stmt = $this->db->prepare("DELETE FROM WertungStation");
+            $stmt->execute();
+
             // Lösche alle Wertungsklassen
             $stmt = $this->db->prepare("DELETE FROM Wertungsklasse");
             $stmt->execute();
@@ -298,6 +306,10 @@ class CompetitionResetModel
 
             // Wertung-Staffel-Zuordnungen löschen
             $stmt = $this->db->prepare("DELETE FROM WertungStaffel");
+            $stmt->execute();
+
+            // Wertung-Station-Zuordnungen löschen
+            $stmt = $this->db->prepare("DELETE FROM WertungStation");
             $stmt->execute();
 
             // 3. Collection-Daten löschen

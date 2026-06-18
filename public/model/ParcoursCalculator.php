@@ -17,8 +17,6 @@ class ParcoursCalculator
      */
     public static function calculateAdjustedPoints(array $parcoursData, array $config): array
     {
-        $stationNames = self::collectStationNames($parcoursData);
-
         // Konfigurationswerte aus der Datenbank verwenden
         $shareParcours = isset($config['SHARE_PARCOURS']) ? (float)$config['SHARE_PARCOURS'] / 100 : 0.5;
         $totalPoints = isset($config['TOTAL_POINTS']) ? (float)$config['TOTAL_POINTS'] : 12000.0;
@@ -33,41 +31,68 @@ class ParcoursCalculator
             error_log("  totalParcoursPoints: $totalParcoursPoints");
         }
 
-        // Summe aller Gewichte berechnen
-        $sumWeights = 0;
-        foreach ($stationNames as $stationName) {
-            $weight = isset($weights[$stationName]) ? (float)$weights[$stationName] : 100;
-            $sumWeights += $weight;
-        }
-
-        if (getenv('APP_DEBUG')) {
-            error_log("  sumWeights: $sumWeights");
-        }
-
-        // Für jede Wertung und jedes Team: adjustierte Punkte berechnen
+        // Der Parcours-Topf wird PRO WERTUNG nur auf deren zugeordnete Stationen
+        // verteilt. Da die Daten bereits pro Wertung auf die zugeordneten Stationen
+        // gefiltert sind, ergibt sich die Stationsmenge je Wertung aus deren
+        // Stations-Keys. Wertung ohne Stationen → sumWeights = 0 → keine Punkte.
         foreach ($parcoursData as $wertung => &$wertungData) {
-            if (isset($wertungData['Teams'])) {
-                foreach ($wertungData['Teams'] as $teamName => &$teamData) {
-                    foreach ($teamData as $stationName => &$stationEntries) {
-                        if ($stationName === 'gesamtpunkte') {
-                            continue;
-                        }
+            if (!isset($wertungData['Teams'])) {
+                continue;
+            }
 
-                        $calculatedPoints = self::calculateStationPoints(
-                            $stationEntries,
-                            $stationName,
-                            $weights,
-                            $sumWeights,
-                            $totalParcoursPoints
-                        );
+            // Stationsmenge dieser Wertung (Union der Stations-Keys ihrer Teams).
+            $wertungStationNames = self::collectWertungStationNames($wertungData['Teams']);
 
-                        $stationEntries = $calculatedPoints;
+            // Summe der Gewichte nur über die dieser Wertung zugeordneten Stationen.
+            $sumWeights = 0;
+            foreach ($wertungStationNames as $stationName) {
+                $sumWeights += isset($weights[$stationName]) ? (float)$weights[$stationName] : 100;
+            }
+
+            if (getenv('APP_DEBUG')) {
+                error_log("  Wertung '$wertung' sumWeights: $sumWeights");
+            }
+
+            foreach ($wertungData['Teams'] as $teamName => &$teamData) {
+                foreach ($teamData as $stationName => &$stationEntries) {
+                    if ($stationName === 'gesamtpunkte') {
+                        continue;
                     }
+
+                    $stationEntries = self::calculateStationPoints(
+                        $stationEntries,
+                        $stationName,
+                        $weights,
+                        $sumWeights,
+                        $totalParcoursPoints
+                    );
+                }
+                unset($stationEntries);
+            }
+            unset($teamData);
+        }
+        unset($wertungData);
+
+        return $parcoursData;
+    }
+
+    /**
+     * Sammelt die eindeutigen Station-Namen innerhalb einer einzelnen Wertung.
+     *
+     * @param array $teams Team-Daten einer Wertung ($wertungData['Teams']).
+     * @return array Liste der eindeutigen Station-Namen dieser Wertung.
+     */
+    private static function collectWertungStationNames(array $teams): array
+    {
+        $stationNames = [];
+        foreach ($teams as $teamName => $results) {
+            foreach (array_keys($results) as $key) {
+                if ($key !== 'gesamtpunkte') {
+                    $stationNames[$key] = true;
                 }
             }
         }
-
-        return $parcoursData;
+        return array_keys($stationNames);
     }
 
     /**
@@ -119,31 +144,6 @@ class ParcoursCalculator
             'original' => $originalPoints,
             'adjusted' => $adjustedPoints
         ];
-    }
-
-    /**
-     * Sammelt alle eindeutigen Station-Namen aus den Parcours-Daten.
-     *
-     * @param array $parcoursData Die Parcours-Daten
-     * @return array Liste der eindeutigen Station-Namen
-     */
-    private static function collectStationNames(array $parcoursData): array
-    {
-        $stationNames = [];
-        foreach ($parcoursData as $wertung => $data) {
-            if (isset($data['Teams'])) {
-                foreach ($data['Teams'] as $teamName => $results) {
-                    foreach (array_keys($results) as $key) {
-                        if ($key !== 'gesamtpunkte') {
-                            $stationNames[] = $key;
-                        }
-                    }
-                }
-            }
-        }
-        $stationNames = array_unique($stationNames);
-        sort($stationNames);
-        return $stationNames;
     }
 
     /**

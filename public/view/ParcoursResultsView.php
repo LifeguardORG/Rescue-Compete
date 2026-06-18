@@ -91,13 +91,14 @@ extract($data); // Jetzt stehen $wertungDetails, $stationIDs und $weights zur Ve
                 <p>Keine Daten verfügbar.</p>
             <?php else: ?>
                 <?php foreach ($wertungDetails as $wertungsklasse => $details): ?>
+                    <?php $wertungStationIDs = $stationNamesByWertung[$wertungsklasse] ?? []; ?>
                     <div class="results-section">
                         <h2>Wertung: <?php echo htmlspecialchars($wertungsklasse); ?></h2>
                         <table class="results-table">
                             <thead>
                             <tr>
                                 <th class="team-header">Mannschaft</th>
-                                <?php foreach ($stationIDs as $stationName): ?>
+                                <?php foreach ($wertungStationIDs as $stationName): ?>
                                     <th class="station-header"><?php echo htmlspecialchars($stationName); ?></th>
                                 <?php endforeach; ?>
                                 <th class="points-header">Gesamtpunkte</th>
@@ -110,7 +111,7 @@ extract($data); // Jetzt stehen $wertungDetails, $stationIDs und $weights zur Ve
                                     <?php
                                     // Summe der adjustierten Punkte für das Team initialisieren
                                     $totalPoints = 0;
-                                    foreach ($stationIDs as $stationName):
+                                    foreach ($wertungStationIDs as $stationName):
                                         if (isset($stations[$stationName]['original']) && is_array($stations[$stationName])) {
                                             $original = $stations[$stationName]['original'];
                                             $adjusted = $stations[$stationName]['adjusted'];

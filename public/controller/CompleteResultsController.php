@@ -26,7 +26,8 @@ class CompleteResultsController {
         $swimmingResults = $this->model->getSwimmingWertungenWithDetails();
         // Je Wertung deren zugeordnete Staffeln (gleiche Quelle wie die Berechnung).
         $staffelNamesByWertung = $this->model->getStaffelnByWertungMap();
-        $stationNames = $this->model->getExpectedStations();
+        // Je Wertung deren zugeordnete Stationen (gleiche Quelle wie die Berechnung).
+        $stationNamesByWertung = $this->model->getStationsByWertungMap();
 
         // 2. Konfiguration laden
         $config = $this->loadConfig();
@@ -36,12 +37,12 @@ class CompleteResultsController {
         $extractedParcoursPoints = ParcoursCalculator::extractAdjustedPointsForComplete($adjustedParcoursData);
 
         // 4. Ergebnisse kombinieren
-        $combinedResults = $this->combineResults($swimmingResults, $extractedParcoursPoints, $staffelNamesByWertung, $stationNames);
+        $combinedResults = $this->combineResults($swimmingResults, $extractedParcoursPoints, $staffelNamesByWertung, $stationNamesByWertung);
 
         return [
             'combinedResults'       => $combinedResults,
             'staffelNamesByWertung' => $staffelNamesByWertung,
-            'stationNames'          => $stationNames,
+            'stationNamesByWertung' => $stationNamesByWertung,
             'config'                => $config,
         ];
     }
@@ -75,7 +76,7 @@ class CompleteResultsController {
         array $swimmingResults,
         array $extractedParcoursPoints,
         array $staffelNamesByWertung,
-        array $stationNames
+        array $stationNamesByWertung
     ): array {
         $combinedResults = [];
 
@@ -123,6 +124,9 @@ class CompleteResultsController {
             if (!isset($combinedResults[$wertung])) {
                 $combinedResults[$wertung] = ['Teams' => []];
             }
+
+            // Nur die dieser Wertung zugeordneten Stationen berücksichtigen.
+            $stationNames = $stationNamesByWertung[$wertung] ?? [];
 
             foreach ($wertungData as $teamName => $teamStations) {
                 if (!isset($combinedResults[$wertung]['Teams'][$teamName])) {

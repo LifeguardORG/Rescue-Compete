@@ -81,6 +81,36 @@ class ResultModel
     }
 
     /**
+     * Liefert je Wertung die Liste ihrer zugeordneten Stationsnamen.
+     * Wertungen ohne Zuordnung tauchen NICHT auf (bewusst: keine Parcours-Punkte,
+     * keine Stationsspalten). Dient als gemeinsame Quelle für Berechnung und
+     * Spaltenköpfe der Parcours-/Gesamt-Ansichten.
+     *
+     * @return array Map: wertungName (string) => string[] (Stationsnamen, sortiert).
+     */
+    public function getStationsByWertungMap(): array
+    {
+        try {
+            $stmt = $this->db->query(
+                "SELECT wk.name AS wertung_name, s.name AS station_name
+                 FROM Wertungsklasse wk
+                 JOIN WertungStation ws ON ws.wertung_ID = wk.ID
+                 JOIN Station s ON s.ID = ws.station_ID
+                 ORDER BY wk.name, s.name"
+            );
+
+            $map = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $map[$row['wertung_name']][] = $row['station_name'];
+            }
+            return $map;
+        } catch (PDOException $e) {
+            error_log("Error in ResultModel::getStationsByWertungMap: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Lädt die komplette Konfiguration inklusive WEIGHTS aus der Datenbank.
      *
      * @return array Vollständige Konfiguration mit allen Parametern
@@ -220,15 +250,17 @@ class ResultModel
     public function getParcoursWertungenWithDetails(): array
     {
         try {
-            $allStations = $this->getExpectedStations();
+            // Je Wertung deren zugeordnete Stationen (kein Backfill: Wertung ohne
+            // Zuordnung bekommt keine Stationen → keine Parcours-Punkte/-Spalten).
+            $stationMap = $this->getStationsByWertungMap();
             $data = $this->initializeParcoursData();
-            $mannschaften = $this->loadTeamData($data, $allStations);
+            $mannschaften = $this->loadTeamData($data, $stationMap);
 
-            // Standarddaten aus MannschaftProtokoll
-            $this->loadProtocolData($data, $mannschaften);
+            // Standarddaten aus MannschaftProtokoll (pro Wertung auf deren Stationen gefiltert)
+            $this->loadProtocolData($data, $mannschaften, $stationMap);
 
-            // Formularpunkte hinzufügen
-            $this->addFormPointsToParcoursData($data, $mannschaften);
+            // Formularpunkte hinzufügen (ebenfalls pro Wertung gefiltert)
+            $this->addFormPointsToParcoursData($data, $mannschaften, $stationMap);
 
             // Gesamtpunkte berechnen und sortieren
             $this->calculateTotalPointsAndSort($data);
@@ -255,8 +287,12 @@ class ResultModel
 
     /**
      * Lädt Team-Daten und initialisiert die Stationen.
+     *
+     * @param array $stationMap Map: wertungName => string[] (zugeordnete Stationsnamen).
+     *                          Pro Team werden nur die DIESER Wertung zugeordneten
+     *                          Stationen initialisiert.
      */
-    private function loadTeamData(array &$data, array $allStations): array
+    private function loadTeamData(array &$data, array $stationMap): array
     {
         $query = "SELECT 
             m.ID as mannschaft_ID,
@@ -291,7 +327,8 @@ class ResultModel
 
             if (!isset($data[$wertung]['Teams'][$teamname])) {
                 $data[$wertung]['Teams'][$teamname] = [];
-                foreach ($allStations as $stationName) {
+                $wertungStations = $stationMap[$wertung] ?? [];
+                foreach ($wertungStations as $stationName) {
                     $data[$wertung]['Teams'][$teamname][$stationName] = [];
                 }
             }
@@ -302,8 +339,12 @@ class ResultModel
 
     /**
      * Lädt Protokoll-Daten aus MannschaftProtokoll.
+     *
+     * @param array $stationMap Map: wertungName => string[] (zugeordnete Stationsnamen).
+     *                          Punkte werden nur Stationen zugeordnet, die der jeweiligen
+     *                          Wertung zugewiesen sind.
      */
-    private function loadProtocolData(array &$data, array $mannschaften): void
+    private function loadProtocolData(array &$data, array $mannschaften, array $stationMap): void
     {
         $query = "SELECT 
             mp.mannschaft_ID, 
@@ -338,6 +379,12 @@ class ResultModel
             $wertungen = $mannschaften[$mannschaftId]['wertungen'];
 
             foreach ($wertungen as $wertung) {
+                // Nur Stationen berücksichtigen, die dieser Wertung zugeordnet sind.
+                $assignedStations = $stationMap[$wertung] ?? [];
+                if (!in_array($stationName, $assignedStations, true)) {
+                    continue;
+                }
+
                 if (!isset($data[$wertung]['Teams'][$teamname][$stationName])) {
                     $data[$wertung]['Teams'][$teamname][$stationName] = [];
                 }
@@ -356,8 +403,12 @@ class ResultModel
 
     /**
      * Fügt Formular-Punkte zu den Parcours-Daten hinzu.
+     *
+     * @param array $stationMap Map: wertungName => string[] (zugeordnete Stationsnamen).
+     *                          Formularpunkte zählen nur für Stationen, die der jeweiligen
+     *                          Wertung zugeordnet sind.
      */
-    private function addFormPointsToParcoursData(array &$data, array $mannschaften): void
+    private function addFormPointsToParcoursData(array &$data, array $mannschaften, array $stationMap): void
     {
         $formPoints = $this->getFormPoints();
 
@@ -368,7 +419,12 @@ class ResultModel
             $wertungen = $mannschaften[$mannschaftId]['wertungen'];
 
             foreach ($wertungen as $wertung) {
+                $assignedStations = $stationMap[$wertung] ?? [];
                 foreach ($stations as $stationName => $stationData) {
+                    // Nur Stationen berücksichtigen, die dieser Wertung zugeordnet sind.
+                    if (!in_array($stationName, $assignedStations, true)) {
+                        continue;
+                    }
                     if (isset($data[$wertung]['Teams'][$teamname][$stationName])) {
                         $data[$wertung]['Teams'][$teamname][$stationName][] = [
                             'protokollNr' => 'form_' . $stationData['stationId'],
