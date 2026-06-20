@@ -41,6 +41,9 @@ $pageTitle = "Eingabe der Parcours-Ergebnisse";
                     <!-- Dropdown-Menü für Mannschaften -->
                     <div class="form-group">
                         <label for="teamSelect">Mannschaft auswählen:</label>
+                        <?php if (empty($teams)): ?>
+                            <p class="warning">Keine Mannschaften für diese Station vorhanden. Es werden nur Teams angezeigt, deren Wertung diese Station enthält – die Station muss zuerst einer Wertung zugeordnet werden.</p>
+                        <?php endif; ?>
                         <select name="teamID" id="teamSelect" required>
                             <option value="" disabled selected hidden>Bitte wählen</option>
                             <?php foreach ($teams as $team): ?>

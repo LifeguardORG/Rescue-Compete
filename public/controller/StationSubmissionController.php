@@ -39,9 +39,10 @@ class StationSubmissionController {
         // Lade den Stationsdatensatz (inkl. Name)
         $stationData = $this->model->getStationByID($stationID);
 
-        // Lade die Protokolle (Ergebnisvorlagen) für die Station und die Mannschaften
+        // Lade die Protokolle (Ergebnisvorlagen) für die Station und die Mannschaften.
+        // Nur Teams, die diese Station über eine ihrer Wertungen haben, werden angezeigt.
         $protocols = $this->model->getProtocolsByStation($stationID);
-        $teams = $this->model->getTeams();
+        $teams = $this->model->getTeamsForStation($stationID);
         $submittedTeams = $this->model->getSubmittedTeams($stationID);
 
         // Übergabe des Stationsnamens statt nur der Nummer

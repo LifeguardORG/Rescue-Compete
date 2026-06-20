@@ -64,6 +64,28 @@ class StationSubmissionModel {
     }
 
     /**
+     * Liefert nur die Mannschaften, die diese Station über eine ihrer Wertungen
+     * tatsächlich haben: Teams, deren Wertung der Station zugeordnet ist
+     * (MannschaftWertung → WertungStation). So erscheinen im Eingabe-Dropdown
+     * nur die für die Station relevanten Teams.
+     *
+     * @param int $stationId Die ID der Station.
+     * @return array Liste der relevanten Mannschaften, sortiert nach Teamname.
+     */
+    public function getTeamsForStation(int $stationId): array {
+        $stmt = $this->db->prepare(
+            "SELECT DISTINCT m.*
+             FROM Mannschaft m
+             JOIN MannschaftWertung mw ON m.ID = mw.mannschaft_ID
+             JOIN WertungStation ws ON mw.wertung_ID = ws.wertung_ID
+             WHERE ws.station_ID = :stationId
+             ORDER BY m.Teamname"
+        );
+        $stmt->execute([':stationId' => $stationId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
      * Ermittelt, welche Mannschaften bereits Ergebnisse für eine bestimmte Station eingetragen haben.
      *
      * @param int $stationID Die Nummer der Station.
