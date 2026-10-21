@@ -14,6 +14,9 @@ RUN apt-get update && apt-get install -y \
 # Produktions-PHP-Konfiguration aktivieren
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
+# Sicherheits-Härtung (php2shell)
+COPY ./php/zz-hardening.ini "$PHP_INI_DIR/conf.d/zz-hardening.ini"
+
 # Kopiere die Anwendungsdateien ins Image
 COPY ./public/ /var/www/html/
 

@@ -36,6 +36,8 @@ services:
     image: phpmyadmin
     environment:
       PMA_HOST: db
+    volumes:
+      - ./php/zz-hardening.ini:/usr/local/etc/php/conf.d/zz-hardening.ini:ro
     expose:
       - "80"
     restart: unless-stopped
